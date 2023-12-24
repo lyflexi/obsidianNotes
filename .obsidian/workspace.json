@@ -14,7 +14,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JavaSDK/接口Interface.md",
+                "file": "JavaSDK/@注解和@元注解 运行时.md",
                 "mode": "source",
                 "source": false
               }
@@ -34,7 +34,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JavaSDK/接口Interface.md"
+                "file": "JavaSDK/@注解和@元注解 运行时.md"
               }
             },
             "group": "8663f69a712e8b59"
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JavaSDK/接口Interface.md",
+                "file": "JavaSDK/@注解和@元注解 运行时.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JavaSDK/接口Interface.md",
+                "file": "JavaSDK/@注解和@元注解 运行时.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -145,7 +145,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JavaSDK/接口Interface.md"
+                "file": "JavaSDK/@注解和@元注解 运行时.md"
               }
             }
           }
@@ -166,12 +166,25 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "247ec86deb4536f5",
+  "active": "ea39a6dcb23f12e2",
   "lastOpenFiles": [
+<<<<<<< .mine
+    "JavaSDK/接口Interface.md",
+    "JavaSDK/抽象类abstract.md",
+=======
+
+
+>>>>>>> .theirs
     "JavaSDK/@注解和@元注解 运行时.md",
+<<<<<<< .mine
+    "Pasted image 20231224145642.png",
+
+
+=======
     "pics/Pasted image 20231224145642.png",
     "JavaSDK/抽象类abstract.md",
     "JavaSDK/接口Interface.md",
+>>>>>>> .theirs
     "README.md.BASE.md",
     "README.md.REMOTE.md",
     "README.md.LOCAL.md",

@@ -1,0 +1,2 @@
+# obsidianNotes
+personalNotes

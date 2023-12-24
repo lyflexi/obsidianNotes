@@ -1,0 +1,180 @@
+{
+  "main": {
+    "id": "f3f72e3c82c5b4d2",
+    "type": "split",
+    "children": [
+      {
+        "id": "d523a35ae2df0740",
+        "type": "tabs",
+        "dimension": 80.58375634517766,
+        "children": [
+          {
+            "id": "247ec86deb4536f5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Java领域/JavaSDK/接口Interface.md",
+                "mode": "source",
+                "source": false
+              }
+            },
+            "group": "8663f69a712e8b59"
+          }
+        ]
+      },
+      {
+        "id": "ff442b2d8a42152f",
+        "type": "tabs",
+        "dimension": 19.416243654822335,
+        "children": [
+          {
+            "id": "94b5fd568ecd90bc",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Java领域/JavaSDK/接口Interface.md"
+              }
+            },
+            "group": "8663f69a712e8b59"
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "30e8f9e17a47137d",
+    "type": "split",
+    "children": [
+      {
+        "id": "4ff4829788cc0f06",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ea39a6dcb23f12e2",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "byModifiedTime"
+              }
+            }
+          },
+          {
+            "id": "cbfcf988840e4f65",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "36f6ad642db30f6c",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "42bec07740fd88a4",
+    "type": "split",
+    "children": [
+      {
+        "id": "70b887985f9613d2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f3ccbf26a666cc44",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Java领域/JavaSDK/接口Interface.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "7e3b91e7319c4a5b",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Java领域/JavaSDK/接口Interface.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "6fc0280e3fa0dd66",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "aae52d130181e829",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Java领域/JavaSDK/接口Interface.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "94b5fd568ecd90bc",
+  "lastOpenFiles": [
+    "Java领域/1.md",
+    "Java领域/JavaSDK/接口Interface.md",
+    "Java领域/JavaSDK",
+    "README.md",
+    "未命名",
+    "Java领域",
+    "Attachments",
+    "pics"
+  ]
+}

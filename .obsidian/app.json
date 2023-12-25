@@ -1,4 +1,5 @@
 {
   "attachmentFolderPath": "pics",
-  "alwaysUpdateLinks": true
+  "alwaysUpdateLinks": true,
+  "trashOption": "local"
 }

@@ -64,8 +64,8 @@ public void test1() {
 }
 ```
 
-`String str = "a"+ "b"` 会创建几个对象 ?
-`javap -v StringNewTest.class` 反编译后， 部分片段如下，只有一个ldc指令
+==`String str = "a"+ "b"` 会创建几个对象 ?==
+`javap -v StringNewTest.class` 反编译后， 部分片段如下，只有一个`ldc`指令
 ![[Pasted image 20231224160532.png]]
 
 "a" + "b" 在编译时，就已经编译为 ab， 被放到常量池中。
@@ -76,7 +76,7 @@ public void test1() {
 String构造方法本质也是字面量初始化，String构造出来的字符串也会存储在常量池中
 ![[Pasted image 20231224160542.png]]
 
-`String str =new String(“ab”)`` 会创建几个对象？
+==`String str =new String(“ab”)`` 会创建几个对象？==
 
 ```Java
 public class StringNewTest {
@@ -114,12 +114,8 @@ class Memory {
 
 ## 隐式调用toString()不会存入串常量池6
 
-有别于上面toString()的显示调用，toString()的隐式调用不会出现字节码指令ldc，因此隐式调用toString()不会在字符串常量池当中生成相应字符串
-
-```Java
-new String("a") + new String("b")//共创建了几个对象
-```
-
+有别于上面`toString()`的显示调用，`toString()`的隐式调用不会出现字节码指令`ldc`，因此隐式调用`toString()`不会在字符串常量池当中生成相应字符串
+==`new String("a") + new String("b")`，共创建了几个对象==
 - 对象1【堆空间】： new String("a")-->对象2： 常量池中的"a"
 - 对象3【堆空间】： new String("b")-->对象4： 常量池中的"b"
 - 对象5【堆空间】：new StringBuilder()，变量拼接“+”操作肯定需要隐式提前创建了StringBuilder

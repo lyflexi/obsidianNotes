@@ -1,0 +1,13 @@
+{
+  "shouldDebug": false,
+  "createAtObsidianAttachmentFolder": false,
+  "customFolderForNewFiles": "/Attachments/tables",
+  "removeMarkdownOnExport": true,
+  "defaultEmbedWidth": "100%",
+  "defaultEmbedHeight": "500px",
+  "hasMigratedTo800": true,
+  "showWelcomeModal": false,
+  "showWhatsNewModal": true,
+  "defaultFrozenColumnCount": 1,
+  "pluginVersion": "8.15.10"
+}

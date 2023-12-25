@@ -1,5 +1,6 @@
 {
-  "attachmentFolderPath": "pics",
+  "attachmentFolderPath": "Attachments/pics",
   "alwaysUpdateLinks": true,
-  "trashOption": "local"
+  "trashOption": "local",
+  "readableLineLength": true
 }

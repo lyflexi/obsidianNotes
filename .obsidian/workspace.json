@@ -4,8 +4,27 @@
     "type": "split",
     "children": [
       {
-        "id": "a788cf28da16ffc4",
+        "id": "14b616eb75cbe094",
         "type": "tabs",
+        "dimension": 30.113636363636363,
+        "children": [
+          {
+            "id": "6447eb3c603dc375",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "JavaSDK/MultiThread/解决线程问题的思路与总结.md"
+              }
+            },
+            "group": "321517d95c28073d"
+          }
+        ]
+      },
+      {
+        "id": "fd9d22748c52fec2",
+        "type": "tabs",
+        "dimension": 69.88636363636364,
         "children": [
           {
             "id": "247ec86deb4536f5",
@@ -13,21 +32,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JavaSDK/JavaIO/零拷贝.md",
+                "file": "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
                 "mode": "source",
                 "source": false
               }
-            }
-          },
-          {
-            "id": "9e5ef7381ec6125e",
-            "type": "leaf",
-            "state": {
-              "type": "image",
-              "state": {
-                "file": "pics/Pasted image 20231225131159.png"
-              }
-            }
+            },
+            "group": "321517d95c28073d"
           }
         ]
       }
@@ -95,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JavaSDK/JavaIO/零拷贝.md",
+                "file": "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -112,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JavaSDK/JavaIO/零拷贝.md",
+                "file": "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,23 +138,14 @@
                 "useHierarchy": true
               }
             }
-          },
-          {
-            "id": "aae52d130181e829",
-            "type": "leaf",
-            "state": {
-              "type": "outline",
-              "state": {
-                "file": "JavaSDK/JavaIO/零拷贝.md"
-              }
-            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "horizontal",
-    "width": 414.5
+    "width": 200,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -154,56 +155,56 @@
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
-      "table-editor-obsidian:Advanced Tables Toolbar": false
+      "notion-like-tables:Create loom": false
     }
   },
   "active": "247ec86deb4536f5",
   "lastOpenFiles": [
-    "pics/Pasted image 20231225132835.png",
-    "pics/Pasted image 20231225132826.png",
-    "pics/Pasted image 20231225132819.png",
-    "pics/Pasted image 20231225132812.png",
-    "pics/Pasted image 20231225132756.png",
-    "pics/Pasted image 20231225132747.png",
-    "pics/Pasted image 20231225132725.png",
-    "JavaSDK/JavaIO/深拷贝与浅拷贝.md",
+    "Attachments/pics/Pasted image 20231225164019.png",
+    "Attachments/pics/Pasted image 20231225164010.png",
+    "JavaSDK/MultiThread/ThreadLocal原理.md",
+    "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
+    "JavaSDK/MultiThread/未命名",
+    "Attachments/pics/Pasted image 20231225163839.png",
+    "Attachments/pics/Pasted image 20231225163829.png",
+    "Attachments/pics/Pasted image 20231225163817.png",
+    "Attachments/pics/Pasted image 20231225163800.png",
+    "Attachments/pics/Pasted image 20231225163755.png",
+    "Attachments/pics/Pasted image 20231225163748.png",
+    "Attachments/pics/Pasted image 20231225163743.png",
+    "Attachments/pics/Pasted image 20231225163736.png",
+    "Attachments/pics/Pasted image 20231225163711.png",
+    "JavaSDK/MultiThread/ReadWriteLock与StampedLock.md",
+    "JavaSDK/MultiThread/中断协商interrupt.md",
+    "JavaSDK/MultiThread/CountDownLatch与CyclicBarrier栅栏.md",
+    "JavaSDK/MultiThread/AbstractQueuedSynchronizer原理.md",
+    "JavaSDK/MultiThread/synchronized锁升级过程.md",
+    "JavaSDK/MultiThread/唤醒方式LockSupport.md",
+    "JavaSDK/MultiThread/Semaphore.md",
+    "JavaSDK/MultiThread/CAS原理.md",
+    "JavaSDK/MultiThread/Atomic工具类.md",
+    "JavaSDK/MultiThread/类型指针压缩测试程序JOL.md",
+    "JavaSDK/MultiThread/synchronized关键字与对比.md",
+    "JavaSDK/MultiThread/异步任务CompletableFuture.md",
+    "JavaSDK/MultiThread/Java线程池.md",
+    "JavaSDK/MultiThread/Thread.md",
+    "Attachments/tables/Java对象头结构.loom",
+    "Attachments/tables/内存屏障指令.loom",
+    "Attachments/tables/volatile重排序混淆矩阵.loom",
+    "Attachments/tables/volatile重排序混淆矩阵.loom.md",
+    "Attachments/tables/volatil.loom.md",
+    "Attachments/volatile重排序混淆矩阵.loom.md",
+    "Attachments/Untitled.loom",
+    "JavaSDK/多态Polymorphism.md",
+    "Attachments/Untitled 1.loom",
+    "Attachments/pic",
+    "Attachments/tables",
+    "Attachment/Untitled.loom",
+    "Attachment",
+    "JavaSDK/泛型Generics.md",
     "JavaSDK/JavaIO/零拷贝.md",
-    "JavaSDK/JavaIO/IO多路复用模型epoll.md",
-    "pics/Pasted image 20231225132608.png",
-    "JavaSDK/JavaIO/BIO NIO AIO模型.md",
-    "pics/Pasted image 20231225131742.png",
-    "pics/Pasted image 20231225131731.png",
-    "pics/Pasted image 20231225131722.png",
-    "JavaSDK/JavaIO/序列化场景.md",
-    "JavaSDK/JavaIO/文件与 IO 流.md",
-    "JavaSDK/Java设计模式/钩子模式-切面增强模型.md",
-    "JavaSDK/JavaIO",
-    "JavaSDK/文件与 IO 流.md",
-    "JavaSDK/Java设计模式/回调模式-事件驱动模型.md",
-    "JavaSDK/Java设计模式/单例模式Singleton.md",
-    "JavaSDK/Java设计模式/包装模式(Wrapper).md",
-    "JavaSDK/Java设计模式/模板设计模式.md",
-    "JavaSDK/Java设计模式/代理模式.md",
-    "JavaSDK/Java设计模式/六大设计原则.md",
-    "JavaSDK/Java设计模式/六种类间关系.md",
-    "JavaSDK/集合Collection/LinkedHashMap队列实现.md",
-    "JavaSDK/Java设计模式",
-    "JavaSDK/集合Collection/ConcurrentHashMap源码.md",
-    "JavaSDK/集合Collection/HashMap源码.md",
-    "JavaSDK/集合Collection/集合api.md",
-    "JavaSDK/集合Collection/SetAPI操作.md",
-    "JavaSDK/集合Collection/MapAPI操作.md",
-    "JavaSDK/集合Collection/ListAPI操作.md",
-    "JavaSDK/字符串/StringBuilder和StringBuffer.md",
-    "JavaSDK/集合Collection",
-    "JavaSDK/字符串/String&&StringBuilder.md",
-    "DB数据库/MySQL/RBAD设计.md",
-    "DB数据库/MySQL",
-    "DB数据库",
-    "JavaSDK/字符串/未命名",
-    "新建文本文档.txt",
-    "JavaSDK/字符串",
-    "pics",
-    "JavaSDK"
+    "JavaSDK/未命名.md",
+    "JavaSDK/JavaIO/深拷贝与浅拷贝.md",
+    "JavaSDK/JavaIO/IO多路复用模型epoll.md"
   ]
 }

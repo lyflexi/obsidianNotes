@@ -6,7 +6,6 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 30.113636363636363,
         "children": [
           {
             "id": "6447eb3c603dc375",
@@ -14,32 +13,24 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JavaSDK/MultiThread/解决线程问题的思路与总结.md"
+                "file": "JavaSDK/泛型Generics.md"
               }
-            },
-            "group": "321517d95c28073d"
-          }
-        ]
-      },
-      {
-        "id": "fd9d22748c52fec2",
-        "type": "tabs",
-        "dimension": 69.88636363636364,
-        "children": [
+            }
+          },
           {
-            "id": "247ec86deb4536f5",
+            "id": "3c860a8b3631063a",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
+                "file": "JavaSDK/泛型Generics.md",
                 "mode": "source",
                 "source": false
               }
-            },
-            "group": "321517d95c28073d"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -105,7 +96,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
+                "file": "JavaSDK/泛型Generics.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +113,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
+                "file": "JavaSDK/泛型Generics.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -158,12 +149,13 @@
       "notion-like-tables:Create loom": false
     }
   },
-  "active": "247ec86deb4536f5",
+  "active": "3c860a8b3631063a",
   "lastOpenFiles": [
+    "README.md",
+    "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
     "Attachments/pics/Pasted image 20231225164019.png",
     "Attachments/pics/Pasted image 20231225164010.png",
     "JavaSDK/MultiThread/ThreadLocal原理.md",
-    "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
     "JavaSDK/MultiThread/未命名",
     "Attachments/pics/Pasted image 20231225163839.png",
     "Attachments/pics/Pasted image 20231225163829.png",
@@ -173,7 +165,6 @@
     "Attachments/pics/Pasted image 20231225163748.png",
     "Attachments/pics/Pasted image 20231225163743.png",
     "Attachments/pics/Pasted image 20231225163736.png",
-    "Attachments/pics/Pasted image 20231225163711.png",
     "JavaSDK/MultiThread/ReadWriteLock与StampedLock.md",
     "JavaSDK/MultiThread/中断协商interrupt.md",
     "JavaSDK/MultiThread/CountDownLatch与CyclicBarrier栅栏.md",

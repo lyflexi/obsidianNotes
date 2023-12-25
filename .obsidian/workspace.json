@@ -6,6 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
+        "dimension": 25.621007806955287,
         "children": [
           {
             "id": "6447eb3c603dc375",
@@ -13,24 +14,30 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JavaSDK/泛型Generics.md"
+                "file": "JavaSDK/JVM/JVM内存结构.md"
               }
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "91f551f450e0473d",
+        "type": "tabs",
+        "dimension": 74.37899219304471,
+        "children": [
           {
             "id": "3c860a8b3631063a",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JavaSDK/泛型Generics.md",
+                "file": "JavaSDK/JVM/JVM内存结构.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -96,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JavaSDK/泛型Generics.md",
+                "file": "JavaSDK/JVM/JVM内存结构.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JavaSDK/泛型Generics.md",
+                "file": "JavaSDK/JVM/JVM内存结构.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -151,11 +158,21 @@
   },
   "active": "3c860a8b3631063a",
   "lastOpenFiles": [
-    "README.md",
+    "JavaSDK/流式编程 Stream.md",
+    "JavaSDK/JVM/JVM内存结构.md",
+    "JavaSDK/JVM",
+    "JavaSDK/接口新特性 函数式接口.md",
+    "Attachments/pics/Pasted image 20231225222624.png",
+    "JavaSDK/方法引用 语法糖.md",
+    "JavaSDK/多态Polymorphism.md",
+    "JavaSDK/抽象类abstract.md",
+    "JavaSDK/MultiThread/ThreadLocal原理.md",
+    "JavaSDK/Java8新特性",
     "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
+    "JavaSDK/泛型Generics.md",
+    "README.md",
     "Attachments/pics/Pasted image 20231225164019.png",
     "Attachments/pics/Pasted image 20231225164010.png",
-    "JavaSDK/MultiThread/ThreadLocal原理.md",
     "JavaSDK/MultiThread/未命名",
     "Attachments/pics/Pasted image 20231225163839.png",
     "Attachments/pics/Pasted image 20231225163829.png",
@@ -164,7 +181,6 @@
     "Attachments/pics/Pasted image 20231225163755.png",
     "Attachments/pics/Pasted image 20231225163748.png",
     "Attachments/pics/Pasted image 20231225163743.png",
-    "Attachments/pics/Pasted image 20231225163736.png",
     "JavaSDK/MultiThread/ReadWriteLock与StampedLock.md",
     "JavaSDK/MultiThread/中断协商interrupt.md",
     "JavaSDK/MultiThread/CountDownLatch与CyclicBarrier栅栏.md",
@@ -184,18 +200,9 @@
     "Attachments/tables/volatile重排序混淆矩阵.loom",
     "Attachments/tables/volatile重排序混淆矩阵.loom.md",
     "Attachments/tables/volatil.loom.md",
-    "Attachments/volatile重排序混淆矩阵.loom.md",
     "Attachments/Untitled.loom",
-    "JavaSDK/多态Polymorphism.md",
     "Attachments/Untitled 1.loom",
     "Attachments/pic",
-    "Attachments/tables",
-    "Attachment/Untitled.loom",
-    "Attachment",
-    "JavaSDK/泛型Generics.md",
-    "JavaSDK/JavaIO/零拷贝.md",
-    "JavaSDK/未命名.md",
-    "JavaSDK/JavaIO/深拷贝与浅拷贝.md",
-    "JavaSDK/JavaIO/IO多路复用模型epoll.md"
+    "Attachments/tables"
   ]
 }

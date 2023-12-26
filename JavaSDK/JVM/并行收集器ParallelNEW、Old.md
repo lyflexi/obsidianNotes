@@ -1,0 +1,89 @@
+对于老年代回收次数少，使用串行方式节省资源，这是因为CPU并行需要切换线程，串行可以省去切换线程的资源
+
+==但是对于年轻代，回收次数频繁，使用并行方式更加高效。注意，此处的并行指的是多个gc线程并行，而不是gc和用户线程并行！！！==
+
+可使用如下命令，查看线上运行的jvm的并行的gc线程数：`java -XX:+PrintFlagsFinal -version | grep ParallelGCThreads`
+![[Pasted image 20231226120549.png]]
+
+可以使用如下命令，来指定==年轻代并行收集器的线程数量==： `-XX:ParallelGCThreads={value}`
+
+- 默认情况下，当 CPU 数量小于8， ParallelGCThreads 的值等于 CPU 数量，即`ParallelGCThreads = 8`，这是由于GC操作会暂停所有的应用程序线程，JVM为了尽量缩短停顿时间就必须尽可能地利用更多的CPU资源。这意味着，默认情况下，JVM会在机器的每个CPU上运行一个gc线程，最多同时运行8个。
+- 一旦达到这个上限，JVM会调整算法，使用新的公式：`ParallelGCThreads = 8 + ((N - 8) * 5/8) = 3 +（（5*CPU）/ 8）`，因此每超出8/5个CPU启动一个新的gc线程。同时这个参数只要是并行 GC 都可以使用，不只是 ParNew。
+
+
+但有时候使用这个算法估算出来的线程数目会偏大。比如应用程序使用一个较小的堆（譬如大小为1 GB）运行在一个八颗CPU的机器上，使用4个线程或者6个线程处理这个堆可能会更高效。又比如在一个128颗CPU的机器上，启动83个垃圾收集线程可能也太多了，除非系统使用的堆已经达到了最大上限。
+
+# ParNew回收器
+
+如果说Serial GC是年轻代中的单线程垃圾收集器，那么ParNew收集器则是Serial收集器的多线程版本。
+
+- Par是Parallel的缩写，
+    
+- New代表只能处理的是新生代
+    
+
+ParNew收集器除了采用并行回收的方式执行内存回收外，ParNew和SerialNew之间几乎没有任何区别。
+
+- ParNew收集器在年轻代中同样也是采用复制算法、"Stop一 the一World"机制。
+- ParNew是很多JVM运行在Server模式下新生代的默认垃圾收集器。常见在服务器环境中使用。例如，那些执行批量处理、订单处理、工资支付、科学计算的应用程序。
+![[Pasted image 20231226120956.png]]
+
+# ParallelScavenge回收器
+
+HotSpot的年轻代中除了拥有ParNew收集器是基于并行回收的以外， Parallel Scavenge收集器同样也采用了复制算法、并行回收和"Stop the World"机制。
+
+那么Parallel收集器的出现是否多此一举？
+
+- 和ParNew收集器不同，Parallel Scavenge收集器的目标则是达到一个可控制的吞吐量（Throughput），它也被称为吞吐量优先的垃圾收集器。
+    
+- 自适应调节策略也是Parallel Scavenge 与ParNew一个重要区别。
+    
+
+# ParallelOld回收器
+
+Parallel收集器在JDK1.6时提供了用于执行老年代垃圾收集的 Parallel Old收集器，用来代替老年代的Serial Old收集器。
+
+- Parallel Old收集器采用了标记压缩算法，但同样也是基于并行回收和”Stop一the一World"机制。
+    
+- 在程序吞吐量优先的应用场景中，Parallel Scavenge收集器和Parallel Old收集器的组合，在Server模式下的内存回收性能很不错。
+    
+
+**在Java8中，默认是此垃圾收集器**
+![[Pasted image 20231226121002.png]]
+
+# 并行垃圾回收器的参数配置
+
+通过`java -XX:+PrintFlagsFinal –version | grep 参数关键字`，来查看当前参数是否被使用。
+并行垃圾回收器的参数主要有以下几种：
+
+- -XX： +UseParallelGC手动指定 年轻代使用Parallel并行收集器执行内存回收任务。
+    
+- -XX： +UseParallelOldGc手 指定老年代都是使用并行回收收集器。
+    
+    - 分别适用于新生代和老年代。默认jdk8是开启的。
+        
+    - 上面两个参数，默认开启一个，另一个也会被开启。 （互相激活）
+        
+- `-XX： ParallelGCThreads`设置年轻代并行收集器的线程数。一般地，最好与CPU数量相等，以避免过多的线程数影响垃圾收集性能。
+    
+    - 在默认情况下，当CPU数量小于8个， Paralle lGCThreads 的值等于CPU数量。
+        
+    - 当CPU数量大于8个， ParallelGCThreads的值等于`3+[5*CPU_ Count]/8]`
+        
+- -XX ：MaxGCPau3eMillis设置垃圾收集器最大停顿时间（即STw的时间）。单位是毫秒。
+    
+    - ➢为了尽可能地把停顿时间控制在MaxGCPauseMills以内，收集器在.工作时会调整Java堆大小或者其他一些参数。
+        
+    - ➢对于用户来讲，停顿时间越短体验越好。但是在服务器端，我们注重 高并发，整体的吞吐量。所以服务器端适合Parallel，进行控制。➢该参数使用需谨慎。
+        
+- -XX：GCTimeRatio垃圾收集时间占总时间的比例（= 1 / （N + 1））用于衡量吞吐量的大小。
+    
+    - ➢取值范围（0， 100）。默认值99，也就是垃圾回收时间不超过1号。
+        
+    - ➢与前一个-XX：MaxGCPauseMillis参数有一定矛盾性。暂停时间越长，Radio参数就容易超过设定的比例。
+        
+- -XX： +UseAdaptiveSizePolicy设 置Parallel Scavenge收 集器具有自适应调节策略
+    
+    - 在这种模式下，年轻代的大小、Eden和Survivor的比例、晋升老年 代的对象年龄等参数会被自动调整，已达到在堆大小、吞吐量和停顿时间之间的平衡点。
+        
+    - 在手动调优比较困难的场合，可以直接使用这种自适应的方式，仅指 定虚拟机的最大堆、目标的吞吐量（GCTimeRatio）和停顿时间（MaxGCPauseMills），让虚拟机自己完成调优工作。

@@ -1,5 +1,10 @@
 {
   "accentColor": "",
   "cssTheme": "",
-  "baseFontSize": 15
+  "baseFontSize": 15,
+  "theme": "system",
+  "baseFontSizeAction": false,
+  "textFontFamily": "",
+  "monospaceFontFamily": "Cascadia Mono",
+  "interfaceFontFamily": "Comic Sans MS"
 }

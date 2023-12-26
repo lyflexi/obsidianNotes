@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 24.059616749467708,
+        "dimension": 26.18878637331441,
         "children": [
           {
             "id": "6447eb3c603dc375",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JavaSDK/JVM/并发收集器CMS oldOnly.md"
+                "file": "JavaSDK/JVM/JVM参数命令.md"
               }
             }
           }
@@ -23,7 +23,7 @@
       {
         "id": "91f551f450e0473d",
         "type": "tabs",
-        "dimension": 75.94038325053229,
+        "dimension": 73.81121362668559,
         "children": [
           {
             "id": "3c860a8b3631063a",
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JavaSDK/JVM/并发收集器CMS oldOnly.md",
+                "file": "JavaSDK/JVM/JVM参数命令.md",
                 "mode": "source",
                 "source": false
               }
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JavaSDK/JVM/并发收集器CMS oldOnly.md",
+                "file": "JavaSDK/JVM/JVM参数命令.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JavaSDK/JVM/并发收集器CMS oldOnly.md",
+                "file": "JavaSDK/JVM/JVM参数命令.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -158,21 +158,23 @@
   },
   "active": "3c860a8b3631063a",
   "lastOpenFiles": [
-    "README.md",
+    "JavaSDK/JVM/全代回收器 G1.md",
+    "JavaSDK/JVM/JVM参数命令.md",
+    "Attachments/pics/Pasted image 20231226141736.png",
+    "Attachments/pics/Pasted image 20231226141419.png",
+    "Attachments/pics/Pasted image 20231226141053.png",
+    "Attachments/pics/Pasted image 20231226140805.png",
+    "Attachments/pics/Pasted image 20231226140548.png",
+    "Attachments/pics/Pasted image 20231226140500.png",
+    "Attachments/pics/Pasted image 20231226140224.png",
+    "Attachments/pics/Pasted image 20231226140205.png",
+    "Attachments/pics/Pasted image 20231226140006.png",
     "JavaSDK/JVM/并发收集器CMS oldOnly.md",
-    "Attachments/pics/Pasted image 20231226121301.png",
-    "Attachments/pics/Pasted image 20231226121249.png",
+    "Attachments/pics/Pasted image 20231226132941.png",
+    "README.md",
     "JavaSDK/JVM/串行收集器SerialNEW、Old.md",
     "JavaSDK/JVM/并行收集器ParallelNEW、Old.md",
-    "Attachments/pics/Pasted image 20231226121002.png",
-    "Attachments/pics/Pasted image 20231226120956.png",
-    "Attachments/pics/Pasted image 20231226120549.png",
-    "Attachments/pics/Pasted image 20231226120231.png",
     "JavaSDK/JVM/垃圾回收概论.md",
-    "Attachments/pics/Pasted image 20231226120045.png",
-    "Attachments/pics/Pasted image 20231226115959.png",
-    "Attachments/pics/Pasted image 20231226115924.png",
-    "Attachments/pics/Pasted image 20231226115915.png",
     "JavaSDK/JVM/双亲委派机制.md",
     "JavaSDK/Java设计模式/六种类间关系.md",
     "JavaSDK/JVM/源代码的执行过程.md",
@@ -195,7 +197,6 @@
     "JavaSDK/MultiThread/AbstractQueuedSynchronizer原理.md",
     "JavaSDK/MultiThread/synchronized锁升级过程.md",
     "JavaSDK/MultiThread/唤醒方式LockSupport.md",
-    "JavaSDK/MultiThread/Semaphore.md",
     "Attachments/tables/Java对象头结构.loom",
     "Attachments/tables/内存屏障指令.loom",
     "Attachments/tables/volatile重排序混淆矩阵.loom",

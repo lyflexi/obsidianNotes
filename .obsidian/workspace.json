@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 26.18878637331441,
+        "dimension": 28.388928317955997,
         "children": [
           {
             "id": "6447eb3c603dc375",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JavaSDK/JVM/JVM参数命令.md"
+                "file": "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md"
               }
             }
           }
@@ -23,7 +23,7 @@
       {
         "id": "91f551f450e0473d",
         "type": "tabs",
-        "dimension": 73.81121362668559,
+        "dimension": 71.611071682044,
         "children": [
           {
             "id": "3c860a8b3631063a",
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JavaSDK/JVM/JVM参数命令.md",
+                "file": "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
                 "mode": "source",
                 "source": false
               }
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JavaSDK/JVM/JVM参数命令.md",
+                "file": "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JavaSDK/JVM/JVM参数命令.md",
+                "file": "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -158,19 +158,32 @@
   },
   "active": "3c860a8b3631063a",
   "lastOpenFiles": [
-    "JavaSDK/JVM/全代回收器 G1.md",
+    "SpringFrameWork/组件添加与获取方式/组件添加/@Import.md",
+    "Attachments/pics/Pasted image 20231226161117.png",
+    "Attachments/pics/Pasted image 20231226160606.png",
+    "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
+    "Attachments/pics/Pasted image 20231226153338.png",
+    "SpringFrameWork/组件添加与获取方式/组件获取/@Autowired和@Resource.md",
+    "SpringFrameWork/IOC容器生命周期与扩展点",
+    "SpringFrameWork/组件添加与获取方式/组件获取/@Primary和@Qualifier.md",
+    "Attachments/pics/Pasted image 20231226152620.png",
+    "SpringFrameWork/组件添加与获取方式/组件添加/BeanDefinitionRegistryPostProcessor.md",
+    "SpringFrameWork/组件添加与获取方式/组件获取",
+    "SpringFrameWork/组件添加与获取方式/组件添加/BeanFactoryPostProcessor.md",
+    "Attachments/pics/Pasted image 20231226151342.png",
+    "Attachments/pics/Pasted image 20231226151337.png",
+    "Attachments/pics/Pasted image 20231226150234.png",
+    "Attachments/pics/Pasted image 20231226150223.png",
+    "Attachments/pics/Pasted image 20231226150215.png",
+    "Attachments/pics/Pasted image 20231226150111.png",
+    "SpringFrameWork/组件添加与获取方式/组件添加/FactoryBean.md",
+    "SpringFrameWork/组件添加与获取方式/组件添加/@Configuration.md",
+    "SpringFrameWork/组件添加与获取方式/组件添加",
     "JavaSDK/JVM/JVM参数命令.md",
-    "Attachments/pics/Pasted image 20231226141736.png",
-    "Attachments/pics/Pasted image 20231226141419.png",
-    "Attachments/pics/Pasted image 20231226141053.png",
-    "Attachments/pics/Pasted image 20231226140805.png",
-    "Attachments/pics/Pasted image 20231226140548.png",
-    "Attachments/pics/Pasted image 20231226140500.png",
-    "Attachments/pics/Pasted image 20231226140224.png",
-    "Attachments/pics/Pasted image 20231226140205.png",
-    "Attachments/pics/Pasted image 20231226140006.png",
+    "SpringFrameWork/组件添加与获取方式",
+    "SpringFrameWork",
+    "JavaSDK/JVM/全代回收器 G1.md",
     "JavaSDK/JVM/并发收集器CMS oldOnly.md",
-    "Attachments/pics/Pasted image 20231226132941.png",
     "README.md",
     "JavaSDK/JVM/串行收集器SerialNEW、Old.md",
     "JavaSDK/JVM/并行收集器ParallelNEW、Old.md",
@@ -186,23 +199,9 @@
     "JavaSDK/方法引用 语法糖.md",
     "JavaSDK/多态Polymorphism.md",
     "JavaSDK/抽象类abstract.md",
-    "JavaSDK/MultiThread/ThreadLocal原理.md",
     "JavaSDK/Java8新特性",
-    "JavaSDK/MultiThread/解决线程问题的思路与总结.md",
-    "JavaSDK/泛型Generics.md",
     "JavaSDK/MultiThread/未命名",
-    "JavaSDK/MultiThread/ReadWriteLock与StampedLock.md",
-    "JavaSDK/MultiThread/中断协商interrupt.md",
-    "JavaSDK/MultiThread/CountDownLatch与CyclicBarrier栅栏.md",
-    "JavaSDK/MultiThread/AbstractQueuedSynchronizer原理.md",
-    "JavaSDK/MultiThread/synchronized锁升级过程.md",
-    "JavaSDK/MultiThread/唤醒方式LockSupport.md",
     "Attachments/tables/Java对象头结构.loom",
-    "Attachments/tables/内存屏障指令.loom",
-    "Attachments/tables/volatile重排序混淆矩阵.loom",
-    "Attachments/Untitled.loom",
-    "Attachments/Untitled 1.loom",
-    "Attachments/pic",
-    "Attachments/tables"
+    "Attachments/tables/内存屏障指令.loom"
   ]
 }

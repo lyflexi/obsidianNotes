@@ -17,10 +17,14 @@
 - linux运维
 - 容器运维
 - kubernetes
-...
+- ...
 
 
 Obsidian 客户端下载（不限速）：https://forum-zh.obsidian.md/t/topic/13718/2
+使用Obsidian打开本知识库：
+- 自动渲染文章
+- 自动建立起附件索引
+- 自动集成我的Obsidian插件
 
 >Reference：[Markdown 官方教程](https://markdown.com.cn/)
 

@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 28.388928317955997,
+        "dimension": 28.73134328358209,
         "children": [
           {
             "id": "6447eb3c603dc375",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md"
+                "file": "JavaSDK/super和this总结.md"
               }
             }
           }
@@ -23,7 +23,7 @@
       {
         "id": "91f551f450e0473d",
         "type": "tabs",
-        "dimension": 71.611071682044,
+        "dimension": 71.26865671641791,
         "children": [
           {
             "id": "3c860a8b3631063a",
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
+                "file": "JavaSDK/super和this总结.md",
                 "mode": "source",
                 "source": false
               }
@@ -87,7 +87,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 368.51103591918945
   },
   "right": {
     "id": "42bec07740fd88a4",
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
+                "file": "JavaSDK/super和this总结.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
+                "file": "JavaSDK/super和this总结.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -158,10 +158,15 @@
   },
   "active": "3c860a8b3631063a",
   "lastOpenFiles": [
+    "JavaSDK/流式编程 Stream.md",
+    "JavaSDK/super和this总结.md",
+    "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
+    "SpringFrameWork/IOC容器生命周期与扩展点/一、prepareRefresh 容器准备刷新.md",
+    "Attachments/pics/Pasted image 20231226175401.png",
+    "Attachments/pics/Pasted image 20231226175343.png",
     "SpringFrameWork/组件添加与获取方式/组件添加/@Import.md",
     "Attachments/pics/Pasted image 20231226161117.png",
     "Attachments/pics/Pasted image 20231226160606.png",
-    "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
     "Attachments/pics/Pasted image 20231226153338.png",
     "SpringFrameWork/组件添加与获取方式/组件获取/@Autowired和@Resource.md",
     "SpringFrameWork/IOC容器生命周期与扩展点",
@@ -174,8 +179,6 @@
     "Attachments/pics/Pasted image 20231226151337.png",
     "Attachments/pics/Pasted image 20231226150234.png",
     "Attachments/pics/Pasted image 20231226150223.png",
-    "Attachments/pics/Pasted image 20231226150215.png",
-    "Attachments/pics/Pasted image 20231226150111.png",
     "SpringFrameWork/组件添加与获取方式/组件添加/FactoryBean.md",
     "SpringFrameWork/组件添加与获取方式/组件添加/@Configuration.md",
     "SpringFrameWork/组件添加与获取方式/组件添加",
@@ -193,12 +196,10 @@
     "JavaSDK/JVM/源代码的执行过程.md",
     "JavaSDK/JVM/常量池constant pool.md",
     "JavaSDK/JVM/JVM内存结构.md",
-    "JavaSDK/流式编程 Stream.md",
     "JavaSDK/JVM",
     "JavaSDK/接口新特性 函数式接口.md",
     "JavaSDK/方法引用 语法糖.md",
     "JavaSDK/多态Polymorphism.md",
-    "JavaSDK/抽象类abstract.md",
     "JavaSDK/Java8新特性",
     "JavaSDK/MultiThread/未命名",
     "Attachments/tables/Java对象头结构.loom",

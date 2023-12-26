@@ -152,16 +152,8 @@ public void refresh() throws BeansException, IllegalStateException {
         
 2. BeanPostProcessors 接口：
     
-    1. 该接口在Bean的实例化过程中被调用,
-        
-    2. 该接口在对一个对象进行初始化 前后 被调用。
-        
-    3. 例如：实现了 EnvironmentAware,EmbeddedValueResolverAware，ResourceLoaderAware，ApplicationContextAware等Aware就是这个时候 被执行的。
-        
-3. MergedBeanDefinitionPostProcessor 接口：
-    
-    1. 该接口继承了BeanPostProcessors接口, 会在 bean 实列化 之后 属性注入前 执行。例如 对@Autowired @Resource @Value 注解的解析。
-        
+    1. 该接口在Bean的实例化过程中被调用，例如MergedBeanDefinitionPostProcessor 接口继承了BeanPostProcessors接口, 会在 bean 实列化 之后 属性注入前 执行。例如 对@Autowired @Resource @Value 注解的解析
+    2. 该接口在对一个对象进行初始化 前后 被调用。例如实现了 EnvironmentAware,EmbeddedValueResolverAware，ResourceLoaderAware，ApplicationContextAware等Aware就是这个时候 被执行的。
 
 # 七、initMessageSource
 
@@ -173,10 +165,8 @@ public void refresh() throws BeansException, IllegalStateException {
 
 # 九、onRefresh
 
-onRefresh是一个模板方法，留给子类容器扩赞，不同的容器做不同的事情。
-
-例如：容器AnnotationConfigEmbeddedWebApplicationContext中会调用createEmbeddedServletContainer方法去创建内置的Servlet容器。 EmbeddedServletContainerAutoConfiguration 类中定义了 Spring boot 支持的三种 Servlet容器。 目前SpringBoot只支持3种内置的Servlet容器：
-
+onRefresh是一个模板方法，留给子类容器扩展，不同的容器做不同的事情。例如：
+容器AnnotationConfigEmbeddedWebApplicationContext中会调用createEmbeddedServletContainer方法去创建内置的Servlet容器。 EmbeddedServletContainerAutoConfiguration 类中定义了 Spring boot 支持的三种 Servlet容器。 目前SpringBoot只支持3种内置的Servlet容器：
 1. Tomcat
     
 2. Jetty
@@ -193,7 +183,7 @@ onRefresh是一个模板方法，留给子类容器扩赞，不同的容器做�
 
 # 十一、finishBeanFactoryInitialization
 
-实列化所有 非懒加载的 类。
+实列化所有 非懒加载的 类（剩下的单实例Bean）
 
 # 十二、finishRefresh
 

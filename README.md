@@ -21,6 +21,7 @@
 
 
 Obsidian 客户端下载（不限速）：https://forum-zh.obsidian.md/t/topic/13718/2
+
 使用Obsidian打开本知识库：
 - 自动渲染文章
 - 自动建立起附件索引

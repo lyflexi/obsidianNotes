@@ -70,7 +70,7 @@ public void refresh() throws BeansException, IllegalStateException {
 4. 初始earlyApplicationEnvents，用于收集已经产生的ApplicationEnvents.
     
 
-# 二、obtainFreshBeanFactory 获取默认容器
+# 二、obtainFreshBeanFactory 获取内部容器
 
 1. 调用子类的refeshBeanFactory()，SpringBoot中采用默认的实现，设置BeanFactory的SerializationId，设置refreshed标志为true。
     

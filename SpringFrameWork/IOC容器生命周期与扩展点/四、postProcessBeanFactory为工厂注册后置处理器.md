@@ -1,0 +1,6 @@
+postProcessBeanFactory方法用于在BeanFactory 完成标准的初始化之后修改BeanFactory。不同容器根据自己的需求添加特殊的后置处理器，  
+![[Pasted image 20231227213758.png]]
+此处会给BeanFactory添加两种后置处理器：
+1. BeanDefinitionRegistryPostProcessor
+2. BeanFactoryPostProcessor
+比如内部BeanFactory容器EmbeddedWebApplicationContext 在这里添加了对ServletContextAware支持的Bean后置处理器WebApplicationContextServletContextAwareProcessor。

@@ -6,36 +6,38 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 28.73134328358209,
+        "dimension": 23.731343283582092,
         "children": [
           {
-            "id": "6447eb3c603dc375",
+            "id": "0e2a48b30b90cdd5",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "JavaSDK/Java设计模式/代理模式.md"
+                "file": "SpringFrameWork/IOC容器生命周期与扩展点/四、postProcessBeanFactory为工厂注册后置处理器.md"
               }
-            }
+            },
+            "group": "99d4e8305e514d1e"
           }
         ]
       },
       {
-        "id": "91f551f450e0473d",
+        "id": "ad469fc731c35108",
         "type": "tabs",
-        "dimension": 71.26865671641791,
+        "dimension": 76.26865671641792,
         "children": [
           {
-            "id": "3c860a8b3631063a",
+            "id": "83c4b3e02b4ccf9b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JavaSDK/Java设计模式/代理模式.md",
+                "file": "SpringFrameWork/IOC容器生命周期与扩展点/四、postProcessBeanFactory为工厂注册后置处理器.md",
                 "mode": "source",
                 "source": false
               }
-            }
+            },
+            "group": "99d4e8305e514d1e"
           }
         ]
       }
@@ -103,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JavaSDK/Java设计模式/代理模式.md",
+                "file": "SpringFrameWork/IOC容器生命周期与扩展点/四、postProcessBeanFactory为工厂注册后置处理器.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JavaSDK/Java设计模式/代理模式.md",
+                "file": "SpringFrameWork/IOC容器生命周期与扩展点/四、postProcessBeanFactory为工厂注册后置处理器.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -156,50 +158,49 @@
       "notion-like-tables:Create loom": false
     }
   },
-  "active": "3c860a8b3631063a",
+  "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "Attachments/pics/Pasted image 20231227133056.png",
+    "SpringFrameWork/组件添加与获取方式/组件添加/@Configuration.md",
+    "SpringFrameWork/组件添加与获取方式/组件添加/FactoryBean.md",
+    "SpringFrameWork/组件添加与获取方式/组件添加/BeanFactoryPostProcessor.md",
+    "SpringFrameWork/组件添加与获取方式/组件添加/BeanDefinitionRegistryPostProcessor.md",
+    "README.md",
+    "Attachments/pics/Pasted image 20231227230441.png",
+    "JavaSDK/Java设计模式/六大设计原则.md",
+    "JavaSDK/Java设计模式/六种类间关系.md",
+    "JavaSDK/Java设计模式/代理模式.md",
+    "Attachments/pics/Pasted image 20231227222211.png",
+    "Attachments/pics/Pasted image 20231227222032.png",
+    "Attachments/pics/Pasted image 20231227222011.png",
+    "Attachments/pics/Pasted image 20231227221836.png",
+    "Attachments/pics/Pasted image 20231227221759.png",
+    "Attachments/pics/Pasted image 20231227221742.png",
+    "JavaSDK/Java设计模式/钩子模式-切面增强模型.md",
+    "SpringFrameWork/IOC容器生命周期与扩展点/四、postProcessBeanFactory为工厂注册后置处理器.md",
+    "Attachments/pics/Pasted image 20231227213758.png",
+    "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
+    "SpringFrameWork/IOC容器生命周期与扩展点/三、prepareBeanFactory 标准初始化内部BeanFactory.md",
+    "SpringFrameWork/IOC容器生命周期与扩展点/二、obtainFreshBeanFactory 获取内部容器.md",
+    "Attachments/pics/Pasted image 20231227213604.png",
+    "Attachments/pics/Pasted image 20231227173529.png",
+    "SpringFrameWork/IOC容器生命周期与扩展点/一、prepareRefresh 容器准备刷新.md",
     "JavaSDK/super和this总结.md",
     "JavaSDK/流式编程 Stream.md",
-    "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
-    "SpringFrameWork/IOC容器生命周期与扩展点/一、prepareRefresh 容器准备刷新.md",
-    "Attachments/pics/Pasted image 20231226175401.png",
-    "Attachments/pics/Pasted image 20231226175343.png",
     "SpringFrameWork/组件添加与获取方式/组件添加/@Import.md",
-    "Attachments/pics/Pasted image 20231226161117.png",
-    "Attachments/pics/Pasted image 20231226160606.png",
-    "Attachments/pics/Pasted image 20231226153338.png",
     "SpringFrameWork/组件添加与获取方式/组件获取/@Autowired和@Resource.md",
     "SpringFrameWork/IOC容器生命周期与扩展点",
     "SpringFrameWork/组件添加与获取方式/组件获取/@Primary和@Qualifier.md",
-    "Attachments/pics/Pasted image 20231226152620.png",
-    "SpringFrameWork/组件添加与获取方式/组件添加/BeanDefinitionRegistryPostProcessor.md",
     "SpringFrameWork/组件添加与获取方式/组件获取",
-    "SpringFrameWork/组件添加与获取方式/组件添加/BeanFactoryPostProcessor.md",
-    "Attachments/pics/Pasted image 20231226151342.png",
-    "Attachments/pics/Pasted image 20231226151337.png",
-    "Attachments/pics/Pasted image 20231226150234.png",
-    "Attachments/pics/Pasted image 20231226150223.png",
-    "SpringFrameWork/组件添加与获取方式/组件添加/FactoryBean.md",
-    "SpringFrameWork/组件添加与获取方式/组件添加/@Configuration.md",
     "SpringFrameWork/组件添加与获取方式/组件添加",
     "JavaSDK/JVM/JVM参数命令.md",
     "SpringFrameWork/组件添加与获取方式",
     "SpringFrameWork",
     "JavaSDK/JVM/全代回收器 G1.md",
     "JavaSDK/JVM/并发收集器CMS oldOnly.md",
-    "README.md",
     "JavaSDK/JVM/串行收集器SerialNEW、Old.md",
     "JavaSDK/JVM/并行收集器ParallelNEW、Old.md",
     "JavaSDK/JVM/垃圾回收概论.md",
-    "JavaSDK/JVM/双亲委派机制.md",
-    "JavaSDK/Java设计模式/六种类间关系.md",
-    "JavaSDK/JVM/源代码的执行过程.md",
-    "JavaSDK/JVM/常量池constant pool.md",
-    "JavaSDK/JVM/JVM内存结构.md",
     "JavaSDK/JVM",
-    "JavaSDK/接口新特性 函数式接口.md",
-    "JavaSDK/方法引用 语法糖.md",
     "JavaSDK/Java8新特性",
     "JavaSDK/MultiThread/未命名",
     "Attachments/tables/Java对象头结构.loom",

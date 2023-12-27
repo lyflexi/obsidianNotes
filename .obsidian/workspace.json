@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JavaSDK/super和this总结.md"
+                "file": "JavaSDK/Java设计模式/代理模式.md"
               }
             }
           }
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JavaSDK/super和this总结.md",
+                "file": "JavaSDK/Java设计模式/代理模式.md",
                 "mode": "source",
                 "source": false
               }
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JavaSDK/super和this总结.md",
+                "file": "JavaSDK/Java设计模式/代理模式.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JavaSDK/super和this总结.md",
+                "file": "JavaSDK/Java设计模式/代理模式.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -158,8 +158,9 @@
   },
   "active": "3c860a8b3631063a",
   "lastOpenFiles": [
-    "JavaSDK/流式编程 Stream.md",
+    "Attachments/pics/Pasted image 20231227133056.png",
     "JavaSDK/super和this总结.md",
+    "JavaSDK/流式编程 Stream.md",
     "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
     "SpringFrameWork/IOC容器生命周期与扩展点/一、prepareRefresh 容器准备刷新.md",
     "Attachments/pics/Pasted image 20231226175401.png",
@@ -199,7 +200,6 @@
     "JavaSDK/JVM",
     "JavaSDK/接口新特性 函数式接口.md",
     "JavaSDK/方法引用 语法糖.md",
-    "JavaSDK/多态Polymorphism.md",
     "JavaSDK/Java8新特性",
     "JavaSDK/MultiThread/未命名",
     "Attachments/tables/Java对象头结构.loom",

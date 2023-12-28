@@ -1,11 +1,17 @@
 Spring IOC ：
 
-- ==Bean定义的定位,Bean 可能定义在XML中，或者一个注解，或者其他形式。这些都被用Resource来定位, IOC容器读取Resource获取BeanDefinition 注册到 Bean定义注册表中。==
+- ==Bean定义的定位,Bean 可能定义在XML中，或者一个注解，或者其他形式。这些都被用Resource来定位, IOC容器读取Resource获取BeanDefinition 注册到 Bean定义注册表beanDefinitionMap中。==
 - 第一次向容器getBean操作会触发Bean的创建过程，实列化一个Bean时，要根据BeanDefinition中类信息等实列化Bean.
 - 将实列化的Bean放到单例Bean缓存内。
 - 此后再次获取向容器getBean就会从缓存中获取。
+![[Pasted image 20231226153338.png]]
 
-==BeanDefinition 的注册时机剖析：==来看构造方法`AnnotationConfigApplicationContext(Class<?>... componentClasses)`
+==BeanDefinition 的注册时机剖析：一共有两个时机！！！==
+xml配置文件和注解配置类（以@Configuration声明）
+1. 父类AbstractApplicationContext.java的refresh的obtainFreshBeanFactory();，这个我们之前以ClassPathXmlApplicationContext类为切入点，深入分析过==xml的生效原理就是走的obtainFreshBeanFactory()：
+	1. refreshBeanFactory()：将 BeanDefinition注册到beanDefinitionMap表中
+	2. obtainFreshBeanFactory()；最终返回内部的工厂（ConfigurableListableBeanFactory）DefaultListableBeanFactory。==ConfigurableListableBeanFactory是spring的发动机，以list集合的方式操作bean==
+2. 来看父类AbstractApplicationContext的另一个子类AnnotationConfigApplicationContext，构造方法`AnnotationConfigApplicationContext(Class<?>... componentClasses)，`componentClasses接收的是注解配置类==MyConfig.class。也是将 BeanDefinition注册到beanDefinitionMap表中==
 ![[Pasted image 20231228120315.png]]
 
 跟踪register(componentClasses)方法，总的来看：
@@ -56,15 +62,14 @@ private <T> void doRegisterBean(Class<T> beanClass, @Nullable String name,
 
     BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
     definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
-    // 注册 bean对象
+    // 注册 BeanDefinition到beanDefinitionMap表中
     BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 }
 ```
 
-![[Pasted image 20231226153338.png]]
 
-==现在Spring IOC容器对Bean的创建过程并没有完成，目前只是将Bean的定义加载到了容器中，但是可能容器本身已经存在这些Bean的定义，所以需要使用refresh()方法刷新容器，回到最开始进入`AnnotationConfigApplicationContext`的源码==
-
+==现在Spring IOC容器对Bean的创建过程并没有完成，目前只是将Bean的定义加载到了容器中，所以需要使用refresh()方法刷新容器，回到最开始进入`AnnotationConfigApplicationContext`的源码==，执行refresh()
+![[Pasted image 20231228120315.png]]
 refresh方法是容器刷新的入口，方法定义在==AnnotationConfigApplicationContext的父类AbstractApplicationContext 中==
 
 ```Java

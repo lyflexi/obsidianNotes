@@ -87,5 +87,5 @@ public final ConfigurableListableBeanFactory getBeanFactory() {
     return this.beanFactory;  
 }
 ```
-翻译上述代码，返回由GenericApplicationContext持有的内部BeanFactory（DefaultListableBeanFactory）作为ConfigurableListableBeanFactory
+翻译上述代码，返回由GenericApplicationContext持有的内部BeanFactory==（DefaultListableBeanFactory）==作为ConfigurableListableBeanFactory
 ![[Pasted image 20231227213604.png]]

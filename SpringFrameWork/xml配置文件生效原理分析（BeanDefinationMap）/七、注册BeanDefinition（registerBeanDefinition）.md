@@ -68,3 +68,9 @@
 
 ```
 结语：本节也比较简单，讲述了创建BeanDefinition后spring把这个BeanDefinition注册到DefaultListableBeanFactory的beanDefinitionMap中。这样，spring就完成了BeanDefinition的收集。
+
+---
+至此， spring 完成了对bean标签的解析与处理，就是获取到 xml 中 bean 标签里配置的各种属性，封装成一个 BeanDefinition 对象，然后把这个对象存到我们 IOC 容器的 beanDefinitionMap、beanDefinitionNames 中，为之后在 IOC 容器中使用与获取创造条件，即完成 ConfigurableListableBeanFactory 的创建。
+
+
+

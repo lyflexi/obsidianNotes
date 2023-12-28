@@ -501,8 +501,22 @@ protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrap
 		
 4. **初始化After：**如果BeanFactory 装配了 org.springframework.beans.factory.config.BeanPostProcessor 后处理 ，则将调用`postProcessAfterInitialization(Object bean, String beanName)` 方法 这个方法在此时调用，容器再次获得了对Bean 的加工机会。此时bean已经准备就绪，可以被应用程序使用了，他们将一直驻留在应用上下文中，直到该应用上下文被销毁；
         
-# @Scope
-如果在`<Bean>` 中指定了作用范围
+# DisposableBean销毁接口
+
+DisposableBean 类似于 InitializingBean，对应生命周期的销毁阶段，以ConfigurableApplicationContext#close()方法作为入口，若bean实现了DisposableBean接口，
+    
+    1. spring将调用它的distroy()接口方法。
+        
+    2. 同样的，如果bean使用了destroy-method属性声明了销毁方法，则该方法被调用；
+
+
+
+Bean的生命周期到此结束啦！！！
+
+
+---
+
+如果在`<Bean>` 中使用Scope指定了作用范围
 1. scope = "prototype" 则将Bean返回给调用者， 由调用者管理Bean 的生命周期，此时Bean是多实例的，多实例Bean在使用getBean获取的时候才创建对象
 	
 2. 如果 scope = "singleton" ,则将Bean放入 IOC容器的缓存池中，由Spring管理Bean的生命周期，此时Bean都是单实例的，对于单实例Bean对象来说，在Spring容器创建完成后就会对单实例Bean进行实例化
@@ -512,13 +526,6 @@ protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrap
 > 因此，Spring提供了懒加载机制。所谓的懒加载机制就是可以指定bean不在启动时立即创建，而是在后续第一次用到时才创建，从而减轻在启动过程中对时间和内存的消耗。懒加载机制只对单例bean有作用，对于多例bean设置懒加载没有意义，因为多例bean本来就是在用户使用时才创建的，而且Spring不负责多实例的生命周期。
 > 
 > 多例bean在用户每次使用时，Spring会每次都重新生成一个新的对象给请求方，虽然这种类型的对象的实例化以及属性设置等工作都是由容器负责的，但是只要准备完毕，并且对象实例返回给用户之后，容器就不在拥有当前对象的引用，用户需要自己负责当前对象后继生命周期的管理工作，包括该对象的销毁。也就是说，容器每次返回请求方该对象的一个新的实例之后，就由这个对象“自生自灭”。
-# DisposableBean销毁接口
 
-DisposableBean 类似于 InitializingBean，对应生命周期的销毁阶段，以ConfigurableApplicationContext#close()方法作为入口，若bean实现了DisposableBean接口，
-    
-    1. spring将调用它的distroy()接口方法。
-        
-    2. 同样的，如果bean使用了destroy-method属性声明了销毁方法，则该方法被调用；
-        
 
 

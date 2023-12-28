@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期分析.md"
+                "file": "SpringFrameWork/Bean生命周期与扩展点/循环依赖.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期分析.md",
+                "file": "SpringFrameWork/Bean生命周期与扩展点/循环依赖.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期分析.md",
+                "file": "SpringFrameWork/Bean生命周期与扩展点/循环依赖.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期分析.md",
+                "file": "SpringFrameWork/Bean生命周期与扩展点/循环依赖.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -158,11 +158,12 @@
       "notion-like-tables:Create loom": false
     }
   },
-  "active": "0e2a48b30b90cdd5",
+  "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
+    "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
+    "SpringFrameWork/Bean生命周期与扩展点/循环依赖.md",
+    "SpringFrameWork/Bean生命周期与扩展点/Bean的两大扩展点分析.md",
     "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期分析",
-    "SpringFrameWork/Bean生命周期与扩展点/Bean扩展点分析.md",
-    "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期分析.md",
     "Attachments/pics/Pasted image 20231228214558.png",
     "Attachments/pics/Pasted image 20231228214547.png",
     "Attachments/pics/Pasted image 20231228214542.png",
@@ -204,7 +205,6 @@
     "SpringFrameWork/IOC容器生命周期与扩展点",
     "SpringFrameWork/依赖注入方式/组件获取",
     "SpringFrameWork/依赖注入方式/组件添加",
-    "SpringFrameWork/用户属性依赖注入的方式",
-    "SpringFrameWork"
+    "SpringFrameWork/用户属性依赖注入的方式"
   ]
 }

@@ -1,13 +1,71 @@
 Spring IOC ：
 
-- Bean定义的定位,Bean 可能定义在XML中，或者一个注解，或者其他形式。这些都被用Resource来定位, IOC容器读取Resource获取BeanDefinition 注册到 Bean定义注册表中。
-- ==第一次向容器getBean操作会触发Bean的创建过程，实列化一个Bean时，要根据BeanDefinition中类信息等实列化Bean.==
-- ==将实列化的Bean放到单例Bean缓存内。==
-- ==此后再次获取向容器getBean就会从缓存中获取。==
+- ==Bean定义的定位,Bean 可能定义在XML中，或者一个注解，或者其他形式。这些都被用Resource来定位, IOC容器读取Resource获取BeanDefinition 注册到 Bean定义注册表中。==
+- 第一次向容器getBean操作会触发Bean的创建过程，实列化一个Bean时，要根据BeanDefinition中类信息等实列化Bean.
+- 将实列化的Bean放到单例Bean缓存内。
+- 此后再次获取向容器getBean就会从缓存中获取。
+
+==BeanDefinition 的注册时机剖析：==来看构造方法`AnnotationConfigApplicationContext(Class<?>... componentClasses)`
+![[Pasted image 20231228120315.png]]
+
+跟踪register(componentClasses)方法，总的来看：
+1. 首先需要构造描述bean实例化信息的`BeanDefinition`对象，需要将注解配置类信息转化为`AnnotatedGenericBeanDefinition` 类型，此处的`AnnotatedGenericBeanDefinition` 就是一种`BeanDefinition`类型，包含了Bean的构造函数参数，属性值以及添加的注解信息。  
+2. 设置`BeanDefinition`属性，完成对`@Scope、@Lazy、@Primary`等注解的处理  
+3. 最后通过`registerBeanDefinition()`方法完成Bean的注册。
+
+```Java
+private <T> void doRegisterBean(Class<T> beanClass, @Nullable String name,
+       @Nullable Class<? extends Annotation>[] qualifiers, @Nullable Supplier<T> supplier,
+       @Nullable BeanDefinitionCustomizer[] customizers) {
+
+    // 将注解配置类信息转换成一种 BeanDefinition
+    AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
+    if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
+       return;
+    }
+
+    abd.setAttribute(ConfigurationClassUtils.CANDIDATE_ATTRIBUTE, Boolean.TRUE);
+    abd.setInstanceSupplier(supplier);
+    // 获取bean的作用域元数据
+    ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
+    // 将bean的作用域写回 BeanDefinition
+    abd.setScope(scopeMetadata.getScopeName());
+    // 生成 beanName
+    String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
+    // 解析AnnotatedGenericBeanDefinition 中的 @lazy 和 @Primary注解
+    AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+    // 处理@Qualifier 注解
+    if (qualifiers != null) {
+       for (Class<? extends Annotation> qualifier : qualifiers) {
+          if (Primary.class == qualifier) {
+             abd.setPrimary(true);
+          }
+          else if (Lazy.class == qualifier) {
+             abd.setLazyInit(true);
+          }
+          else {
+             abd.addQualifier(new AutowireCandidateQualifier(qualifier));
+          }
+       }
+    }
+    if (customizers != null) {
+       for (BeanDefinitionCustomizer customizer : customizers) {
+          customizer.customize(abd);
+       }
+    }
+
+    BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+    definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+    // 注册 bean对象
+    BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
+}
+```
 
 ![[Pasted image 20231226153338.png]]
 
-refresh方法是容器刷新的入口，方法定义在AbstractApplicationContext 中
+==现在Spring IOC容器对Bean的创建过程并没有完成，目前只是将Bean的定义加载到了容器中，但是可能容器本身已经存在这些Bean的定义，所以需要使用refresh()方法刷新容器，回到最开始进入`AnnotationConfigApplicationContext`的源码==
+
+refresh方法是容器刷新的入口，方法定义在==AnnotationConfigApplicationContext的父类AbstractApplicationContext 中==
 
 ```Java
 public void refresh() throws BeansException, IllegalStateException {

@@ -1,39 +1,7 @@
-按类型自动注入可能会导致多个候选者，所以往往需要对选择过程进行针对的控制。
-# @Primary
-
-实现这一目标的方法之一是使用Spring的@Primary注解。@Primary表示如果在候选者中正好有一个主要Bean存在，它就会成为自动注入的值。
-
-```Java
-@Configuration
-public class MovieConfiguration {
-
-    @Bean
-    @Primary
-    public MovieCatalog firstMovieCatalog() { ... }
-
-    @Bean
-    public MovieCatalog secondMovieCatalog() { ... }
-
-    // ...
-}
-```
-
-通过前面的配置，下面的MovieRecommender被自动注入主Bean：firstMovieCatalog
-
-```Java
-public class MovieRecommender {
-
-    @Autowired
-    private MovieCatalog movieCatalog;
-
-    // ...
-}
-```
-
-# @Qualifier
 
 @Primary是按类型使用自动注入主Bean的一种有效方式。当你需要对选择过程进行更多控制时，你可以使用Spring的@Qualifier注解。你可以将限定符的值与特定的参数联系起来，缩小类型匹配的范围，从而为每个注入参数选择一个特定的bean。如下面的例子所示：
 
+# 定义Qualifier
 容器中存在修饰词为`main`和`action`的两个`SimpleMovieCatalog`
 
 ```Java
@@ -64,8 +32,8 @@ public class MovieRecommender {
 
 </beans>
 ```
-
-## 获取方式一、原始注解
+# 依据Qualifier针对性依赖注入
+## 方式一、原始注解
 使用`@Qualifier`注解注入名字叫做的`main`的`SimpleMovieCatalog`
 
 ```Java
@@ -99,7 +67,7 @@ public class MovieRecommender {
 }
 ```
 
-## 获取方式二、自定义注解
+## 方式二、自定义注解
 你可以创建你自己的自定义限定符注解，你需要为你的注解打上@Qualifier注解，自定义限定符注解的默认字段叫做`value()`
 
 ```Java

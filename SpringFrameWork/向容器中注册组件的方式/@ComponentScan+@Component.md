@@ -1,0 +1,1 @@
+使用@ComponentScan修改默认包扫描规则，使其扫描指定路径，指定路径下的类要用@Component注解声明

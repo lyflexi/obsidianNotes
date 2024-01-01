@@ -1,22 +1,18 @@
-
-
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=MjFlMDNmOWZhNjIyODk2YTJhZWVlMTdkYTgyMTQ3ODFfR2xjSDJBV1VFOHBNU01CcW5aMm5oMGVqZWM3MEJ0OXVfVG9rZW46QjZ4MWJSaEFGb2Ftak54UXFmSWNGTHJHblpjXzE3MDM3NzA3NzM6MTcwMzc3NDM3M19WNA)
-
+![[Pasted image 20240101212508.png]]
 Bean 生命周期的整个执行过程描述如下：
 1. 实例化接口InstantiationAwareBeanPostProcessor 
 2. populateBean设置对象属性
 3. 初始化接口BeanPostProcessor
-4. @Scope
-5. DisposableBean销毁接口
+4. DisposableBean销毁接口
 
 # 实例化Instantiation 
 实例化接口InstantiationAwareBeanPostProcessor
-    
-    1. 调用者通过`getBean(beanName)` 请求某一个Bean
-        
-    2. **实例化Before：**如果容器注册了 `org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor` 接口，则在实例化Bean 之前，将调用 postProcessBeforeInstantiation（）方法。根据配置情况调用Bean构造函数 或工厂方法实例化Bean
-        
-    3. **实例化After：**如果容器注册了`InstantiationAwareBeanPostProcessor` 接口，那么在实例化Bean之后，调用该接口的postProcessAfterInstantiation（）方法，可在这里对已经实例化的Bean 进行一些操作
+
+1. 调用者通过`getBean(beanName)` 请求某一个Bean
+	
+2. **实例化Before：**如果容器注册了 `org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor` 接口，则在实例化Bean 之前，将调用 postProcessBeforeInstantiation（）方法。根据配置情况调用Bean构造函数 或工厂方法实例化Bean
+	
+3. **实例化After：如果容器注册了`InstantiationAwareBeanPostProcessor` 接口，那么在实例化Bean之后，调用该接口的postProcessAfterInstantiation（）方法，可在这里对已经实例化的Bean 进行一些操作
         
 # populateBean设置对象属性：
 根据传入的`RootBeanDefinition mbd`（xml配置信息和@Configuration配置信息），那么IOC容器在这一步着手将配置值设置到Bean 对应的属性中去。
@@ -40,6 +36,7 @@ protected void populateBean(String beanName, RootBeanDefinition mbd, @Nullable B
 			if (bp instanceof InstantiationAwareBeanPostProcessor) {
 				InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
 				if (!ibp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
+					//如果用户实现的postProcessBeanDefinitionRegistry返回false，则框架提前结束
 					return;
 				}
 			}
@@ -116,7 +113,7 @@ protected void populateBean(String beanName, RootBeanDefinition mbd, @Nullable B
 
 好，下面我们一一分析其实现逻辑
 
-#### 支持外部自定义属性注入
+## 支持外部自定义属性注入
 
 ```java
 if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
@@ -132,13 +129,13 @@ if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 
 ```
 
-可以看到，在设置属性之前，让任何实现 InstantiationAwareBeanPostProcessor 接口的类有机会修改 bean 的状态。具体通过调用 postProcessAfterInstantiation 方法，如果调用返回 false，表示不必继续进行依赖注入，直接返回
-
 在这主要是让用户可以自定义属性注入。比如用户实现一个 InstantiationAwareBeanPostProcessor 类型的后置处理器，并通过 postProcessAfterInstantiation 方法向 bean 的成员变量注入自定义的信息。
 
-#### 注入属性到 PropertyValues 中
+==但如果postProcessAfterInstantiation调用返回 false，表示不必继续进行依赖注入，框架提前结束，直接返回==
 
-在这注意：常规的根据 Bean 配置的依赖注入方式完成注入，resolvedAutowireMode 默认是0，即不走以下逻辑 autowireByName 或者 autowireByType，在这注入可以看 doCreateBean 中的 applyMergedBeanDefinitionPostProcessors ，具体在上一篇文章有所讲解。只有在配置文件中声明了 autowire="byName" 才会进行至 autowireByName 方法。
+## 注入属性到 PropertyValues 中
+
+在这注意：==常规的根据 Bean 配置的依赖注入方式完成注入，resolvedAutowireMode 默认是0，即不走以下逻辑 autowireByName 或者 autowireByType==。只有在配置文件中声明了 autowire="byName" 才会进行至 autowireByName 方法。
 ```java
 	// pvs 是一个 MutablePropertyValues 实例，里面实现了 PropertyValues 接口，
 	// 提供属性的读写操作实现，同时可以通过调用构造函数实现深拷贝
@@ -278,7 +275,7 @@ protected void autowireByType(
 
 该方法的开始也是去获取非简单类型属性的名称，根据名称去创建一个要被注入的依赖描述，方便提供统一的访问，根据容器的 BeanDefinition 解析依赖关系，返回所有要被注入的 Bean 实例，最后都是将解析出的 bean 存入到属性值列表 pvs 中，然后执行 registerDependentBean 方法来注册依赖关系。
 
-#### 对解析完但未设置的属性进行再处理
+## 对解析完但未设置的属性进行再处理
 
 在这里主要是对 @Autowired 标记的属性进行依赖注入，我们看下源码：
 ```java
@@ -313,6 +310,7 @@ if (hasInstAwareBpps) {
 }
 
 ```
+
 我们跟进依赖注入的方法 postProcessProperties ，他的实现类为：AutowiredAnnotationBeanPostProcessor
 ```java
 public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
@@ -355,7 +353,7 @@ private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz
 
 可以看到该方法主要就是解析给定类 @Autowired 相关注解元信息，从而将得到的给定类 autowire 相关注解元信息存储在容器缓存中。
 
-#### 将 PropertyValues 中的属性值设置到 BeanWrapper 中
+## 将 PropertyValues 中的属性值设置到 BeanWrapper 中
 
 在这我们可以看到有前置判断条件 pvs != null，所以只有执行了 autowireByName 或者 autowireByType 的属性注入，才会调用该方法（applyPropertyValues），最终将属性注入到 Bean 的 Wrapper 实例里。源码如下：
 ```java
@@ -475,9 +473,7 @@ protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrap
 
 # 初始化接口BeanPostProcessor
     
-  此处非常重要，Spring 的 AOP 就是利用它实现的
-    
-2. **初始化Before：**如果BeanFactory 装配了 org.springframework.beans.factory.config.BeanPostProcessor 后处理 ，则将调用`postProcessBeforeInitialization`方法 对Bean 进行加工操作，`postProcessBeforeInitialization`当中调用了`invokeAwareMethod`方法：使用了Spring Aware 你的Bean将会和Spring框架耦合，Spring Aware 的目的是为了让Bean获取Spring容器的服务。
+1. **初始化Before：如果BeanFactory 装配了 org.springframework.beans.factory.config.BeanPostProcessor 后处理 ，则将调用`postProcessBeforeInitialization`方法 对Bean 进行加工操作，`postProcessBeforeInitialization`当中调用了`invokeAwareMethod`方法：使用了Spring Aware 你的Bean将会和Spring框架耦合，Spring Aware 的目的是为了让Bean获取Spring容器的服务。
 	
 	1. 如果 Bean 实现了 BeanNameAware 接口，则 Spring 调用 Bean 的 setBeanName() 方法传入当前 Bean 的 id 值。
 		
@@ -493,23 +489,19 @@ protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrap
 		
 	7. 如果bean实现了applicationEventPulisherAware：应用事件发布器，可以发布事件，
 		
-3. **初始化方法invokeInitMethods，**因为 Aware 方法都是执行在初始化方法之前，所以可以在初始化方法中放心大胆的使用 Aware 接口获取的资源，这也是我们自定义扩展 Spring 的常用方式。如果Bean实现了 InitializingBean 接口：
+2. **初始化方法invokeInitMethods，**因为 Aware 方法都是执行在初始化方法之前，所以可以在初始化方法中放心大胆的使用 Aware 接口获取的资源，这也是我们自定义扩展 Spring 的常用方式。如果Bean实现了 InitializingBean 接口：
 	
 	1. 则将调用接口的afterPropertiesSet 方法。
 		
 	2. 类似的如果在applicationContext.xml配置文件中通过init-method属性指定了初始化方法，则将执行指定的初始化方法
 		
-4. **初始化After：**如果BeanFactory 装配了 org.springframework.beans.factory.config.BeanPostProcessor 后处理 ，则将调用`postProcessAfterInitialization(Object bean, String beanName)` 方法 这个方法在此时调用，容器再次获得了对Bean 的加工机会。此时bean已经准备就绪，可以被应用程序使用了，他们将一直驻留在应用上下文中，直到该应用上下文被销毁；
-        
+3. **初始化After：**如果BeanFactory 装配了 org.springframework.beans.factory.config.BeanPostProcessor 后处理 ，则将调用`postProcessAfterInitialization(Object bean, String beanName)` 方法，容器再次获得了对Bean 的加工机会。此时bean已经准备就绪，可以被应用程序使用了，他们将一直驻留在应用上下文中，直到该应用上下文被销毁；  ==此处非常重要，Spring 的 AOP 就是利用after实现的，代理对象的创建时机就位于Bean的初始化之后==
 # DisposableBean销毁接口
 
-DisposableBean 类似于 InitializingBean，对应生命周期的销毁阶段，以ConfigurableApplicationContext#close()方法作为入口，若bean实现了DisposableBean接口，
-    
-    1. spring将调用它的distroy()接口方法。
-        
-    2. 同样的，如果bean使用了destroy-method属性声明了销毁方法，则该方法被调用；
-
-
+DisposableBean 类似于 InitializingBean，对应生命周期的销毁阶段，以ConfigurableApplicationContext#close()方法作为入口，
+1. 若bean实现了DisposableBean接口，spring将调用它的distroy()接口方法。
+	
+2. 同样的，如果bean使用了destroy-method属性声明了销毁方法，则该方法被调用；
 
 Bean的生命周期到此结束啦！！！
 

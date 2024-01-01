@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/二、loadBeanDefinitions.md"
+                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/二、loadBeanDefinitions.md",
+                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/二、loadBeanDefinitions.md",
+                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/二、loadBeanDefinitions.md",
+                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -160,11 +160,17 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "SpringFrameWork/MyConfig.class配置文件生效原理分析（BeanDefinationMap）/1.md",
-    "SpringFrameWork/Bean生命周期与扩展点/循环依赖.md",
-    "SpringFrameWork/MyConfig.class配置文件生效原理分析（BeanDefinationMap）",
-    "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
     "SpringFrameWork/Bean生命周期与扩展点/Bean的两大扩展点分析.md",
+    "Attachments/pics/Pasted image 20240101213534.png",
+    "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
+    "Attachments/pics/Pasted image 20240101212508.png",
+    "SpringFrameWork/Bean生命周期与扩展点/循环依赖.md",
+    "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
+    "SpringFrameWork/IOC容器生命周期与扩展点/一、prepareRefresh 容器准备刷新.md",
+    "SpringFrameWork/BeanDefination生效时机/MyConfig.class配置文件生效原理分析/AnnotationConfigApplicationContext.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/二、loadBeanDefinitions.md",
+    "SpringFrameWork/BeanDefination生效时机",
+    "SpringFrameWork/BeanDefination生效时机/MyConfig.class配置文件生效原理分析",
     "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期分析",
     "Attachments/pics/Pasted image 20231228214558.png",
     "Attachments/pics/Pasted image 20231228214547.png",
@@ -174,25 +180,21 @@
     "Attachments/pics/Pasted image 20231228214431.png",
     "Attachments/pics/Pasted image 20231228214423.png",
     "Attachments/pics/Pasted image 20231228214213.png",
-    "Attachments/pics/Pasted image 20231228214151.png",
-    "Attachments/pics/Pasted image 20231228214012.png",
-    "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
     "SpringFrameWork/Bean生命周期与扩展点",
-    "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/七、注册BeanDefinition（registerBeanDefinition）.md",
-    "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/六、构造器注入和setter注入原理.md",
-    "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/五、创建BeanDefinition（processBeanDefinitionElement）.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/七、注册BeanDefinition（registerBeanDefinition）.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/六、构造器注入和setter注入原理.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/五、创建BeanDefinition（processBeanDefinitionElement）.md",
     "SpringFrameWork/IOC容器生命周期与扩展点/二、obtainFreshBeanFactory 获取内部工厂ConfigurableListableBeanFactory.md",
-    "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/一、ClassPathXmlApplicationContext定义bean.md",
-    "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/二、loadBeanDefinitions.md",
-    "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/八、obtainFreshBeanFactory()返回ConfigurableListableBeanFactory.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/一、ClassPathXmlApplicationContext定义bean.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/八、obtainFreshBeanFactory()返回ConfigurableListableBeanFactory.md",
     "SpringFrameWork/向容器中注册组件的方式/@Configuration+@Bean.md",
     "SpringFrameWork/向容器中注册组件的方式/xml传统配置.md",
     "SpringFrameWork/向容器中注册组件的方式/@ComponentScan+@Component.md",
     "SpringFrameWork/用户属性依赖注入的方式/自动注入@Autowired和@Resource原理.md",
-    "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/四、xml的解析parseDefaultElement.md",
-    "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）/三、初步了解Resource.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/四、xml的解析parseDefaultElement.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/三、初步了解Resource.md",
     "SpringFrameWork/用户属性依赖注入的方式/xml传统依赖注入.md",
-    "SpringFrameWork/Xml配置文件生效原理分析（BeanDefinationMap）",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析",
     "SpringFrameWork/用户属性依赖注入的方式/xml传统依赖注入方式",
     "SpringFrameWork/组件限定符（针对性注册以满足针对性依赖注入）/@Qualifier.md",
     "SpringFrameWork/组件限定符（针对性注册以满足针对性依赖注入）/@Primary.md",
@@ -201,10 +203,7 @@
     "SpringFrameWork/向容器中注册方式/xml配置注入.md",
     "SpringFrameWork/向容器中注册组件的方式/FactoryBean.md",
     "SpringFrameWork/向容器中注册组件的方式",
-    "SpringFrameWork/IOC容器生命周期与扩展点/四、postProcessBeanFactory为工厂注册后置处理器.md",
-    "SpringFrameWork/向容器中注册组件的方式/BeanFactoryPostProcessor.md",
     "SpringFrameWork/IOC容器生命周期与扩展点",
-    "SpringFrameWork/依赖注入方式/组件获取",
-    "SpringFrameWork/依赖注入方式/组件添加"
+    "SpringFrameWork/依赖注入方式/组件获取"
   ]
 }

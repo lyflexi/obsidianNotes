@@ -158,11 +158,10 @@ protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable
 
 这些接口的实现类是独立于 Bean 的，并且会注册到 Spring 容器中。在 Spring 容器创建任何 Bean 的时候，这些后处理器都会发生作用。
 
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=YjMzOTJmMzM5M2U5NzFhMzgwMWUwMmRkOTc0NGY2ZWZfTTJJQkR0T09HaDhBcVRscFR1N09McXhTQVhxajFVcjZfVG9rZW46THFHamJVU3hsb2hqSFl4MDhlV2MyakdXbkJmXzE3MDM3NzA3NzM6MTcwMzc3NDM3M19WNA)
-
+![[Pasted image 20240101213534.png]]
 # 扩展点分析
 
-## **InstantiationAwareBeanPostProcessor**
+## **一、InstantiationAwareBeanPostProcessor**
 
 我们翻一下源码发现 InstantiationAwareBeanPostProcessor 是继承了 BeanPostProcessor，并且新增了三个方法
 
@@ -441,7 +440,7 @@ private InjectionMetadata buildResourceMetadata(Class<?> clazz) {
 }
 ```
 
-## BeanPostProcessor
+## 二、BeanPostProcessor
 
 BeanPostProcessor 中有两个方法：
 

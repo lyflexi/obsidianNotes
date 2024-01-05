@@ -88,5 +88,9 @@ public class MyConfig {
 }
 ```
 
-如果想要获取FactoryBean本身，只需要在Bean的id前面加上&符号即可，BeanFactory源码如下：
+如果想要获取FactoryBean本身，需要调用getBean方法，并且传入（FACTORY_BEAN_PREFIX+beanName）
+```java
+Used to dereference a FactoryBean instance and distinguish it from beans created by the FactoryBean. For example, if the bean named myJndiObject is a FactoryBean, getting &myJndiObject will return the factory, not the instance returned by the factory.
+```
+参见容器顶级接口BeanFactory的源码：
 ![[Pasted image 20231226150011.png]]

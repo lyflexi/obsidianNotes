@@ -58,6 +58,7 @@ public static void invokeBeanFactoryPostProcessors(
        // Separate between BeanDefinitionRegistryPostProcessors that implement
        // PriorityOrdered, Ordered, and the rest.
        List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
+       
 // Invoke BeanDefinitionRegistryPostProcessors orderd
        // First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
        String[] postProcessorNames =

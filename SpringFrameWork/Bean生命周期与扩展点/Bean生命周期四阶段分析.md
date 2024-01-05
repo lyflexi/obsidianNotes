@@ -1,9 +1,10 @@
 ![[Pasted image 20240101212508.png]]
 Bean 生命周期的整个执行过程描述如下：
 1. 实例化接口InstantiationAwareBeanPostProcessor 
-2. populateBean设置对象属性
-3. 初始化接口BeanPostProcessor
-4. DisposableBean销毁接口
+2. addSingletonFactory，会获取原始对象的AOP早期引用getEarlyBeanReference，并存入三级缓存`singletonFactories`中
+3. populateBean设置对象属性
+4. 初始化接口BeanPostProcessor
+5. DisposableBean销毁接口
 
 # 实例化Instantiation 
 实例化接口InstantiationAwareBeanPostProcessor
@@ -13,7 +14,10 @@ Bean 生命周期的整个执行过程描述如下：
 2. **实例化Before：**如果容器注册了 `org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor` 接口，则在实例化Bean 之前，将调用 postProcessBeforeInstantiation（）方法。根据配置情况调用Bean构造函数 或工厂方法实例化Bean
 	
 3. **实例化After：如果容器注册了`InstantiationAwareBeanPostProcessor` 接口，那么在实例化Bean之后，调用该接口的postProcessAfterInstantiation（）方法，可在这里对已经实例化的Bean 进行一些操作
-        
+
+# addSingletonFactory
+
+会获取原始对象的AOP早期引用getEarlyBeanReference，并存入三级缓存`singletonFactories`中
 # populateBean设置对象属性：
 根据传入的`RootBeanDefinition mbd`（xml配置信息和@Configuration配置信息），那么IOC容器在这一步着手将配置值设置到Bean 对应的属性中去。
 1. ==支持外部自定义属性注入，控制是否继续给 Bean 设置属性值==。由用户实现扩展点`InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation`
@@ -473,7 +477,8 @@ protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrap
 
 # 初始化接口BeanPostProcessor
     
-1. **初始化Before：如果BeanFactory 装配了 org.springframework.beans.factory.config.BeanPostProcessor 后处理 ，则将调用`postProcessBeforeInitialization`方法 对Bean 进行加工操作，`postProcessBeforeInitialization`当中调用了`invokeAwareMethod`方法：使用了Spring Aware 你的Bean将会和Spring框架耦合，Spring Aware 的目的是为了让Bean获取Spring容器的服务。
+1. **初始化Before：如果BeanFactory 装配了 org.springframework.beans.factory.config.BeanPostProcessor 后处理 ，则将调用`postProcessBeforeInitialization`方法 对Bean 进行加工操作，==`postProcessBeforeInitialization`当中调用了`invokeAwareMethod`方法：使用了Spring Aware 你的Bean将会和Spring框架耦合，Spring Aware 的目的是为了让Bean获取Spring容器的服务。==
+	![[Pasted image 20240105114206.png]]
 	
 	1. 如果 Bean 实现了 BeanNameAware 接口，则 Spring 调用 Bean 的 setBeanName() 方法传入当前 Bean 的 id 值。
 		

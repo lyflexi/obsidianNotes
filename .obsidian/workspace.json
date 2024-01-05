@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md"
+                "file": "SpringFrameWork/AOP切面增强原理/AOP源码解析.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
+                "file": "SpringFrameWork/AOP切面增强原理/AOP源码解析.md",
                 "mode": "source",
                 "source": false
               }
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": " ",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
+                "file": "SpringFrameWork/AOP切面增强原理/AOP源码解析.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
+                "file": "SpringFrameWork/AOP切面增强原理/AOP源码解析.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -160,50 +160,50 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "SpringFrameWork/Bean生命周期与扩展点/Bean的两大扩展点分析.md",
-    "Attachments/pics/Pasted image 20240101213534.png",
+    "SpringFrameWork/Bean生命周期与扩展点/循环依赖与三级缓存.md",
+    "Attachments/pics/Pasted image 20240105171150.png",
+    "SpringFrameWork/AOP切面增强原理/AOP源码解析.md",
+    "Attachments/pics/Pasted image 20240105165913.png",
+    "Attachments/pics/Pasted image 20240105165903.png",
+    "Attachments/pics/Pasted image 20240105165318.png",
+    "Attachments/pics/Pasted image 20240105165250.png",
     "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
-    "Attachments/pics/Pasted image 20240101212508.png",
-    "SpringFrameWork/Bean生命周期与扩展点/循环依赖.md",
-    "SpringFrameWork/IOC容器生命周期与扩展点/BeanFactory全流程介绍.md",
-    "SpringFrameWork/IOC容器生命周期与扩展点/一、prepareRefresh 容器准备刷新.md",
+    "SpringFrameWork/Bean生命周期与扩展点/Bean的两大扩展点分析.md",
+    "Attachments/pics/Pasted image 20240105151542.png",
+    "Attachments/pics/Pasted image 20240105151531.png",
+    "Attachments/pics/Pasted image 20240105151526.png",
+    "Attachments/pics/Pasted image 20240105151519.png",
+    "Attachments/pics/Pasted image 20240105151511.png",
+    "SpringFrameWork/AOP切面增强原理",
+    "SpringFrameWork/IOC容器生命周期/BeanFactory全流程介绍.md",
+    "SpringFrameWork/IOC容器生命周期/十二、finishRefresh结束.md",
+    "SpringFrameWork/IOC容器生命周期/十一、finishBeanFactoryInitialization，初始化所有剩下的单实例bean的！/3.Trigger post-initialization callback for all applicable beans....md",
+    "SpringFrameWork/IOC容器生命周期/十一、finishBeanFactoryInitialization，初始化所有剩下的单实例bean的！/2.Trigger initialization of all non-lazy singleton beans....md",
+    "SpringFrameWork/IOC容器生命周期/十一、finishBeanFactoryInitialization，初始化所有剩下的单实例bean的！/1.preInstantiateSingletons入口.md",
+    "SpringFrameWork/向容器中注册组件的方式/FactoryBean.md",
+    "SpringFrameWork/IOC容器生命周期/十一、finishBeanFactoryInitialization，初始化所有剩下的单实例bean的！",
+    "SpringFrameWork/IOC容器生命周期/十、registerListeners将监听器注册到广播器上.md",
+    "SpringFrameWork/IOC容器生命周期/九、onRefresh是一个模板方法.md",
+    "SpringFrameWork/IOC容器生命周期/八、initApplicationEventMulticaster初始化事件广播器.md",
+    "SpringFrameWork/IOC容器生命周期/七、initMessageSource国际化属性.md",
+    "SpringFrameWork/IOC容器生命周期/六、registerBeanPostProcessors 注册bean后置处理器.md",
+    "SpringFrameWork/IOC容器生命周期/五、invokeBeanFactoryPostProcessors执行BeanFactory后置处理器。.md",
+    "SpringFrameWork/IOC容器生命周期/四、postProcessBeanFactory注册工厂后置处理器.md",
+    "SpringFrameWork/向容器中注册组件的方式/BeanDefinitionRegistryPostProcessor.md",
+    "SpringFrameWork/向容器中注册组件的方式/BeanFactoryPostProcessor.md",
     "SpringFrameWork/BeanDefination生效时机/MyConfig.class配置文件生效原理分析/AnnotationConfigApplicationContext.md",
+    "JavaSDK/Java设计模式/六种类间关系.md",
+    "SpringFrameWork/IOC容器生命周期/一、prepareRefresh 容器准备刷新.md",
     "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/二、loadBeanDefinitions.md",
     "SpringFrameWork/BeanDefination生效时机",
     "SpringFrameWork/BeanDefination生效时机/MyConfig.class配置文件生效原理分析",
     "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期分析",
-    "Attachments/pics/Pasted image 20231228214558.png",
-    "Attachments/pics/Pasted image 20231228214547.png",
-    "Attachments/pics/Pasted image 20231228214542.png",
-    "Attachments/pics/Pasted image 20231228214443.png",
-    "Attachments/pics/Pasted image 20231228214436.png",
-    "Attachments/pics/Pasted image 20231228214431.png",
-    "Attachments/pics/Pasted image 20231228214423.png",
-    "Attachments/pics/Pasted image 20231228214213.png",
     "SpringFrameWork/Bean生命周期与扩展点",
     "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/七、注册BeanDefinition（registerBeanDefinition）.md",
     "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/六、构造器注入和setter注入原理.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/五、创建BeanDefinition（processBeanDefinitionElement）.md",
-    "SpringFrameWork/IOC容器生命周期与扩展点/二、obtainFreshBeanFactory 获取内部工厂ConfigurableListableBeanFactory.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/一、ClassPathXmlApplicationContext定义bean.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/八、obtainFreshBeanFactory()返回ConfigurableListableBeanFactory.md",
-    "SpringFrameWork/向容器中注册组件的方式/@Configuration+@Bean.md",
-    "SpringFrameWork/向容器中注册组件的方式/xml传统配置.md",
-    "SpringFrameWork/向容器中注册组件的方式/@ComponentScan+@Component.md",
-    "SpringFrameWork/用户属性依赖注入的方式/自动注入@Autowired和@Resource原理.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/四、xml的解析parseDefaultElement.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/三、初步了解Resource.md",
-    "SpringFrameWork/用户属性依赖注入的方式/xml传统依赖注入.md",
     "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析",
     "SpringFrameWork/用户属性依赖注入的方式/xml传统依赖注入方式",
-    "SpringFrameWork/组件限定符（针对性注册以满足针对性依赖注入）/@Qualifier.md",
-    "SpringFrameWork/组件限定符（针对性注册以满足针对性依赖注入）/@Primary.md",
     "SpringFrameWork/组件限定符（针对性注册以满足针对性依赖注入）",
-    "SpringFrameWork/组件限定符.md",
-    "SpringFrameWork/向容器中注册方式/xml配置注入.md",
-    "SpringFrameWork/向容器中注册组件的方式/FactoryBean.md",
-    "SpringFrameWork/向容器中注册组件的方式",
-    "SpringFrameWork/IOC容器生命周期与扩展点",
-    "SpringFrameWork/依赖注入方式/组件获取"
+    "SpringFrameWork/向容器中注册组件的方式"
   ]
 }

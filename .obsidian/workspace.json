@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 23.73134328358209,
+        "dimension": 24.132364810330913,
         "children": [
           {
             "id": "0e2a48b30b90cdd5",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/循环依赖与三级缓存.md"
+                "file": "SpringFrameWork/事务控制/Spring事务的其他失效场景.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -24,7 +24,7 @@
       {
         "id": "ad469fc731c35108",
         "type": "tabs",
-        "dimension": 76.26865671641791,
+        "dimension": 75.86763518966909,
         "children": [
           {
             "id": "83c4b3e02b4ccf9b",
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/循环依赖与三级缓存.md",
+                "file": "SpringFrameWork/事务控制/Spring事务的其他失效场景.md",
                 "mode": "source",
                 "source": false
               }
@@ -89,7 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 469.51103591918945
+    "width": 392.51103591918945
   },
   "right": {
     "id": "42bec07740fd88a4",
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/循环依赖与三级缓存.md",
+                "file": "SpringFrameWork/事务控制/Spring事务的其他失效场景.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringFrameWork/Bean生命周期与扩展点/循环依赖与三级缓存.md",
+                "file": "SpringFrameWork/事务控制/Spring事务的其他失效场景.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -160,21 +160,29 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "Attachments/pics/747662-20210206153259183-1350022613.gif",
-    "Attachments/pics/Pasted image 20240105213820.png",
+    "SpringFrameWork/事务控制/声明式事务源码解析.md",
+    "SpringFrameWork/事务控制/Spring事务的其他失效场景.md",
+    "SpringFrameWork/事务控制/Spring事务参数配置.md",
+    "Attachments/pics/Pasted image 20240106163426.png",
     "SpringFrameWork/AOP切面增强原理/AOP源码解析.md",
-    "SpringFrameWork/Bean生命周期与扩展点/循环依赖与三级缓存.md",
-    "Attachments/pics/Pasted image 20240105171150.png",
-    "Attachments/pics/Pasted image 20240105165913.png",
-    "Attachments/pics/Pasted image 20240105165903.png",
-    "Attachments/pics/Pasted image 20240105165318.png",
-    "Attachments/pics/Pasted image 20240105165250.png",
-    "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
+    "SpringFrameWork/AOP切面增强原理/拦截器链MethodInterceptor.md",
+    "Attachments/pics/Pasted image 20240106155608.png",
+    "SpringFrameWork/事务控制/编程式事务接口.md",
+    "Attachments/pics/Pasted image 20240106143058.png",
+    "Attachments/pics/Pasted image 20240106121900.png",
+    "Attachments/pics/Pasted image 20240106121832.png",
+    "Attachments/pics/Pasted image 20240106121342.png",
+    "Attachments/pics/Pasted image 20240106121104.png",
+    "Attachments/pics/Pasted image 20240106120922.png",
     "SpringFrameWork/Bean生命周期与扩展点/Bean的两大扩展点分析.md",
-    "Attachments/pics/Pasted image 20240105151542.png",
-    "Attachments/pics/Pasted image 20240105151531.png",
-    "Attachments/pics/Pasted image 20240105151526.png",
-    "Attachments/pics/Pasted image 20240105151519.png",
+    "SpringFrameWork/向容器中注册组件的方式/@Import.md",
+    "Attachments/pics/Pasted image 20240106101534.png",
+    "SpringFrameWork/AOP切面增强原理/AOP结合策略模式实践.md",
+    "SpringFrameWork/事务控制",
+    "Attachments/pics/Pasted image 20240106101438.png",
+    "SpringFrameWork/AOP切面增强原理/AOP的两种切入方式.md",
+    "SpringFrameWork/Bean生命周期与扩展点/循环依赖与三级缓存.md",
+    "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
     "SpringFrameWork/AOP切面增强原理",
     "SpringFrameWork/IOC容器生命周期/BeanFactory全流程介绍.md",
     "SpringFrameWork/IOC容器生命周期/十二、finishRefresh结束.md",
@@ -191,20 +199,12 @@
     "SpringFrameWork/IOC容器生命周期/五、invokeBeanFactoryPostProcessors执行BeanFactory后置处理器。.md",
     "SpringFrameWork/IOC容器生命周期/四、postProcessBeanFactory注册工厂后置处理器.md",
     "SpringFrameWork/向容器中注册组件的方式/BeanDefinitionRegistryPostProcessor.md",
-    "SpringFrameWork/向容器中注册组件的方式/BeanFactoryPostProcessor.md",
-    "SpringFrameWork/BeanDefination生效时机/MyConfig.class配置文件生效原理分析/AnnotationConfigApplicationContext.md",
-    "JavaSDK/Java设计模式/六种类间关系.md",
-    "SpringFrameWork/IOC容器生命周期/一、prepareRefresh 容器准备刷新.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/二、loadBeanDefinitions.md",
     "SpringFrameWork/BeanDefination生效时机",
     "SpringFrameWork/BeanDefination生效时机/MyConfig.class配置文件生效原理分析",
     "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期分析",
     "SpringFrameWork/Bean生命周期与扩展点",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/七、注册BeanDefinition（registerBeanDefinition）.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/六、构造器注入和setter注入原理.md",
     "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析",
     "SpringFrameWork/用户属性依赖注入的方式/xml传统依赖注入方式",
-    "SpringFrameWork/组件限定符（针对性注册以满足针对性依赖注入）",
-    "SpringFrameWork/向容器中注册组件的方式"
+    "SpringFrameWork/组件限定符（针对性注册以满足针对性依赖注入）"
   ]
 }

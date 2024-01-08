@@ -4,25 +4,19 @@
 >
 >庆幸的是在 Java 6 之后 Java 官方对从 JVM 层面对 synchronized 较大优化，所以现在的 synchronized 锁效率也优化得很不错了。JDK1.6 对锁的实现引入了大量的优化，如自旋锁、适应性自旋锁、偏向锁、轻量级锁等技术来减少锁操作的开销。
 
-在HotSpot虚拟机里，new出来的对象在堆内存中的布局分为三块区域，分别是对象头，实例数据和对齐填充：
-![[Pasted image 20231225145553.png]]
 
-1.  对象头(Header)，对象头中包含三部分内容：
-- MarkWord ：Mark Word 用于存储对象自身的运行时数据，如 HashCode、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID即JavaThread、偏向时间戳epoch等等。
-    
-- 类型指针：虚拟机通过这个指针确定该对象是哪个类的实例。虚拟机通过这个指针来确定这个对象是哪个类的实例
-```Java
-public class CustomerTest {
-    public static void main(String[] args) {
-        Customer cust = new Customer();
-    }
-}
-```
-	![[Pasted image 20231225150724.png]]
-- 如果是数组对象的话，对象头还有一部分是存储数组的长度。
-![[Java对象头结构.loom]]
-2. 实例数据(Instance Data)
-3. 对齐填充(Padding)，虚拟机要求对象起始地址必须是8字节的整数倍。填充数据不是必须存在的，仅仅是为了字节对齐。
+
+对象头(Header)，对象头中包含三部分内容：
+1. MarkWord 
+2. 类型指针：虚拟机通过这个指针确定该对象是哪个类的实例。虚拟机通过这个指针来确定这个对象是哪个类的实例Customer cust = new Customer();
+		![[Pasted image 20231225150724.png]]
+3. 如果是数组对象的话，对象头还有一部分是存储数组的长度。
+
+| 变量 | 说明 | 变量所占长度 |
+| ---- | ---- | ---- |
+| Mark Word | Mark Word 用于存储对象自身的运行时数据，如 HashCode、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID即JavaThread、偏向时间戳epoch等等。 | 32bit（8字节） |
+| Class MetadataAddress | 存储到对象类型数据的指针 | 32bit（8字节） |
+| Array length | 数组的长度 | 32bit（8字节） |
 # MarkWord
 多线程下 synchronized 的加锁就是对同一个对象的对象头中的 MarkWord 中的变量进行CAS操作。
 

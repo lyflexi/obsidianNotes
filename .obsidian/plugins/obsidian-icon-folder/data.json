@@ -29,5 +29,6 @@
     "iconName": "FabEnvira",
     "inheritanceIcon": "FabEnvira"
   },
-  "SpringFrameWork": "FabEmpire"
+  "SpringFrameWork": "FabEmpire",
+  "SpringMVC": "FabEmpire"
 }

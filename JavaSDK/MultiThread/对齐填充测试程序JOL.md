@@ -1,5 +1,11 @@
-聊聊Object obj = new Object()
 
+聊聊Object obj = new Object()
+其实，在HotSpot虚拟机里，new出来的对象在堆内存中的布局，除了我们常说的对象头(MarkWord，类型指针，数组长度之外)
+
+还有其他两块区域。分别是：
+- 实例数据(Instance Data)，见名知意，略...
+- 对齐填充字段(Padding)，虚拟机要求对象起始地址必须是8字节的整数倍。填充数据不是必须存在的，仅仅是为了字节对齐。
+![[Pasted image 20231225145553.png]]
 添加分析对象工具JOL的pom依赖：
 
 ```XML
@@ -14,6 +20,7 @@
             <version>0.9</version>
         </dependency>
 ```
+# 不带有实例数据的对象的内存布局
 
 测试类：
 
@@ -26,14 +33,14 @@ public class JOLDemo{
 }
 ```
 
-# 默认开启类型指针压缩
+## 默认开启类型指针压缩
 
 结果呈现说明：
 ![[Pasted image 20231225154713.png]]
 
-其中loss due to the next object alignment：就是对齐填充花费的内存
+==其中loss due to the next object alignment=4：就是对齐填充花费的内存==
 
-但是为什么类型指针只有4个字节呢？上文不是说好了MarkWord+类型指针==8+8==16字节吗？
+但是为什么类型指针只有4个字节呢？正常情况下MarkWord和类型指针都是8字节
 
 控制台执行命令`java -XX:+PrintCommandLineFlags -version`，查看JVM运行时参数：
 
@@ -46,12 +53,14 @@ java version "1.8.0_211"
 Java(TM) SE Runtime Environment (build 1.8.0_211-b12)
 Java HotSpot(TM) 64-Bit Server VM (build 25.211-b12, mixed mode)
 ```
-
+## 手动关闭类型指针压缩测试
 手动关闭压缩再看看 `-XX:-UseCompressedClassPointers`
 ![[Pasted image 20231225154721.png]]
 ![[Pasted image 20231225154728.png]]
+==正好8+8=16字节，因此此时不再需要对齐填充==
 
-# 关闭类型指针压缩测试
+# 带有实例数据的对象的内存布局
+## 关闭类型指针压缩测试
 
 关闭了类型指针压缩之后，最后再测试一个带有实例数据的对象的内存布局，满足我们的心理预期
 
@@ -114,8 +123,7 @@ Space losses: 0 bytes internal + 2 bytes external = 2 bytes total
 
 Process finished with exit code 0
 ```
-
-再开启指针压缩：
+## 再开启指针压缩
 ![[Pasted image 20231225154757.png]]
 
 ```Java

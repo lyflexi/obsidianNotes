@@ -37,6 +37,7 @@
         </init-param>  
         <load-on-startup>1</load-on-startup>  
     </servlet>  
+    <!—Servlet 映射-->
     <servlet-mapping>  
         <servlet-name>dispatcher</servlet-name>  
         <url-pattern>/*</url-pattern>  
@@ -46,16 +47,14 @@
 ```
 
 在上面的配置中：
-
-1. ==父容器applicationContext.xml会被优先初始化==，根据`<context-param>`元素中contextConfigLocation参数指定的配置文件路径，在这里就是`"/WEB-INF/spring/applicationContext.xml”`。 
-    1. 并调用ServletContext的setAttribute方法，将其设置到ServletContext中，属性的key为`”org.springframework.web.context.WebApplicationContext.ROOT”`，最后的”ROOT"字样表明这是一个 Root WebApplicationContext。
-    2. 并通过ContextLoaderListener来创建Root WebApplicationContext
-        
-2. DispatcherServlet在初始化时，会根据`<init-param>`元素中contextConfigLocation参数指定的配置文件路径，即`"/WEB-INF/spring/spring-servlet.xml”`，来创建Servlet WebApplicationContext子容器。同时，其会调用ServletContext的getAttribute方法来判断是否存在Root WebApplicationContext。如果存在，则将其设置为自己的parent。这就是父子上下文(父子容器)的概念。
-    
-    1. 当我们尝试从child context(即：Servlet WebApplicationContext)中获取一个bean时，如果找不到，则会委派给parent context (即Root WebApplicationContext)来查找。
-    2. 如果第一步中，我们没有通过ContextLoaderListener来创建Root WebApplicationContext，那么Servlet WebApplicationContext的parent就是null，也就是没有parent context。
-        
+1. 父容器Root WebApplicationContext会先被初始化，根据`<context-param>`元素中contextConfigLocation参数指定的配置文件路径，在这里就是`"/WEB-INF/spring/applicationContext.xml”`。 
+	1. 内部创建ContextLoaderListener，并添加到父容器当中
+2. 子容器Servlet WebApplicationContext后背初始化，会根据`<init-param>`元素中contextConfigLocation参数指定的配置文件路径，即`"/WEB-INF/spring/spring-servlet.xml”`
+	1. 内部创建DispatcherServlet，并添加到子容器当中
+	2. 注册servlet信息，如映射规则等
+注意事项：
+- 当我们尝试从child context(即：Servlet WebApplicationContext)中获取一个bean时，如果找不到，则会委派给parent context (即Root WebApplicationContext)来查找。
+- 如果第一步中，我们没有通过ContextLoaderListener来创建Root WebApplicationContext，那么Servlet WebApplicationContext的parent就是null，也就是没有parent context。
 
 # **为什么要有父子容器**
 

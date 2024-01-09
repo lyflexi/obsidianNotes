@@ -1,8 +1,7 @@
-在JDK8的部分源码中，比如Java8的`Function`接口，我们可以发现以下几点不同：
-- ==在接口中，如果接口当中只有一个传统的接口方法，那么后期实现接口的时候，匿名内部类就可以写成lambda表达式的形式==
-- 在接口中，可以直接添加非抽象的实例方法，用default修饰
-- 在接口中，可以直接添加静态方法。
+函数式接口在JDK8中是指有且仅有一个抽象方法的接口。函数式接口可以通过Lambda表达式实现，Lambda表达式是匿名内部类的语法糖。
 
+函数式接口中只能存在一个抽象方法，因为接口只有一个抽象方法的前提下，实例化接口的时候匿名内部类才唯一
+比如
 ```Java
 package java.util.function;
 
@@ -81,13 +80,7 @@ public interface Function<T, R> {
     }
 }
 ```
-# 函数式接口
-
-函数式接口在JDK8中是指有且仅有一个抽象方法的接口。函数式接口可以通过Lambda表达式实现，Lambda表达式是匿名内部类的语法糖。
-
-函数式接口中只能存在一个抽象方法，因为接口只有一个抽象方法的前提下，实例化接口的时候匿名内部类才唯一
-
-函数式接口举例：
+函数式接口使用举例：
 用lambda表达式去实现`Runnable`接口，并将`Runnable`的实现传入`Thread`类的构造方法
 
 ```Java
@@ -104,10 +97,8 @@ public class ThreadBaseDemo
 ```
 
 上面简单介绍了一些Lambda表达式得好处与语法，我们知道使用Lambda表达式是需要使用函数式接口的，那么，岂不是在我们开发过程中需要定义许多函数式接口。其实不然，java8其实已经为我们定义好了四类内置函数式接口，这四类接口其实已经可以解决我们开发过程中绝大部分的问题。四大函数式接口指的是Consumer、Supplier、Function、Predicate，位于java.util.function包下
-
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=YmEwYjRjMTBhZmM5ZmU4NzhmNzkyYzViNDQxMjViMDRfQnVGQ2RoWW42M21PRXVaQmtCVzVPMmhJR3hQYmpWU0ZfVG9rZW46TkFObWJhNmY4b05aNzR4MzR4bmNOek1TbnBoXzE3MDM1MDk1NDk6MTcwMzUxMzE0OV9WNA)
-
-## `Consumer<T>`：消费型接口
+![[Pasted image 20240109200926.png]]
+# `Consumer<T>`：消费型接口
 
 消费型接口的内置方法`void accept(T t)`：有参数，无返回值类型
 
@@ -173,7 +164,7 @@ public interface Consumer<T> {
     }
 ```
 
-## `Supplier<T>`：供给型接口
+# `Supplier<T>`：供给型接口
 
 供给型接口的内置方法`T get()`：只有返回值，没有入参
 
@@ -234,7 +225,7 @@ public interface Supplier<T> {
     }
 ```
 
-## `Function<T, R>`：函数型接口
+# `Function<T, R>`：函数型接口
 
 函数型接口内置方法`R apply(T t)`：既要有返回值，也要有方法入参
 
@@ -341,7 +332,7 @@ public interface Function<T, R> {
     }
 ```
 
-## `Predicate<T>`：断言型接口
+# `Predicate<T>`：断言型接口
 
 断言型接口内置方法`boolean test(T t)`：输入一个参数，返回boolean值
 
@@ -478,11 +469,10 @@ public interface Predicate<T> {
     }
 ```
 
-## 函数式接口用于集合操作
+# 函数式接口用于集合操作
 
 List集合的超类Superinterfaces有`Collection`和`Iterable` ，其中`Iterable` 接口中存在forEach方法，forEach接收函数式接口参数`Consumer`
-
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=N2EwNzA4ZDZmZmIxNTc4ZTBlNzU4MGQ0N2M3YWM4NGNfd3NPOE1aOVp3S2xlVlVhV0ptU2dITW5ha01oRndXOW9fVG9rZW46UkVkbmJKdU9qb0FnbTB4bVR6VmNqZThhbjZmXzE3MDM1MDk1NDk6MTcwMzUxMzE0OV9WNA)
+![[Pasted image 20240109200757.png]]
 
 因此List可以通过forEach方法遍历出集合元素之后对每一个元素进行后续的业务逻辑处理
 
@@ -491,9 +481,7 @@ resources.forEach(item -> {});
 ```
 
 其中`Collection`接口中存在`removeIf`方法，`removeIf`接收函数式接口参数`Predicate`
-
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=OGMxYWFiYmNiNmM2NGUyZGI3Y2Y1NWY2MGNmM2QzM2ZfWDMzY0FzeTdnTlBDOXFmMlhreVJIdktwUTBESVFGMzlfVG9rZW46THJmbGIyVVhjb0c2Y214Y1FSN2NrRDQzbjFmXzE3MDM1MDk1NDk6MTcwMzUxMzE0OV9WNA)
-
+![[Pasted image 20240109200807.png]]
 因此可以`removeIf`方法删除符合断言的元素
 
 ```Java
@@ -517,68 +505,4 @@ map.forEach((key,value)->{ System.out.println(key+"-------"+value); });
 //使用stream的foreach遍历hashmap
 System.out.println("使用stream遍历HashMap:");
 map.entrySet().stream().forEach(entry->{System.out.println(entry.getKey()+""+entry.getValue()); });
-```
-
-# default实例方法
-
-新接口中实例方法是接口自带的方法，实例方法的声明，需要增加default关键字修饰，因此这种方法也称为默认方法
-
-接口被实现后，实例可以直接使用这些默认方法，同时如果对默认方法需要重写时，可以直接重写即可。
-
-```Java
-    /**
-     * Returns a composed function that first applies the {@code before}
-     * function to its input, and then applies this function to the result.
-     * If evaluation of either function throws an exception, it is relayed to
-     * the caller of the composed function.
-     *
-     * @param <V> the type of input to the {@code before} function, and to the
-     *           composed function
-     * @param before the function to apply before this function is applied
-     * @return a composed function that first applies the {@code before}
-     * function and then applies this function
-     * @throws NullPointerException if before is null
-     *
-     * @see #andThen(Function)
-     */
-    default <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
-        Objects.requireNonNull(before);
-        return (V v) -> apply(before.apply(v));
-    }
-
-    /**
-     * Returns a composed function that first applies this function to
-     * its input, and then applies the {@code after} function to the result.
-     * If evaluation of either function throws an exception, it is relayed to
-     * the caller of the composed function.
-     *
-     * @param <V> the type of output of the {@code after} function, and of the
-     *           composed function
-     * @param after the function to apply after this function is applied
-     * @return a composed function that first applies this function and then
-     * applies the {@code after} function
-     * @throws NullPointerException if after is null
-     *
-     * @see #compose(Function)
-     */
-    default <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
-        return (T t) -> after.apply(apply(t));
-    }
-```
-
-# 接口静态方法
-
-新接口中的静态方法作为接口的类方法，可以直接使用，不需要依托某个实现类。
-
-```Java
-    /**
-     * Returns a function that always returns its input argument.
-     *
-     * @param <T> the type of the input and output objects to the function
-     * @return a function that always returns its input argument
-     */
-    static <T> Function<T, T> identity() {
-        return t -> t;
-    }
 ```

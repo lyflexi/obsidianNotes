@@ -30,5 +30,6 @@
     "inheritanceIcon": "FabEnvira"
   },
   "SpringFrameWork": "FabEmpire",
-  "SpringMVC": "FabEmpire"
+  "SpringMVC": "FabEmpire",
+  "本地IDE与环境配置": "FabEmpire"
 }

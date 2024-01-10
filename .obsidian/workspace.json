@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "手写mini_SpringhasMvc/导读.md"
+                "file": "本地IDE与环境配置/tomcat10.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "手写mini_SpringhasMvc/导读.md",
+                "file": "本地IDE与环境配置/tomcat10.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "手写mini_SpringhasMvc/导读.md",
+                "file": "本地IDE与环境配置/tomcat10.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "手写mini_SpringhasMvc/导读.md",
+                "file": "本地IDE与环境配置/tomcat10.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,10 +159,13 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "手写mini_SpringhasMvc/一、实现SpringIOC/4.实现完整的IoC容器：构建工厂体系并添加容器事件.md",
-    "手写mini_SpringhasMvc/一、实现SpringIOC/5.通过 BeanPostProcessor 机制让容器支持注解.md",
-    "手写mini_SpringhasMvc/一、实现SpringIOC/2.调整工作并扩展BeanDefinition，配置xml（constructor、property和init-method）.md",
-    "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/导读.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/4.实现完整的IoC容器：构建工厂体系并添加容器事件.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/5.通过 BeanPostProcessor 机制让容器支持注解.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/2.调整工作并扩展BeanDefinition，配置xml（constructor、property和init-method）.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
     "Attachments/pics/Pasted image 20240110200431.png",
     "Attachments/pics/Pasted image 20240110200132.png",
     "Attachments/pics/Pasted image 20240110194203.png",
@@ -177,8 +180,7 @@
     "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/2.loadBeanDefinitions.md",
     "Attachments/pics/Pasted image 20240110184741.png",
     "Attachments/pics/Pasted image 20240110174024.png",
-    "手写mini_SpringhasMvc/一、实现SpringIOC/1.原始IoC：如何通过BeanFactory实现原始版本的IoC容器？.md",
-    "手写mini_SpringhasMvc/导读.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/1.原始IoC：如何通过BeanFactory实现原始版本的IoC容器？.md",
     "手写mini_SpringhasMvc/一、实现SpringIOC/1.手动实现IOC 1 1 1 1.md",
     "手写mini_SpringhasMvc/一、实现SpringIOC/1.手动实现IOC 1 1 1.md",
     "手写mini_SpringhasMvc/一、实现SpringIOC/1.手动实现IOC 1 1.md",
@@ -188,10 +190,10 @@
     "Attachments/pics/Pasted image 20240110162012.png",
     "Attachments/pics/Pasted image 20240110154837.png",
     "Attachments/pics/Pasted image 20240110154820.png",
-    "手写mini_SpringhasMvc/一、实现SpringIOC",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC",
     "README.md",
     "本地IDE与环境配置/tomcat10.md",
-    "手写mini_SpringhasMvc",
+    "手写框架系列handson_miniFramework",
     "Tomcat/1.md",
     "SpringBoot/Bean是线程不安全的.md",
     "Tomcat",
@@ -201,8 +203,6 @@
     "本地IDE与环境配置",
     "Servlet3.0&&SpringMVC",
     "Attachments/tables/Untitled.loom",
-    "Attachments/tables/Java对象头结构.loom",
-    "SpringFrameWork/监听器和多播器",
-    "SpringFrameWork/事务控制"
+    "Attachments/tables/Java对象头结构.loom"
   ]
 }

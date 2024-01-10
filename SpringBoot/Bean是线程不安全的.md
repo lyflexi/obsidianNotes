@@ -47,7 +47,8 @@ Spring的根本就是通过大量这种单例Bean构建起系统，如果单例B
 /**  
  * @Author: ly  
  * @Date: 2024/1/8 16:52  
- */@RestController  
+ */
+@RestController  
 //@Scope(value = "prototype") // prototype singleton  
 public class UnsafeBeanController {  
     private int var = 0; // 定义一个普通变量  

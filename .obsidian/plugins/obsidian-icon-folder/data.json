@@ -30,6 +30,8 @@
     "inheritanceIcon": "FabEnvira"
   },
   "SpringFrameWork": "FabEmpire",
-  "SpringMVC": "FabEmpire",
-  "本地IDE与环境配置": "FabEmpire"
+  "本地IDE与环境配置": "FabEmpire",
+  "Servlet3.0&&SpringMVC": "FabEmpire",
+  "SpringBoot": "FabEmpire",
+  "Tomcat": "FabEmpire"
 }

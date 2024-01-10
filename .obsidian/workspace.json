@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 15.94533029612756,
+        "dimension": 23.480243161094226,
         "children": [
           {
             "id": "0e2a48b30b90cdd5",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Tomcat/1.md"
+                "file": "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -24,7 +24,7 @@
       {
         "id": "ad469fc731c35108",
         "type": "tabs",
-        "dimension": 84.05466970387243,
+        "dimension": 76.51975683890578,
         "children": [
           {
             "id": "83c4b3e02b4ccf9b",
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Tomcat/1.md",
+                "file": "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Tomcat/1.md",
+                "file": "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Tomcat/1.md",
+                "file": "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,8 +159,28 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "SpringBoot/Bean是线程不安全的.md",
+    "Attachments/pics/Pasted image 20240110184741.png",
+    "Attachments/pics/Pasted image 20240110174024.png",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/2.调整工作并扩展BeanDefinition，配置xml（constructor、property和init-method）.md",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/1.原始IoC：如何通过BeanFactory实现原始版本的IoC容器？.md",
+    "手写mini_SpringhasMvc/导读.md",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/1.手动实现IOC 1 1 1 1.md",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/1.手动实现IOC 1 1 1.md",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/1.手动实现IOC 1 1.md",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/1.手动实现IOC 1.md",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/1.手动实现IOC.md",
+    "Attachments/pics/Pasted image 20240110164534.png",
+    "Attachments/pics/Pasted image 20240110162012.png",
+    "Attachments/pics/Pasted image 20240110154837.png",
+    "Attachments/pics/Pasted image 20240110154820.png",
+    "Attachments/pics/Pasted image 20240110152336.png",
+    "手写mini_SpringhasMvc/一、实现SpringIOC",
+    "README.md",
+    "本地IDE与环境配置/tomcat10.md",
+    "手写mini_SpringhasMvc",
     "Tomcat/1.md",
+    "SpringBoot/Bean是线程不安全的.md",
     "Tomcat",
     "SpringBoot",
     "Servlet3.0&&SpringMVC/最新版Springmvc6接管servlet3.0.md",
@@ -170,7 +190,6 @@
     "Attachments/pics/servlet3.0支持异步请求，springmvc做了封装.png",
     "Attachments/pics/Pasted image 20240110110802.png",
     "Attachments/pics/Pasted image 20240110105818.png",
-    "本地IDE与环境配置/tomcat10.md",
     "JavaSDK/Interface特性.md",
     "SpringMVC/1.md",
     "JavaSDK/lambda表达式.md",
@@ -178,32 +197,13 @@
     "JavaSDK/方法引用 lambda表达式的语法糖.md",
     "JavaSDK/super和this总结.md",
     "JavaSDK/函数式编程lambda.md",
-    "Attachments/pics/Pasted image 20240109200926.png",
-    "Attachments/pics/Pasted image 20240109200807.png",
-    "Attachments/pics/Pasted image 20240109200757.png",
     "Servlet3.0&&SpringMVC/Spring和SpringMVC父子容器xml版本分析.md",
-    "Attachments/pics/Pasted image 20240109141146.png",
-    "Attachments/pics/Pasted image 20240109141048.png",
-    "Attachments/pics/Pasted image 20240109141029.png",
-    "README.md",
     "本地IDE与环境配置",
     "Servlet3.0&&SpringMVC/SpringMVC设计模式总结.md",
-    "Servlet3.0&&SpringMVC/SpringMVC原理DispatcherServlet.md",
-    "JavaSDK/Java设计模式/六种类间关系.md",
-    "Servlet3.0&&SpringMVC/Filter和Intercepter的区别.md",
-    "SpringFrameWork/Spring设计模式总结.md",
     "Servlet3.0&&SpringMVC",
-    "JavaSDK/MultiThread/对齐填充测试程序JOL.md",
-    "JavaSDK/MultiThread/synchronized锁升级过程.md",
     "Attachments/tables/Untitled.loom",
     "Attachments/tables/Java对象头结构.loom",
-    "JavaSDK/流式编程 Stream.md",
-    "JavaSDK/JavaIO/文件与 IO 流.md",
-    "JavaSDK/JavaIO/序列化场景Serializable.md",
-    "JavaSDK/JavaIO/IO多路复用模型epoll.md",
     "SpringFrameWork/监听器和多播器",
-    "SpringFrameWork/事务控制",
-    "SpringFrameWork/AOP切面增强原理",
-    "SpringFrameWork/IOC容器生命周期/十一、finishBeanFactoryInitialization，初始化所有剩下的单实例bean的！"
+    "SpringFrameWork/事务控制"
   ]
 }

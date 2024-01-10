@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 23.480243161094226,
+        "dimension": 31.68693009118541,
         "children": [
           {
             "id": "0e2a48b30b90cdd5",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md"
+                "file": "手写mini_SpringhasMvc/导读.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -24,7 +24,7 @@
       {
         "id": "ad469fc731c35108",
         "type": "tabs",
-        "dimension": 76.51975683890578,
+        "dimension": 68.3130699088146,
         "children": [
           {
             "id": "83c4b3e02b4ccf9b",
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
+                "file": "手写mini_SpringhasMvc/导读.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
+                "file": "手写mini_SpringhasMvc/导读.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
+                "file": "手写mini_SpringhasMvc/导读.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,10 +159,24 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "Attachments/pics/Pasted image 20240110184741.png",
-    "Attachments/pics/Pasted image 20240110174024.png",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/4.实现完整的IoC容器：构建工厂体系并添加容器事件.md",
+    "手写mini_SpringhasMvc/一、实现SpringIOC/5.通过 BeanPostProcessor 机制让容器支持注解.md",
     "手写mini_SpringhasMvc/一、实现SpringIOC/2.调整工作并扩展BeanDefinition，配置xml（constructor、property和init-method）.md",
     "手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
+    "Attachments/pics/Pasted image 20240110200431.png",
+    "Attachments/pics/Pasted image 20240110200132.png",
+    "Attachments/pics/Pasted image 20240110194203.png",
+    "Attachments/pics/Pasted image 20240110193118.png",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/3.初步了解Resource.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/4.xml的解析parseDefaultElement.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/5.创建BeanDefinition（processBeanDefinitionElement）.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/6.构造器注入和setter注入原理.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/8.obtainFreshBeanFactory()返回ConfigurableListableBeanFactory.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/7.注册BeanDefinition（registerBeanDefinition）.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/1.ClassPathXmlApplicationContext定义bean.md",
+    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/2.loadBeanDefinitions.md",
+    "Attachments/pics/Pasted image 20240110184741.png",
+    "Attachments/pics/Pasted image 20240110174024.png",
     "手写mini_SpringhasMvc/一、实现SpringIOC/1.原始IoC：如何通过BeanFactory实现原始版本的IoC容器？.md",
     "手写mini_SpringhasMvc/导读.md",
     "手写mini_SpringhasMvc/一、实现SpringIOC/1.手动实现IOC 1 1 1 1.md",
@@ -174,7 +188,6 @@
     "Attachments/pics/Pasted image 20240110162012.png",
     "Attachments/pics/Pasted image 20240110154837.png",
     "Attachments/pics/Pasted image 20240110154820.png",
-    "Attachments/pics/Pasted image 20240110152336.png",
     "手写mini_SpringhasMvc/一、实现SpringIOC",
     "README.md",
     "本地IDE与环境配置/tomcat10.md",
@@ -185,21 +198,7 @@
     "SpringBoot",
     "Servlet3.0&&SpringMVC/最新版Springmvc6接管servlet3.0.md",
     "Servlet3.0&&SpringMVC/async异步servlet和springmvc支持.md",
-    "Servlet3.0&&SpringMVC/可插拔servlet3.0 ServletContainerInitializer.md",
-    "Attachments/pics/Pasted image 20240110114058.png",
-    "Attachments/pics/servlet3.0支持异步请求，springmvc做了封装.png",
-    "Attachments/pics/Pasted image 20240110110802.png",
-    "Attachments/pics/Pasted image 20240110105818.png",
-    "JavaSDK/Interface特性.md",
-    "SpringMVC/1.md",
-    "JavaSDK/lambda表达式.md",
-    "JavaSDK/抽象类abstract.md",
-    "JavaSDK/方法引用 lambda表达式的语法糖.md",
-    "JavaSDK/super和this总结.md",
-    "JavaSDK/函数式编程lambda.md",
-    "Servlet3.0&&SpringMVC/Spring和SpringMVC父子容器xml版本分析.md",
     "本地IDE与环境配置",
-    "Servlet3.0&&SpringMVC/SpringMVC设计模式总结.md",
     "Servlet3.0&&SpringMVC",
     "Attachments/tables/Untitled.loom",
     "Attachments/tables/Java对象头结构.loom",

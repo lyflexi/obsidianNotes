@@ -34,10 +34,9 @@ public class test1 {
 Harry's age is 12
 ```
 
-3.引用构造函数
-
-这个和 super 放在一起讲，见下面。
-
+3. 引用构造函数
+this(参数)：调用本类中其他形式的构造函数（应为当前构造函数中的第一条语句）
+注意：- ==如果当前类继承了父类，则this还可以指向父类的成员变量或者成员方法==
 # super
 
 super 可以理解为是指向自己超（父）类对象的一个指针，而这个超类指的是离自己最近的一个父类。
@@ -78,9 +77,8 @@ China
 
 
 
-3. 引用构造函数对比
+3. super引用构造函数
 	- super(参数)：调用父类中的某个构造函数（应为当前构造函数中的第一条语句）。==如果在子类构造函数位置调用super(参数)，则可以省略~~super(参数)~~，因为子类构造一定会调用父类构造==
-	- this(参数)：调用本类中其他形式的构造函数（应为当前构造函数中的第一条语句）
 
 ```java
 package com.javadebug.test;  
@@ -125,8 +123,10 @@ public class TestSuper {
 ```java
 父类·无参数构造方法： A Person.
 子类·调用父类”无参数构造方法“： A chinese coder.
+
 父类·含一个参数的构造方法： A person's name is codersai
 子类·调用父类”含一个参数的构造方法“： his name is codersai
+
 父类·含一个参数的构造方法： A person's name is codersai
 子类·调用父类”含一个参数的构造方法“： his name is codersai
 子类：调用子类具有相同形参的构造方法：his age is 18

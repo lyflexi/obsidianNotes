@@ -25,10 +25,7 @@
   },
   "JavaSDK": "FabEmpire",
   "DB数据库": "FabEmpire",
-  "Attachments": {
-    "iconName": "FabEnvira",
-    "inheritanceIcon": "FabEnvira"
-  },
+  "Attachments": "FabEnvira",
   "SpringFrameWork": "FabEmpire",
   "本地IDE与环境配置": "FabEmpire",
   "Servlet3.0&&SpringMVC": "FabEmpire",

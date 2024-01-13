@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 25.60790273556231,
+        "dimension": 25.607902735562313,
         "children": [
           {
             "id": "0e2a48b30b90cdd5",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/4.解耦WAC，引入父子容器.md"
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/6.WebDataBinder将请求参数绑定方法参数对象.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/4.解耦WAC，引入父子容器.md",
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/6.WebDataBinder将请求参数绑定方法参数对象.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/4.解耦WAC，引入父子容器.md",
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/6.WebDataBinder将请求参数绑定方法参数对象.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/4.解耦WAC，引入父子容器.md",
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/6.WebDataBinder将请求参数绑定方法参数对象.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,8 +159,10 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/5.抽取HandlerMapping 与 HandlerAdapter.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/6.WebDataBinder将请求参数绑定方法参数对象.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/4.解耦WAC，引入父子容器.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
     "Attachments/pics/minisMVC-servlet.xml",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/3.整合IoC，引入AnnotationConfigWebApplicationContext.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/2.实现注解驱动@RequestMapping与包扫描.md",
@@ -196,7 +198,6 @@
     "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/8.obtainFreshBeanFactory()返回ConfigurableListableBeanFactory.md",
     "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/7.注册BeanDefinition（registerBeanDefinition）.md",
     "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/1.ClassPathXmlApplicationContext定义bean.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/2.loadBeanDefinitions.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC",
     "手写框架系列handson_miniFramework",
     "Tomcat",

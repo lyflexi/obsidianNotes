@@ -494,11 +494,12 @@ protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrap
 		
 	7. 如果bean实现了applicationEventPulisherAware：应用事件发布器，可以发布事件，
 		
-2. **初始化方法invokeInitMethods，**因为 Aware 方法都是执行在初始化方法之前，所以可以在初始化方法中放心大胆的使用 Aware 接口获取的资源，这也是我们自定义扩展 Spring 的常用方式。如果Bean实现了 InitializingBean 接口：
-	
-	1. 则将调用接口的afterPropertiesSet 方法。
+2. **初始化方法invokeInitMethods**：
+	因为 Aware 方法都是执行在初始化方法之前，所以可以在初始化方法中放心大胆的使用 Aware 接口获取的资源，这也是我们自定义扩展 Spring 的常用方式。
+	1. 如果Bean实现了 InitializingBean 接口，则将调用接口的afterPropertiesSet 方法。
 		
 	2. 类似的如果在applicationContext.xml配置文件中通过init-method属性指定了初始化方法，则将执行指定的初始化方法
+	
 		
 3. **初始化After：**如果BeanFactory 装配了 org.springframework.beans.factory.config.BeanPostProcessor 后处理 ，则将调用`postProcessAfterInitialization(Object bean, String beanName)` 方法，容器再次获得了对Bean 的加工机会。此时bean已经准备就绪，可以被应用程序使用了，他们将一直驻留在应用上下文中，直到该应用上下文被销毁；  ==此处非常重要，Spring 的 AOP 就是利用after实现的，代理对象的创建时机就位于Bean的初始化之后==
 # DisposableBean销毁接口

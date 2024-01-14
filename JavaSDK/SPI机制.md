@@ -312,3 +312,26 @@ public final class ServiceLoader<S>
 	                 x);  
 	        }  
 ```
+## spi打破了双亲委派机制
+
+上述例子中，通过ServiceLoader.load(ISearch.class) 来加载ISearch接口的实现类，==我们知道Java加载类都离不开类加载器，查看ServiceLoader.load()方法的源码就会发现==，spi加载类是通过java.lang.Thread#setContextClassLoader方法设置了线程上下文加载器
+```java
+public static <S> ServiceLoader<S> load(Class<S> service,  
+                                        ClassLoader loader)  
+{  
+    return new ServiceLoader<>(service, loader);  
+}  
+
+//load是个重载方法
+public static <S> ServiceLoader<S> load(Class<S> service) {  
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();  
+    return ServiceLoader.load(service, cl);  
+}
+```
+
+正常情况下，我们的Java类若未设置类加载器，则会从父线程中继承，在应用程序全局都未设置的情况下，默认是应用程序类加载器，即
+1. JDK 中的本地方法类一般由根加载器（Bootstrp loader）装载，Java核心类库位于<JAVA_HOME>\lib目录中
+2. JDK 中内部实现的扩展类一般由扩展加载器（ExtClassLoader ）实现装载，位于<JAVA_HOME>\lib\ext目录
+3. 而程序中的类文件则由系统加载器（AppClassLoader ）实现装载。
+
+==而SPI使用了线程上下文加载器加载所需的SPI代码，实际上是父类加载器请求子类加载器来完成加载类的动作，打破了双亲委派模型的层次结构。==

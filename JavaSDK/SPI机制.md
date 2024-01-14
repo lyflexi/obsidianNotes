@@ -335,3 +335,219 @@ public static <S> ServiceLoader<S> load(Class<S> service) {
 3. 而程序中的类文件则由系统加载器（AppClassLoader ）实现装载。
 
 ==而SPI使用了线程上下文加载器加载所需的SPI代码，实际上是父类加载器请求子类加载器来完成加载类的动作，打破了双亲委派模型的层次结构。==
+
+# SPI业界的应用案例
+
+## 日志框架slf4j
+
+SPI的实际应用，最常见的应该是日志框架slf4j，它就是个日志门面，并不提供具体的实现，需要绑定其他具体实现。例如可使用log4j2作为具体的绑定器，只需要在 pom 中引入slf4j-log4j12，就可以使用具体功能。
+```xml
+```text
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>2.0.3</version>
+</dependency>
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-log4j12</artifactId>
+    <version>2.0.3</version>
+</dependency>
+```
+引入项目后，点开它的 jar 包看一下具体结构：
+### slf4j-api（门面）定义spi
+首先看下门面依赖的jar包结构，在spi目录中定义了许多的契约接口
+![[Pasted image 20240114195753.png]]
+### slf4j-log4j12（厂商）
+在来看下具体的厂商实现的jar，slf4j-log4j12
+![[Pasted image 20240114200902.png]]
+jar 包的META-INF.services里面，通过 SPI 注入了Reload4jServiceProvider这个实现类，它实现了SLF4JServiceProvider这一接口，在它的初始化方法initialize()中，会完成初始化等工作，后续可以继续获取到LoggerFactory和Logger等具体日志对象。
+```java
+  
+public class Reload4jServiceProvider implements SLF4JServiceProvider {  
+    public static String REQUESTED_API_VERSION = "2.0.99";  
+    private ILoggerFactory loggerFactory;  
+    private IMarkerFactory markerFactory;  
+    private MDCAdapter mdcAdapter;  
+  
+    public Reload4jServiceProvider() {  
+        try {  
+            Level var1 = Level.TRACE;  
+        } catch (NoSuchFieldError var2) {  
+            Util.report("This version of SLF4J requires log4j version 1.2.12 or later. See also http://www.slf4j.org/codes.html#log4j_version");  
+        }  
+  
+    }  
+  
+    public void initialize() {  
+        this.loggerFactory = new Reload4jLoggerFactory();  
+        this.markerFactory = new BasicMarkerFactory();  
+        this.mdcAdapter = new Reload4jMDCAdapter();  
+    }  
+  
+    public ILoggerFactory getLoggerFactory() {  
+        return this.loggerFactory;  
+    }  
+  
+    public IMarkerFactory getMarkerFactory() {  
+        return this.markerFactory;  
+    }  
+  
+    public MDCAdapter getMDCAdapter() {  
+        return this.mdcAdapter;  
+    }  
+  
+    public String getRequestedApiVersion() {  
+        return REQUESTED_API_VERSION;  
+    }  
+}
+```
+
+## 数据库驱动mysql-connector
+DriverManager是JDBC里管理数据库驱动的的工具类。一个数据库可能会存在不同实现的数据库驱动。我们在使用特定的驱动实现时，通过一个简单的配置就而不用修改代码就可以达到效果。 
+引入依赖：
+```xml
+<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->  
+<dependency>  
+    <groupId>mysql</groupId>  
+    <artifactId>mysql-connector-java</artifactId>  
+    <version>5.1.44</version>  
+</dependency>
+```
+查看mysql-connector-java的jar包，通过META-INF/services/java.sql.Driver加载了com.mysql.jdbc.Driver  
+![[Pasted image 20240114200812.png]]
+
+查看com.mysql.jdbc.Driver  源码，发现源码当中使用DriverManager的静态方法加载了该厂商的实现类com.mysql.jdbc.Driver。
+### java.sql.Driver（门面）定义spi
+```java
+
+package java.sql;  
+  
+import java.util.logging.Logger;  
+  
+
+ public interface Driver {  
+  
+
+     
+     Connection connect(String url, java.util.Properties info)  
+        throws SQLException;  
+     boolean acceptsURL(String url) throws SQLException;  
+
+     DriverPropertyInfo[] getPropertyInfo(String url, java.util.Properties info)  
+                         throws SQLException;  
+
+     int getMajorVersion();  
+  
+
+     int getMinorVersion();  
+  
+   
+     boolean jdbcCompliant();  
+  
+    //------------------------- JDBC 4.1 -----------------------------------  
+  
+
+     public Logger getParentLogger() throws SQLFeatureNotSupportedException;  
+}
+```
+### com.mysql.jdbc.Driver（厂商）
+com.mysql.jdbc.Driver
+```java
+package com.mysql.jdbc;  
+  
+import java.sql.SQLException;
+
+public class Driver extends NonRegisteringDriver implements java.sql.Driver {  
+    //  
+    // Register ourselves with the DriverManager    //    static {  
+        try {  
+            java.sql.DriverManager.registerDriver(new Driver());  
+        } catch (SQLException E) {  
+            throw new RuntimeException("Can't register driver!");  
+        }  
+    }  
+  
+    /**  
+     * Construct a new driver and register it with DriverManager     ** @throws SQLException  
+     *             if a database error occurs.     */ 
+
+	
+     public Driver() throws SQLException {  
+        // Required for Class.forName().newInstance()  
+    }  
+}
+```
+//由于ServiceLoader的底层是用无参的反射方法newInstance()来创建实例，因此com.mysql.jdbc.Driver提供了一个无参的构造
+```java
+//jdk8
+try {  
+    S p = service.cast(c.newInstance());  
+    providers.put(cn, p);  
+    return p;  
+} catch (Throwable x) {  
+    fail(service,  
+         "Provider " + cn + " could not be instantiated",  
+         x);  
+}
+```
+
+
+我们在运用Class.forName("com.mysql.jdbc.Driver")加载mysql驱动后，会执行其中的静态代码把driver注册到DriverManager中。
+
+#### java.sql.DriverManager
+查看DriverManager源码，loadInitialDrivers方法中创建了ServiceLoader，ServiceLoader#iterator()的底层迭代出所有的mysql驱动实现类并通过反射创建驱动
+```java
+//jdk8
+
+private static void loadInitialDrivers() {  
+    String drivers;  
+    try {  
+        drivers = AccessController.doPrivileged(new PrivilegedAction<String>() {  
+            public String run() {  
+                return System.getProperty("jdbc.drivers");  
+            }  
+        });  
+    } catch (Exception ex) {  
+        drivers = null;  
+    }  
+    // If the driver is packaged as a Service Provider, load it.  
+    // Get all the drivers through the classloader    // exposed as a java.sql.Driver.class service.    // ServiceLoader.load() replaces the sun.misc.Providers()  
+    AccessController.doPrivileged(new PrivilegedAction<Void>() {  
+        public Void run() {  
+  
+            ServiceLoader<Driver> loadedDrivers = ServiceLoader.load(Driver.class);  
+            Iterator<Driver> driversIterator = loadedDrivers.iterator();  
+  
+            /* Load these drivers, so that they can be instantiated.  
+             * It may be the case that the driver class may not be there             * i.e. there may be a packaged driver with the service class             * as implementation of java.sql.Driver but the actual class             * may be missing. In that case a java.util.ServiceConfigurationError             * will be thrown at runtime by the VM trying to locate             * and load the service.             *             * Adding a try catch block to catch those runtime errors             * if driver not available in classpath but it's             * packaged as service and that service is there in classpath.             */            try{  
+                while(driversIterator.hasNext()) {  
+                    driversIterator.next();  
+                }  
+            } catch(Throwable t) {  
+            // Do nothing  
+            }  
+            return null;  
+        }  
+    });  
+  
+    println("DriverManager.initialize: jdbc.drivers = " + drivers);  
+  
+    if (drivers == null || drivers.equals("")) {  
+        return;  
+    }  
+    String[] driversList = drivers.split(":");  
+    println("number of Drivers:" + driversList.length);  
+    for (String aDriver : driversList) {  
+        try {  
+            println("DriverManager.Initialize: loading " + aDriver);  
+            Class.forName(aDriver, true,  
+                    ClassLoader.getSystemClassLoader());  
+        } catch (Exception ex) {  
+            println("DriverManager.Initialize: load failed: " + ex);  
+        }  
+    }  
+}
+```
+于此同时，由于DriverManager使用了ServiceLoader，通过ServiceLoader底层的上下文类加载器来反射实现厂商类，因此ServiceLoader打破了Java的双亲委派模型
+![[Pasted image 20240114204416.png]]

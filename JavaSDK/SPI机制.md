@@ -549,5 +549,6 @@ private static void loadInitialDrivers() {
     }  
 }
 ```
-于此同时，由于DriverManager使用了ServiceLoader，通过ServiceLoader底层的上下文类加载器来反射实现厂商类，因此ServiceLoader打破了Java的双亲委派模型
+但是与此同时DriverManage内部创建的ServiceLoader打破了Java的双亲委派机制：
+因为DriverManager是java.sql包中的，所以DriverManager本身是被启动类加载器加载的，只是在加载DriverManager类的时候会触发调用static方法，在static方法中使用的是SPI机制（创建了ServiceLoader打破了Java的双亲委派模型）来切换到上下文类加载器，然后使用上下文类加载器来加载classpath下的MySQL驱动（反射实现厂商类c.newInstance()）。
 ![[Pasted image 20240114204416.png]]

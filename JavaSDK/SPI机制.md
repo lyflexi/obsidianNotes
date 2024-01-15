@@ -358,7 +358,7 @@ SPI的实际应用，最常见的应该是日志框架slf4j，它就是个日志
 ### slf4j-api（门面）定义spi
 首先看下门面依赖的jar包结构，在spi目录中定义了许多的契约接口
 ![[Pasted image 20240114195753.png]]
-### slf4j-log4j12（厂商）
+### slf4j-log4j12（厂商）实现spi
 在来看下具体的厂商实现的jar，slf4j-log4j12
 ![[Pasted image 20240114200902.png]]
 jar 包的META-INF.services里面，通过 SPI 注入了Reload4jServiceProvider这个实现类，它实现了SLF4JServiceProvider这一接口，在它的初始化方法initialize()中，会完成初始化等工作，后续可以继续获取到LoggerFactory和Logger等具体日志对象。
@@ -403,7 +403,7 @@ public class Reload4jServiceProvider implements SLF4JServiceProvider {
 }
 ```
 
-## 数据库驱动mysql-connector
+## 数据库驱动mysql-connector-java
 DriverManager是JDBC里管理数据库驱动的的工具类。一个数据库可能会存在不同实现的数据库驱动。我们在使用特定的驱动实现时，通过一个简单的配置就而不用修改代码就可以达到效果。 
 引入依赖：
 ```xml
@@ -451,8 +451,9 @@ import java.util.logging.Logger;
      public Logger getParentLogger() throws SQLFeatureNotSupportedException;  
 }
 ```
-### com.mysql.jdbc.Driver（厂商）
+### com.mysql.jdbc.Driver（厂商）实现spi
 com.mysql.jdbc.Driver
+Driver extends NonRegisteringDriver，实现了java.sql.Driver规定的的所有接口
 ```java
 package com.mysql.jdbc;  
   
@@ -460,7 +461,8 @@ import java.sql.SQLException;
 
 public class Driver extends NonRegisteringDriver implements java.sql.Driver {  
     //  
-    // Register ourselves with the DriverManager    //    static {  
+    // Register ourselves with the DriverManager    //    
+    static {  
         try {  
             java.sql.DriverManager.registerDriver(new Driver());  
         } catch (SQLException E) {  
@@ -478,7 +480,7 @@ public class Driver extends NonRegisteringDriver implements java.sql.Driver {
     }  
 }
 ```
-//由于ServiceLoader的底层是用无参的反射方法newInstance()来创建实例，因此com.mysql.jdbc.Driver提供了一个无参的构造
+//由于ServiceLoader的底层是用无参的反射方法newInstance()来创建com.mysql.jdbc.Driver实例，==因此com.mysql.jdbc.Driver提供了一个无参的构造==
 ```java
 //jdk8
 try {  
@@ -492,13 +494,26 @@ try {
 }
 ```
 
+#### 第一步：java.sql.DriverManager jdk使用ServiceLoader创建厂商驱动
+查看DriverManager源码，jvm在启动的时候，根加载器会加载java.sql.DriverManager，首先执行java.sql.DriverManager的静态代码块
+```java
+ static {  
+    loadInitialDrivers();  
+    println("JDBC DriverManager initialized");  
+}
+```
 
-我们在运用Class.forName("com.mysql.jdbc.Driver")加载mysql驱动后，会执行其中的静态代码把driver注册到DriverManager中。
-
-#### java.sql.DriverManager
-查看DriverManager源码，loadInitialDrivers方法中创建了ServiceLoader，ServiceLoader#iterator()的底层迭代出所有的mysql驱动实现类并通过反射创建驱动
+loadInitialDrivers方法中创建了ServiceLoader，ServiceLoader#iterator()的底层迭代出厂商所有的mysql驱动实现类并通过反射创建驱动
 ```java
 //jdk8
+
+/**  
+ * Load the initial JDBC drivers by checking the System property * jdbc.properties and then use the {@code ServiceLoader} mechanism  
+ */
+ static {  
+    loadInitialDrivers();  
+    println("JDBC DriverManager initialized");  
+}
 
 private static void loadInitialDrivers() {  
     String drivers;  
@@ -520,7 +535,8 @@ private static void loadInitialDrivers() {
             Iterator<Driver> driversIterator = loadedDrivers.iterator();  
   
             /* Load these drivers, so that they can be instantiated.  
-             * It may be the case that the driver class may not be there             * i.e. there may be a packaged driver with the service class             * as implementation of java.sql.Driver but the actual class             * may be missing. In that case a java.util.ServiceConfigurationError             * will be thrown at runtime by the VM trying to locate             * and load the service.             *             * Adding a try catch block to catch those runtime errors             * if driver not available in classpath but it's             * packaged as service and that service is there in classpath.             */            try{  
+             * It may be the case that the driver class may not be there             * i.e. there may be a packaged driver with the service class             * as implementation of java.sql.Driver but the actual class             * may be missing. In that case a java.util.ServiceConfigurationError             * will be thrown at runtime by the VM trying to locate             * and load the service.             *             * Adding a try catch block to catch those runtime errors             * if driver not available in classpath but it's             * packaged as service and that service is there in classpath.             */            
+            try{  
                 while(driversIterator.hasNext()) {  
                     driversIterator.next();  
                 }  
@@ -536,6 +552,7 @@ private static void loadInitialDrivers() {
     if (drivers == null || drivers.equals("")) {  
         return;  
     }  
+    //jdk保障机制，jdk帮我们加载驱动，即使用户忘记Class.forName("com.mysql.jdbc.Driver");,依然保证驱动加载成功 
     String[] driversList = drivers.split(":");  
     println("number of Drivers:" + driversList.length);  
     for (String aDriver : driversList) {  
@@ -550,5 +567,178 @@ private static void loadInitialDrivers() {
 }
 ```
 但是与此同时DriverManage内部创建的ServiceLoader打破了Java的双亲委派机制：
-因为DriverManager是java.sql包中的，所以DriverManager本身是被启动类加载器加载的，只是在加载DriverManager类的时候会触发调用static方法，在static方法中使用的是SPI机制（创建了ServiceLoader打破了Java的双亲委派模型）来切换到上下文类加载器，然后使用上下文类加载器来加载classpath下的MySQL驱动（反射实现厂商类c.newInstance()）。
+因为DriverManager是java.sql包中的，所以DriverManager本身是被启动类根加载器加载的，只是在加载DriverManager类的时候会触发调用static方法，在static方法中使用的是SPI机制（创建了ServiceLoader打破了Java的双亲委派模型）来切换到上下文类加载器，然后使用上下文类加载器来加载classpath下的MySQL驱动（反射实现厂商类c.newInstance()）。
 ![[Pasted image 20240114204416.png]]
+#### 多了一步：java.sql.DriverManager 注册驱动给用户使用，因此用户最终使用的是java.sql.DriverManager的API#getConnection
+==用户可以这样去注册Driver==
+```java
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class TempMain {
+	// 连接数据库URL格式为：jdbc协议:数据库子协议:主机:端口/连接的数据库名
+	// 和HTTP协议类似
+	private static String url = "jdbc:mysql://localhost:3306/mydb";
+	private static String user = "root";// 用户名
+	private static String password = "root";// 密码
+
+	// 第三种方法：使用驱动管理器类连接数据库
+	public static void main(String[] args) throws SQLException, ClassNotFoundException {
+		// 1.通过得到字节码对象的方式加载静态代码块，从而注册驱动程序
+		Class.forName("com.mysql.jdbc.Driver"); // 参数是字节码
+
+		// 2.连接到具体的数据库
+		Connection conn = DriverManager.getConnection(url, user, password);
+		System.out.println(conn);
+		//输出：com.mysql.jdbc.JDBC4Connection@50675690，表明连接成功
+	}
+}
+
+```
+==我们在运用Class.forName("com.mysql.jdbc.Driver")加载com.mysql.jdbc.Driver的字节码的时候，会自动执行其中的静态代码把driver注册到DriverManager中==
+```java
+package com.mysql.jdbc;  
+  
+import java.sql.SQLException;
+
+public class Driver extends NonRegisteringDriver implements java.sql.Driver {  
+    //  
+    // Register ourselves with the DriverManager    //    
+    static {  
+        try {  
+            java.sql.DriverManager.registerDriver(new Driver());  
+        } catch (SQLException E) {  
+            throw new RuntimeException("Can't register driver!");  
+        }  
+    }  
+  
+    /**  
+     * Construct a new driver and register it with DriverManager     ** @throws SQLException  
+     *             if a database error occurs.     */ 
+
+	
+     public Driver() throws SQLException {  
+        // Required for Class.forName().newInstance()  
+    }  
+}
+```
+进而DriverManager可以拿到Driver的引用，同时DriverManager对成员变量Driver做了一层包装`private final static CopyOnWriteArrayList<DriverInfo> registeredDrivers = new CopyOnWriteArrayList<>();`，进而我们可以使用DriverManager#getConnection方便的操作数据库连接
+```java
+//java8
+public class DriverManager {
+	// List of registered JDBC drivers  
+	private final static CopyOnWriteArrayList<DriverInfo> registeredDrivers = new CopyOnWriteArrayList<>();  
+	private static volatile int loginTimeout = 0;  
+	private static volatile java.io.PrintWriter logWriter = null;  
+	private static volatile java.io.PrintStream logStream = null;  
+	// Used in println() to synchronize logWriter  
+	private final static  Object logSync = new Object();  
+	  
+	/* Prevent the DriverManager class from being instantiated. */  
+	private DriverManager(){}  
+	  
+	  
+	/**  
+	 * Load the initial JDBC drivers by checking the System property * jdbc.properties and then use the {@code ServiceLoader} mechanism  
+	 */static {  
+	    loadInitialDrivers();  
+	    println("JDBC DriverManager initialized");  
+	}
+
+
+
+		//  Worker method called by the public getConnection() methods.  
+	private static Connection getConnection(String url, java.util.Properties info, Class<?> caller) throws SQLException {  
+	    /*  
+	     * When callerCl is null, we should check the application's     * (which is invoking this class indirectly)     * classloader, so that the JDBC driver class outside rt.jar     * can be loaded from here.     */    
+	    ClassLoader callerCL = caller != null ? caller.getClassLoader() : null;  
+	    synchronized(DriverManager.class) {  
+	        // synchronize loading of the correct classloader.  
+	        if (callerCL == null) {  
+	            callerCL = Thread.currentThread().getContextClassLoader();  
+	        }  
+	    }  
+	  
+	    if(url == null) {  
+	        throw new SQLException("The url cannot be null", "08001");  
+	    }  
+	  
+	    println("DriverManager.getConnection(\"" + url + "\")");  
+	  
+	    // Walk through the loaded registeredDrivers attempting to make a connection.  
+	    // Remember the first exception that gets raised so we can reraise it.    
+	    SQLException reason = null;  
+	  
+	    for(DriverInfo aDriver : registeredDrivers) {  
+	        // If the caller does not have permission to load the driver then  
+	        // skip it.        
+	        if(isDriverAllowed(aDriver.driver, callerCL)) {  
+	            try {  
+	                println("    trying " + aDriver.driver.getClass().getName());  
+	                Connection con = aDriver.driver.connect(url, info);  
+	                if (con != null) {  
+	                    // Success!  
+	                    println("getConnection returning " + aDriver.driver.getClass().getName());  
+	                    return (con);  
+	                }  
+	            } catch (SQLException ex) {  
+	                if (reason == null) {  
+	                    reason = ex;  
+	                }  
+	            }  
+	  
+	        } else {  
+	            println("    skipping: " + aDriver.getClass().getName());  
+	        }  
+	  
+	    }  
+	  
+	    // if we got here nobody could connect.  
+	    if (reason != null)    {  
+	        println("getConnection failed: " + reason);  
+	        throw reason;  
+	    }  
+	  
+	    println("getConnection: no suitable driver found for "+ url);  
+	    throw new SQLException("No suitable driver found for "+ url, "08001");  
+	}
+}
+
+```
+
+上述代码可以清楚的看到，DriverManager#getConnection可以方便操作数据库连接，但是DriverManager#getConnection其实依然使用的是注册进来的com.mysql.jdbc.Driver驱动（registeredDrivers）。因此接下来要探讨的问题是？Driver是如何被包装成registeredDrivers的
+```java
+public static synchronized void registerDriver(java.sql.Driver driver)  
+    throws SQLException {  
+  
+    registerDriver(driver, null);  
+}  
+  
+/**  
+ * Registers the given driver with the {@code DriverManager}.  
+ * A newly-loaded driver class should call * the method {@code registerDriver} to make itself  
+ * known to the {@code DriverManager}. If the driver is currently  
+ * registered, no action is taken. * * @param driver the new JDBC Driver that is to be registered with the  
+ *               {@code DriverManager}  
+ * @param da     the {@code DriverAction} implementation to be used when  
+ *               {@code DriverManager#deregisterDriver} is called  
+ * @exception SQLException if a database access error occurs  
+ * @exception NullPointerException if {@code driver} is null  
+ * @since 1.8  
+ */public static synchronized void registerDriver(java.sql.Driver driver,  
+        DriverAction da)  
+    throws SQLException {  
+  
+    /* Register the driver if it has not already been added to our list */  
+    if(driver != null) {  
+        registeredDrivers.addIfAbsent(new DriverInfo(driver, da));  
+    } else {  
+        // This is for compatibility with the original DriverManager  
+        throw new NullPointerException();  
+    }  
+  
+    println("registerDriver: " + driver);  
+  
+}
+```

@@ -66,7 +66,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 ```
 
 因此最终生效的是WebApplicationInitializer.class，我们只需要编写接口实现WebApplicationInitializer即可
-## WebApplicationInitializer.class
+## WebApplicationInitializer.class（著名的WAC）
 WebApplicationInitializer接口旗下三层抽象类，接下来依次分析AbstractContextLoaderInitializer，AbstractDispatcherServletInitializer，AbstractAnnotationConfigDispatcherServletInitializer分别干了什么事
 ![[Pasted image 20240110110802.png]]
 ### AbstractContextLoaderInitializer
@@ -98,7 +98,7 @@ public void onStartup(ServletContext servletContext) throws ServletException {
     }  
 }
 ```
-### AbstractDispatcherServletInitializer
+#### AbstractDispatcherServletInitializer
 AbstractDispatcherServletInitializer：  
 - 创建一个web的ioc容器；createServletApplicationContext();  
 - 创建了DispatcherServlet；并且将DispatcherServlet添加到web的ioc容器当中
@@ -154,7 +154,7 @@ public void onStartup(ServletContext servletContext) throws ServletException {
 
 protected abstract String[] getServletMappings();
 ```
-### AbstractAnnotationConfigDispatcherServletInitializer：注解方式配置的DispatcherServlet初始化器  
+##### AbstractAnnotationConfigDispatcherServletInitializer：注解方式配置的DispatcherServlet初始化器  
 1. 创建根容器：重写了createRootApplicationContext()  
 	1. getRootConfigClasses();传入一个配置类  
 1. 创建web的ioc容器： 重写了createServletApplicationContext();  

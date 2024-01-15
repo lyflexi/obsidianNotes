@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JavaSDK/SPI机制.md"
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JavaSDK/SPI机制.md",
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JavaSDK/SPI机制.md",
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JavaSDK/SPI机制.md",
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,13 +159,28 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/3.实现数据库（源）连接池PooledDataSource.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/7.再回首.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/4.实现SQL语句配置化的MyBatis.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/2.抽取专门的参数传入组件与返回对象封装组件.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/1.抽取JDBCTemplate并整合IOC.md",
+    "Servlet3.0&&SpringMVC/最新版Springmvc6如何接管servlet3.0.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate",
+    "JavaSDK/SPI机制.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/4.通过 BeanPostProcessor 机制让容器支持注解.md",
+    "Servlet3.0&&SpringMVC/SpringMVC原理DispatcherServlet.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/5.抽取HandlerMapping 与 HandlerAdapter.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/3.整合IoC，引入AnnotationConfigWebApplicationContext.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/1.原始servlet：通过xml配置的方式响应请求.md",
+    "Servlet3.0&&SpringMVC/可插拔servlet3.0 ServletContainerInitializer.md",
+    "Servlet3.0&&SpringMVC/async异步servlet和springmvc支持.md",
     "Attachments/pics/Pasted image 20240114204416.png",
     "Attachments/pics/Pasted image 20240114200902.png",
     "Attachments/pics/Pasted image 20240114200812.png",
     "Attachments/pics/Pasted image 20240114195911.png",
     "Attachments/pics/Pasted image 20240114195753.png",
     "JavaSDK/JVM/双亲委派机制.md",
-    "JavaSDK/SPI机制.md",
     "Attachments/pics/Pasted image 20240114165340.png",
     "Attachments/pics/Pasted image 20240114165212.png",
     "Attachments/pics/Pasted image 20240114152804.png",
@@ -174,36 +189,21 @@
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/8.再回首.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/7.ModelAndView ：如何将处理结果返回给前端？.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/6.WebDataBinder将请求参数绑定方法参数对象.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/7.再回首.md",
-    "Attachments/pics/Pasted image 20240113203705.png",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/5.抽取HandlerMapping 与 HandlerAdapter.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/4.解耦WAC，引入父子容器.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
     "Attachments/pics/minisMVC-servlet.xml",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/3.整合IoC，引入AnnotationConfigWebApplicationContext.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/2.实现注解驱动@RequestMapping与包扫描.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/1.原始servlet：通过xml配置的方式响应请求.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/4.通过 BeanPostProcessor 机制让容器支持注解.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/5.构建完整的工厂体系DefaultListableBeanFactory.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
     "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/2.调整工作并扩展BeanDefinition，配置xml（constructor、property和init-method）.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/1.原始IoC：如何通过BeanFactory实现原始版本的IoC容器？.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/导读.md",
-    "本地IDE与环境配置/tomcat10.md",
-    "Servlet3.0&&SpringMVC/SpringMVC原理DispatcherServlet.md",
-    "Servlet3.0&&SpringMVC/Spring和SpringMVC父子容器xml版本分析.md",
-    "JavaSDK/super和this总结.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/3.初步了解Resource.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/4.xml的解析parseDefaultElement.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC",
     "手写框架系列handson_miniFramework",
     "Tomcat",
     "SpringBoot",
     "本地IDE与环境配置",
-    "Servlet3.0&&SpringMVC",
-    "Attachments/tables/Untitled.loom"
+    "Servlet3.0&&SpringMVC"
   ]
 }

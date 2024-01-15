@@ -404,7 +404,7 @@ public class Reload4jServiceProvider implements SLF4JServiceProvider {
 ```
 
 ## 数据库驱动mysql-connector-java
-DriverManager是JDBC里管理数据库驱动的的工具类。一个数据库可能会存在不同实现的数据库驱动。我们在使用特定的驱动实现时，通过一个简单的配置就而不用修改代码就可以达到效果。 
+MySQL驱动用来连接MySQL数据库，但是一个数据库可能会存在不同实现的数据库驱动，因此这也是SPI机制。 
 引入依赖：
 ```xml
 <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->  
@@ -570,7 +570,11 @@ private static void loadInitialDrivers() {
 因为DriverManager是java.sql包中的，所以DriverManager本身是被启动类根加载器加载的，只是在加载DriverManager类的时候会触发调用static方法，在static方法中使用的是SPI机制（创建了ServiceLoader打破了Java的双亲委派模型）来切换到上下文类加载器，然后使用上下文类加载器来加载classpath下的MySQL驱动（反射实现厂商类c.newInstance()）。
 ![[Pasted image 20240114204416.png]]
 #### 多了一步：java.sql.DriverManager 注册驱动给用户使用，因此用户最终使用的是java.sql.DriverManager的API#getConnection
-==用户可以这样去注册Driver==
+我们在使用特定的驱动实现时，通过一个简单的配置就而不用修改代码就可以达到效果。代码都是同一份
+```java
+Connection conn = DriverManager.getConnection(url, user, password);
+```
+TempMain测试用例
 ```java
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -585,10 +589,11 @@ public class TempMain {
 
 	// 第三种方法：使用驱动管理器类连接数据库
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
-		// 1.通过得到字节码对象的方式加载静态代码块，从而注册驱动程序
+		// 1.通过得到字节码对象的方式加载静态代码块，从而给java.sql.DriverManager注册驱动程序
 		Class.forName("com.mysql.jdbc.Driver"); // 参数是字节码
 
-		// 2.连接到具体的数据库
+		// 2.使用java.sql.DriverManager连接到具体的数据库
+		//java.sql.DriverManager使用getConnection包装了驱动Driver本身的连接方法connect
 		Connection conn = DriverManager.getConnection(url, user, password);
 		System.out.println(conn);
 		//输出：com.mysql.jdbc.JDBC4Connection@50675690，表明连接成功

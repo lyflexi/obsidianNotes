@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md"
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md",
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md",
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md",
+                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,8 +159,9 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/3.实现数据库（源）连接池PooledDataSource.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/5.构建完整的工厂体系DefaultListableBeanFactory.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/3.实现数据库（源）连接池PooledDataSource.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/7.再回首.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/4.实现SQL语句配置化的MyBatis.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/2.抽取专门的参数传入组件与返回对象封装组件.md",
@@ -193,7 +194,6 @@
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
     "Attachments/pics/minisMVC-servlet.xml",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/2.实现注解驱动@RequestMapping与包扫描.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/5.构建完整的工厂体系DefaultListableBeanFactory.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
     "SpringFrameWork/Bean生命周期与扩展点/Bean生命周期四阶段分析.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/2.调整工作并扩展BeanDefinition，配置xml（constructor、property和init-method）.md",

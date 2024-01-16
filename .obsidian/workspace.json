@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/4.添加配置化的AutoProxyCreator后置处理器，批量代理目标类.md"
+                "file": "SpringFrameWork/BeanFactory刷新机制（Bean生命周期与扩展点）/循环依赖与三级缓存.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/4.添加配置化的AutoProxyCreator后置处理器，批量代理目标类.md",
+                "file": "SpringFrameWork/BeanFactory刷新机制（Bean生命周期与扩展点）/循环依赖与三级缓存.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/4.添加配置化的AutoProxyCreator后置处理器，批量代理目标类.md",
+                "file": "SpringFrameWork/BeanFactory刷新机制（Bean生命周期与扩展点）/循环依赖与三级缓存.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/4.添加配置化的AutoProxyCreator后置处理器，批量代理目标类.md",
+                "file": "SpringFrameWork/BeanFactory刷新机制（Bean生命周期与扩展点）/循环依赖与三级缓存.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,18 +157,19 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "83c4b3e02b4ccf9b",
+  "active": "0e2a48b30b90cdd5",
   "lastOpenFiles": [
+    "SpringFrameWork/AOP切面增强原理/AOP源码解析.md",
+    "SpringFrameWork/BeanFactory刷新机制（Bean生命周期与扩展点）/循环依赖与三级缓存.md",
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/4.添加配置化的AutoProxyCreator后置处理器，批量代理目标类.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/3.实现配置化的切入点表达式，批量增强目标方法.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/2.解耦Interceptor和Invocation，实现三种Interceptor.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/1.完成零代码侵入的动态代理的框架封装.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/5.再回首.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/4.添加配置化的AutoProxyCreator后置处理器，批量代理目标类.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/4.通过 BeanPostProcessor 机制让容器支持注解.md",
     "JavaSDK/Java设计模式/六种类间关系.md",
     "JavaSDK/Java设计模式/六大设计原则.md",
     "Attachments/pics/Pasted image 20240116154232.png",
-    "SpringFrameWork/AOP切面增强原理/AOP源码解析.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP",
     "SpringFrameWork/AOP切面增强原理/AOP的两种切入方式.md",
     "SpringFrameWork/AOP切面增强原理/AOP结合策略模式实践.md",
@@ -187,7 +188,6 @@
     "JavaSDK/SPI机制.md",
     "Servlet3.0&&SpringMVC/SpringMVC原理DispatcherServlet.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/5.抽取HandlerMapping 与 HandlerAdapter.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/3.整合IoC，引入AnnotationConfigWebApplicationContext.md",
     "Attachments/pics/Pasted image 20240114204416.png",
     "Attachments/pics/Pasted image 20240114200902.png",
     "Attachments/pics/Pasted image 20240114200812.png",

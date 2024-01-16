@@ -36,8 +36,11 @@ Spring事务源码是通过数据库连接来实现的，当前线程中保存�
 private static final ThreadLocal<Map<Object, Object>> resources = new NamedThreadLocal<>("Transactional resources");
 ```
 
-# 嵌套事务中使用了this
-`updateStatus`方法拥有事务的能力是因为`spring aop`生成了代理对象，因此在事务方法中通过`this`调用另一个事务方法`updateStatus`是不生效的
+# 使用了this调用事务方法
+`updateStatus`方法拥有事务的能力是因为`spring aop`生成了代理对象，针对所有的Spring AOP注解（比如@Transcational或者@Async），Spring在扫描bean的时候如果发现有此类注解，那么会把目标方法所在的类动态构造一个代理对象返回，此后的目标方法调用相当于是代理对象在执行方法调用，Spring让代理对象暗中给目标方法做了增强
+
+
+但是通过this获取到的当前对象不是代理对象，因此通过`this`调用另一个事务方法`updateStatus`，AOP是不生效的
 
 ```Java
 @Service
@@ -90,7 +93,7 @@ public class ServiceA {
 
 ## 解决方式2：在该Service类中注入自己
 
-如果不想再新加一个Service类，在该Service类中注入自己也是一种选择。Spring的三级缓存解决了循环依赖问题
+如果不想再新加一个Service类，在该Service类中注入自己也是一种选择。Spring的三级缓存解决了循环依赖问题（自我依赖也是种循环依赖）
 
 ```Java
 @Servcie

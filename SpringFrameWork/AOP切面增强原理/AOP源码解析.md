@@ -1,5 +1,9 @@
 SpringAOP的实现原理是动态代理，最终放入容器的是代理类的对象，而不是Bean本身的对象。
-
+先澄清几个概念：
+- Advice：通知，表示在特定的连接点采取的操作。
+- Advisor：通知者，或者叫管理者，Advisor中包含了Advice。形象地说，advice是饭（真正的业务增强逻辑），advisor是碗筷（装饭给人吃的工具），人不能直接用嘴巴啃饭，要用一个工具把饭吃到嘴里。
+- Interceptor：单一职责。Interceptor#invoke(invocation)方法，封装了反射执行目标方法之外的逻辑
+- Invocation：单一职责。Invocation#process()，封装了真正反射执行目标方法的逻辑
 AOP增强定位于Bean生命周期当中的后置处理操作`BeanPostProcessor`，如下图所示
 ![[Pasted image 20240105145914.png]]
 

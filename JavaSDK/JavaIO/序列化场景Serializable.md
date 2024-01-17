@@ -187,7 +187,7 @@ serialVersionUID的生成有三种方式（private static final long serialVersi
 - json序列化/反序列化：json字符串可读性高、可跨平台使用无语言限制、扩展性好。
     
 
-如果你的项目进行了前后端分离，那你一定使用过JSON进行数据交互，那在后端就一定会涉及到对Json数据的解析，虽然使用SpringMvc加上@requestBody都已经帮我们解析好并映射到bean里了，但是他底层也是通过这些JSON解析类库来完成的（SpringMVC默认使用的就是Jackson）。在我们后端直接调其他服务的接口时，很多也会返回JSON数据也需要我们自己使用这些类库来进行解析。
+如果你的项目进行了前后端分离，那你一定使用过JSON进行数据交互，那在后端就一定会涉及到对Json数据的解析，虽然使用SpringMvc加上@requestBody都已经帮我们解析好并映射到bean里了，但是他底层也是通过这些JSON解析类库来完成的==（SpringMVC默认使用的就是Jackson）==。在我们后端直接调其他服务的接口时，很多也会返回JSON数据也需要我们自己使用这些类库来进行解析。
 
 常见的JSON解析类库：
 

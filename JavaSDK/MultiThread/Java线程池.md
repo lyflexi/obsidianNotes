@@ -90,11 +90,11 @@ public ThreadPoolExecutor(int corePoolSize,
 
 1. corePoolSize : 核心线程数线程数定义了最小可以同时运行的线程数量。
     
-2. workQueue: 当新任务来的时候会先判断当前运行的线程数量是否达到核心线程数，如果达到的话，新任务就会被存放在阻塞队列中。注意，阻塞队列中的线程暂时不会执行
+2. workQueue: ==当新任务来的时候会先判断当前运行的线程数量是否达到核心线程数corePoolSize==，如果达到的话，新任务就会被存放在阻塞队列中。注意，阻塞队列中的线程暂时不会执行
     
 3. maximumPoolSize : 当队列中存放的任务达到阻塞队列容量的时候，当前还可以新运行`maximumPoolSize -corePoolSize` 个线程数。
     
-4. keepAliveTime：当线程池中的线程数量大于 corePoolSize 的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了 keepAliveTime才会被回收销毁；
+4. keepAliveTime：==当线程池中的线程数量大于 corePoolSize 的时候==，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了 keepAliveTime才会被回收销毁；
     
 5. unit : keepAliveTime 参数的时间单位。
     
@@ -108,7 +108,7 @@ public ThreadPoolExecutor(int corePoolSize,
         
     3. DiscardOldestPolicy： 只要还有任务新增，一直会丢弃阻塞队列workQueue的最老的任务，并将新的任务加入
         
-    4. **CallerRunsPolicy【提供可伸缩队列】**：该策略直接在调用者线程中，运行当前的被丢弃的任务。==调用者线程指的是执行`execute`方法的线程，也即创建当前线程池的线程，特别的当调用者是主线程的时候，指的就是main线程。==
+    4. **CallerRunsPolicy【提供可伸缩队列，前三种都是丢弃！！！】**：该策略直接在调用者线程中，运行当前的被丢弃的任务。==调用者线程指的是执行`execute`或者`submit`方法的线程，也即创建当前线程池的线程，特别的当调用者是主线程的时候，指的就是main线程。==
     
 
 例题举例1：一个线程池 core 7； max 20 ，queue：50，100并发进来怎么分配的；

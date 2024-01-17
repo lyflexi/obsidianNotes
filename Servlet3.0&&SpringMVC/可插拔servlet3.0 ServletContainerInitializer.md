@@ -70,8 +70,9 @@ class lyflexi.service.AbstractHelloService
 重写方法onStartup的第二个参数是上下文sc，通过sc我们可以注册servlet以及servlet的组件（如Listener和Filter）
 # 如何生效
 Servlet容器启动会扫描，当前应用里面每一个jar包的ServletContainerInitializer的实现 
-1. 老版本tomcat10-javax.servlet_initializer-api下必须绑定在，META-INF/services/javax.servlet_initializer.ServletContainerInitializer  
-	1. 新版本tomcat10+jakarta.servlet-api下必须绑定在，META-INF/services/jakarta.servlet_initializer.ServletContainerInitializer  
-	2. META-INF要放在idea的resources目录中
-3. 文件的内容就是ServletContainerInitializer实现类的全类名lyflexi.servlet_initializer.MyServletContainerInitializer； 
+1. 老版本tomcat10-javax.servlet_initializer-api下必须绑定在META-INF/services/javax.servlet_initializer.ServletContainerInitializer  
+2. 新版本tomcat10+jakarta.servlet-api下必须绑定在，META-INF/services/jakarta.servlet_initializer.ServletContainerInitializer ，同时META-INF要放在idea的resources目录中
+
+文件名就是jakarta.servlet_initializer.ServletContainerInitializer
+文件的内容就是ServletContainerInitializer实现类的全类名lyflexi.servlet_initializer.MyServletContainerInitializer； 
 

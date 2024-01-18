@@ -268,21 +268,184 @@ truncate table
 drop table
 ```
 
-# 慢查询日志
+# SQL优化（慢查询优化）
+
+## 开启慢查询日志
 慢查询日志是MySQL提供的一种日志记录，用于记录在MySQL中响应时间超过阀值的语句。具体来说，慢查询日志会记录那些运行时间超过long_query_time值的SQL语句，其中long_query_time的默认值为10秒。
 
 开启慢查询日志需要手动设置，因为默认情况下MySQL的慢查询日志是禁用的。要开启慢查询日志，可以通过设置slow_query_log的值来开启，例如使用以下命令：
 
-```sql
-sql复制代码SET GLOBAL slow_query_log = 1;
+```shell
+SET GLOBAL slow_query_log = 1;
 ```
 
-另外，还可以通过修改my.cnf文件来永久生效，例如在[mysqld]下添加以下行：
+另外，还可以通过修改my.cnf文件来永久生效，例如在mysqld下添加以下行：
 
-```makefile
-makefile复制代码slow_query_log = 1  slow_query_log_file = /var/lib/mysql/node-slow.log
+```sql
+slow_query_log = 1  
+slow_query_log_file = /var/lib/mysql/node-slow.log
 ```
 
 其中，slow_query_log_file指定了慢查询日志文件的存储路径。
 
 开启慢查询日志后，可以通过查看慢查询日志来分析哪些SQL语句超出了最大忍耐时间值，从而进行优化。但需要注意的是，开启慢查询日志会或多或少地带来一定的性能影响，因为它需要记录每个超时的SQL语句。因此，如果不是调优需要的话，一般不建议开启慢查询日志。
+
+
+制造慢查询并执行。如下。
+
+```sql
+mysql> select sleep(1);
++----------+
+| sleep(1) |
++----------+
+|        0 |
++----------+
+1 row in set (1.00 sec)
+```
+
+打开慢查询日志文件。可以看到上述慢查询的SQL语句被记录到日志中。慢查询SQL都会被放在这个特殊的日志当中后
+
+```sql
+# Time: 180620 17:13:06
+# User@Host: apsara[apsara] @ dc1487859883577.et2sqa [11.239.51.96]  Id:     3
+# Query_time: 1.000246  Lock_time: 0.000000 Rows_sent: 1  Rows_examined: 0
+SET timestamp=1529485986;
+select sleep(1);
+```
+## 定位慢查询SQL语句
+在生产环境中，如果要手工分析日志，查找、分析SQL，显然是个体力活。因此除了逐行分析慢查询日志之外，MySQL还自带了分析慢查询的工具mysqldumpslow，该工具是Perl脚本。
+常用参数如下。
+```shell
+-s：排序方式，值如下
+    c：查询次数
+    t：查询时间
+    l：锁定时间
+    r：返回记录
+    ac：平均查询次数
+    al：平均锁定时间
+    ar：平均返回记录书
+    at：平均查询时间
+-t：top N查询
+-g：正则表达式
+```
+
+使用示例如下：
+比如我们执行了多次类似如下的查询。
+
+```sql
+select * from db_user where name like 'zb%';
+select * from db_user where name like 'aaa%';
+select * from db_user where name like 'bc%';
+......
+```
+
+通过命令mysqldumpslow -s c -t 5 /var/lib/mysql/slow-query.log获取访问次数最多的5个SQL语句
+
+```shell
+Reading mysql slow query log from /var/lib/mysql/slow-query.log
+Count: 15  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), apsara[apsara]@dc1487859883577.et2sqa
+  # Query_time: N.N  Lock_time: N.N Rows_sent: N  Rows_examined: N
+  SET timestamp=N;
+  select * from db_user where name like 'S'
+
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), apsara[apsara]@dc1487859883577.et2sqa
+  # Query_time: N.N  Lock_time: N.N Rows_sent: N  Rows_examined: N
+  use test;
+  SET timestamp=N;
+  select * from db_user where name like 'S'
+```
+
+通过命令mysqldumpslow -s t -t 5 /var/lib/mysql/slow-query.log按照时间排的top 5个SQL语句
+通过命令mysqldumpslow -s t -t 3 -g "like" /var/lib/mysql/slow-query.log按照时间排序且含有'like'的top 5个SQL语句
+## 解释慢查询SQL执行过程
+利用explain关键字可以分析SQL查询语句的执行过程
+
+例如：执行
+
+```sql
+EXPLAIN SELECT * FROM res_user ORDER BYmodifiedtime LIMIT 0,1000
+```
+
+得到如下结果：显示结果分析：
+
+table | type | possible_keys | key |key_len | ref | rows | Extra EXPLAIN列的解释：
+重点关注：
+- key（显示走的索引名称）：显示索引名称，比如I_name_age表示联合索引名称叫I_name_age
+- key_len（查看索引使用是否充分）：这里有个内置的计算公式
+- type（显示走的索引类型）：
+	- const：通过一次索引就能找到数据，一般用于主键或唯一索引作为条件的查询sql中
+	- eq_ref：常用于主键或唯一索引扫描。
+	- ref：常用于普通索引和唯一索引扫描。
+	- range：常用于范围查询，比如：between ... and 或 In ，like等操作
+	- index：全索引扫描。执行sql如下
+	- ALL：全表扫描。执行sql如下：
+- Extra查看附加信息：
+	- Using where：表示使用了where条件过滤。
+	- Using temporary：表示是否使用了临时表，一般多见于order by 和 group by语句。
+	- Using filesort：表示按文件排序，一般是SQL指定的排序字段和联合索引字段的排序顺序不一致的情况才会出现。比如我建立的是code和name的联合索引，顺序是code在前，name在后，这里直接按name排序，跟之前联合索引的顺序不一样。执行explain select code  from test1 order by name desc;附加信息中就会出现Using filesort
+	- Using index：表示是否用了覆盖索引，说白了它表示是否所有获取的列都走了索引
+	- Using index condition：默认开启了索引下推机制
+## 慢查询优化措施举例
+### 1.索引没起作用的情况
+
+1. 使用LIKE关键字的查询语句
+在使用LIKE关键字进行查询的查询语句中，如果匹配字符串的第一个字符为“%”，索引不会起作用。只有“%”不在第一个位置索引才会起作用。
+
+2. 使用多列索引的查询语句
+MySQL可以为多个字段创建索引。一个索引最多可以包括16个字段。对于多列索引，只有查询条件使用了这些字段中的第一个字段时，索引才会被使用。
+
+...还有很多种索引失效情况，这里不再赘述
+### 2.优化数据库结构
+
+合理的数据库结构不仅可以使数据库占用更小的磁盘空间，而且能够使查询速度更快。数据库结构的设计，需要考虑数据冗余、查询和更新的速度、字段的数据类型是否合理等多方面的内容。
+
+1. 将字段很多的表分解成多个表
+
+对于字段比较多的表，如果有些字段的使用频率很低，可以将这些字段分离出来形成新表。因为当一个表的数据量很大时，会由于使用频率低的字段的存在而变慢。
+
+2. 增加中间表（冗余表），避免频繁join操作，减少关联查询次数
+
+对于需要经常联合查询的表，可以建立中间表以提高查询效率。通过建立中间表，把需要经常联合查询的数据插入到中间表中，然后将原来的联合查询改为对中间表的查询，以此来提高查询效率。这是一种空间换时间的策略
+
+### 3.分解关联查询
+
+将一个大的查询分解为多个小查询是很有必要的。
+
+很多高性能的应用都会对关联查询进行分解，就是可以对每一个表进行一次单表查询，然后让查询结果在应用程序中进行关联，很多场景下这样会更高效，例如：
+
+```javascript
+SELECT * FROM tag 
+        JOIN tag_post ON tag_id = tag.id
+        JOIN post ON tag_post.post_id = post.id
+        WHERE tag.tag = 'mysql';
+分解为：
+     SELECT * FROM tag WHERE tag = 'mysql';
+     SELECT * FROM tag_post WHERE tag_id = 1234;
+     SELECT * FROM post WHERE post.id in (123,456,567);
+```
+
+### 4.优化LIMIT分页
+先说一下limit分页语法
+```sql
+select * from user_address limit M,N
+```
+limit后跟两个参数，第一个参数M为从第几个数据开始，第二个参数N为取多少个数据。
+第一个参数也叫偏移量，初始值是0
+如果数据量很小，这么写分页当然没问题，但是当数据量大起来的时候，查询速度就会慢很多。
+```sql
+-- 查询用时0.011S
+select field1,field2,field3 from user_address limit 100,10 
+-- 查询用时0.618S
+select field1,field2,field3 from user_address limit 90000,10 
+```
+
+不考虑加索引，试想，如果limit的下一次的查询能从前一次查询结束后标记的位置开始查找，同时我们让第一次查询只查id（因为只查id会比同时查field1,field2,field3要快），那不就好上了吗？
+因此我们可以做出如下的优化方案：
+```sql
+-- 查询用时0.068S
+select field1,field2,field3 from user_address where id >= (select id from user_address order by id limit 100000,1) limit 10  
+-- 或者
+Select news.id, news.description from news inner join (select id from news order by title limit 50000,5) as myNew using(id);
+```
+
+

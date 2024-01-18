@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 25.607902735562313,
+        "dimension": 17.705167173252278,
         "children": [
           {
             "id": "0e2a48b30b90cdd5",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md"
+                "file": "DB数据库/MySQL/SQL与优化.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -24,7 +24,7 @@
       {
         "id": "ad469fc731c35108",
         "type": "tabs",
-        "dimension": 74.3920972644377,
+        "dimension": 82.29483282674772,
         "children": [
           {
             "id": "83c4b3e02b4ccf9b",
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+                "file": "DB数据库/MySQL/SQL与优化.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+                "file": "DB数据库/MySQL/SQL与优化.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+                "file": "DB数据库/MySQL/SQL与优化.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,6 +159,10 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
+    "DB数据库/MySQL/索引与优化.md",
+    "DB数据库/MySQL/意向锁Intention.md",
+    "DB数据库/MySQL/SQL与优化.md",
+    "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
     "Attachments/pics/Pasted image 20240118191950.png",
     "Attachments/pics/Pasted image 20240118191939.png",
     "Attachments/pics/Pasted image 20240118191933.png",
@@ -169,12 +173,7 @@
     "Attachments/pics/Pasted image 20240118191553.png",
     "Attachments/pics/Pasted image 20240118185321.png",
     "Attachments/pics/Pasted image 20240118171340.png",
-    "DB数据库/MySQL/意向锁Intention.md",
-    "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
-    "Attachments/pics/Pasted image 20240118162132.png",
-    "DB数据库/MySQL/Index与优化.md",
     "DB数据库/MySQL/MyISAM已经被淘汰了.md",
-    "DB数据库/MySQL/SQL与优化.md",
     "DB数据库/MySQL/MySQL日志.md",
     "DB数据库/MySQL/数据库范式.md",
     "DB数据库/MySQL/RBAC设计.md",

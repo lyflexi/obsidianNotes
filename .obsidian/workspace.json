@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Servlet3.0&&SpringMVC/最新版Springmvc6如何接管可插拔的servlet3.0.md"
+                "file": "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Servlet3.0&&SpringMVC/最新版Springmvc6如何接管可插拔的servlet3.0.md",
+                "file": "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Servlet3.0&&SpringMVC/最新版Springmvc6如何接管可插拔的servlet3.0.md",
+                "file": "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Servlet3.0&&SpringMVC/最新版Springmvc6如何接管可插拔的servlet3.0.md",
+                "file": "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,8 +159,28 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "Servlet3.0&&SpringMVC/可插拔servlet3.0 ServletContainerInitializer.md",
+    "Attachments/pics/Pasted image 20240118191950.png",
+    "Attachments/pics/Pasted image 20240118191939.png",
+    "Attachments/pics/Pasted image 20240118191933.png",
+    "Attachments/pics/Pasted image 20240118191926.png",
+    "Attachments/pics/Pasted image 20240118191919.png",
+    "Attachments/pics/Pasted image 20240118191903.png",
+    "Attachments/pics/Pasted image 20240118191847.png",
+    "Attachments/pics/Pasted image 20240118191553.png",
+    "Attachments/pics/Pasted image 20240118185321.png",
+    "Attachments/pics/Pasted image 20240118171340.png",
+    "DB数据库/MySQL/意向锁Intention.md",
+    "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+    "Attachments/pics/Pasted image 20240118162132.png",
+    "DB数据库/MySQL/Index与优化.md",
+    "DB数据库/MySQL/MyISAM已经被淘汰了.md",
+    "DB数据库/MySQL/SQL与优化.md",
+    "DB数据库/MySQL/MySQL日志.md",
+    "DB数据库/MySQL/数据库范式.md",
+    "DB数据库/MySQL/RBAC设计.md",
+    "DB数据库/MySQL/关系表设计.md",
     "Servlet3.0&&SpringMVC/最新版Springmvc6如何接管可插拔的servlet3.0.md",
+    "Servlet3.0&&SpringMVC/可插拔servlet3.0 ServletContainerInitializer.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/1.实现ThreadPoolTaskExecutor整合进IOC.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/3.增加@Async注解，更像Spring了.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/2.自定义拒绝策略.md",
@@ -176,28 +196,8 @@
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/5.再回首.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/4.通过 BeanPostProcessor 机制让容器支持注解.md",
     "JavaSDK/Java设计模式/六种类间关系.md",
-    "JavaSDK/Java设计模式/六大设计原则.md",
-    "Attachments/pics/Pasted image 20240116154232.png",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP",
-    "SpringFrameWork/AOP切面增强原理/AOP的两种切入方式.md",
-    "SpringFrameWork/AOP切面增强原理/AOP结合策略模式实践.md",
-    "SpringFrameWork/事务控制/Spring事务的其他失效场景.md",
-    "SpringFrameWork/AOP切面增强原理/拦截器链MethodInterceptor.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/5.构建完整的工厂体系DefaultListableBeanFactory.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/5.再回首.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/3.实现数据库（源）连接池PooledDataSource.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/7.再回首.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate",
-    "Attachments/pics/Pasted image 20240114204416.png",
-    "Attachments/pics/Pasted image 20240114200902.png",
-    "Attachments/pics/Pasted image 20240114200812.png",
-    "Attachments/pics/Pasted image 20240114195911.png",
-    "Attachments/pics/Pasted image 20240114195753.png",
-    "Attachments/pics/Pasted image 20240114165340.png",
-    "Attachments/pics/Pasted image 20240114165212.png",
-    "Attachments/pics/Pasted image 20240114152804.png",
-    "Attachments/pics/Pasted image 20240114151959.png",
     "Attachments/pics/minisMVC-servlet.xml",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc",

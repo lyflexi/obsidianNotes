@@ -1,0 +1,725 @@
+# 1. 什么是索引?
+
+索引（在 MySQL 中也叫“键key”）是存储引擎快速找到记录的一种数据结构，通俗来说类似书本的目录，这个比方虽然被用的最多但是也是最恰如其当的，在查询书本中的某个知识点不借助目录的情况下，往往都找的够呛，那么索引相较于数据库的重要性也可见一斑。
+# 2. 索引的有哪些种类？
+索引的种类这里只罗列出InnoDB支持的索引：主键索引(PRIMARY)，普通索引(INDEX)，唯一索引(UNIQUE)，联合索引(Compound)，总体划分为三类：
+1. 主键索引也被称为聚簇索引（clustered index）==（Innodb没有非聚簇索引了，以后不要再提了）==
+2. 其余都称呼为非主键索引也被称为二级索引（secondary index）。
+```sql
+1.添加 PRIMARY KEY（主键索引）
+ALTER TABLE `table_name` ADD PRIMARY KEY ( `column` )
+ 
+2.添加 UNIQUE(唯一索引)
+ALTER TABLE `table_name` ADD UNIQUE ( `column` )
+ 
+3.添加 INDEX(普通索引)
+ALTER TABLE `table_name` ADD INDEX index_name ( `column` )
+
+4.添加联合索引
+ALTER TABLE `table_name` ADD INDEX index_name ( `column1`, `column2`, `column3` )
+```
+
+> 除此之外，还有一种全文索引FULLTEXT，它比 like + % 快 N 倍，这里不多讲
+> 
+> 添加 FULLTEXT(全文索引)ALTER TABLE `table_name` ADD FULLTEXT ( `column`)
+
+# 索引的数据结构是什么？
+众所周知在InnoDB引用的是B+树索引模型，如下：
+- B+树只有叶子节点存放key和data，其他内节点只存放key，任何查找都是从根节点到叶子节点的过程
+- 此外B+树的叶子节点还有一条引用链指向与它相邻的叶子节点
+下图展示了B+Tree的结构
+![[Pasted image 20240118110454.png]]
+> 这里与B-树做个对比：
+> B-树的所有节点既存放key也存放data，可能还没有到达叶子节点检索就结束了
+> B-树的叶子节点都是独立的，叶子节点之间没有引用链
+
+这么看来，B+树每次查询数据都需要到叶子节点去找数据，和B+树比起来还是会有欠缺的，其实不然：
+- 操作系统将磁盘中的多个块组合在一起形成页，然后再对页进行整体的操作。由于B-树的所有节点既存放key也存放data，当我们的data比较占内存的时候，一个中间节点又存不下太多的记录，不可避免的要增大树的高度，因此B-树要比B+树的树要高很多。高是缺点。
+- B+树支持范围查询，因为B+树的叶子节点是一个双向有序列表
+# 3. InnoDB的不同的索引组织结构是怎样的呢？
+
+在第二问中我们对索引的种类划分为两大类主键索引和非主键索引，那么问题就在于比较两种索引的区别了，我们这里建立一张学生表，其中包含字段id设置主键索引、name设置普通索引、age(无处理)，并向数据库中插入4条数据：（"小赵", 10）（"小王", 11）（"小李", 12）（"小陈", 13）
+```sql
+CREATE TABLE `student` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(32) COLLATE utf8_bin NOT NULL COMMENT '名称',
+  `age` int(3) unsigned NOT NULL DEFAULT '1' COMMENT '年龄',
+  PRIMARY KEY (`id`),
+  KEY `I_name` (`name`)
+) ENGINE=InnoDB;
+
+INSERT INTO student (name, age) VALUES("小赵", 10),("小王", 11),("小李", 12),("小陈", 13);
+
+```
+
+这里我们设置了主键为自增，那么此时数据库里数据为
+![[Pasted image 20240118112417.png]]
+==每一个索引在 InnoDB 里面对应一棵B+树，那么此时就存着两棵B+树。==
+![[Pasted image 20240118112427.png]]
+
+可以发现区别在与叶子节点中，主键索引存储了整行数据，而非主键索引中存储的值为主键id, 在我们执行如下sql后
+```sql
+SELECT age FROM student WHERE name = '小李'；
+```
+
+流程为：
+
+1. 在name索引树上找到名称为小李的节点 id为03
+2. 从id索引树上找到id为03的节点 获取所有数据
+3. 从数据中获取字段命为age的值返回 12
+
+**在流程中从非主键索引树搜索回到主键索引树搜索的过程称为：回表**，在本次查询中因为查询结果只存在主键索引树中，我们必须回表才能查询到结果，那么如何优化这个过程呢？引入正文覆盖索引
+
+# 4. 覆盖索引（索引优化1）
+
+覆盖索引（covering index ，或称为索引覆盖）即从非主键索引中就能查到的记录，而不需要查询主键索引中的记录，避免了回表的产生减少了树的搜索次数，显著提升性能。
+
+## 如何使用覆盖索引？
+
+之前我们已经建立了表student，那么现在出现的业务需求中要求根据名称获取学生的年龄，并且该搜索场景非常频繁，那么先在我们删除掉之前以字段name建立的普通索引，以name和age两个字段建立联合索引，
+```sql
+ALTER TABLE student DROP INDEX I_name; 
+ALTER TABLE student ADD INDEX I_name_age(name, age);
+```
+sql命令与建立后的索引树结构如下
+![[Pasted image 20240118112740.png]]
+
+那在我们再次执行如下sql后
+```sql
+SELECT age FROM student WHERE name = '小李'；
+```
+
+流程为：
+
+1. 在name,age联合索引树上找到名称为小李的节点
+2. 此时节点索引里包含信息age 直接返回 12
+
+## 如何确定数据库成功使用了覆盖索引呢？
+
+当发起一个索引覆盖查询时，在查询语句前加上EXPLAIN关键字，即可在extra列可以看到using index的信息，重点关注：
+- key（查看有没有使用索引）：此处使用了联合索引I_name_age
+- key_len（查看索引使用是否充分）：
+- type（查看索引类型）：
+- ==Extra查看附加信息：Using index表明我们成功使用了覆盖索引==
+![[Pasted image 20240118114051.png]]
+> 总结：覆盖索引避免了回表现象的产生，从而减少树的搜索次数，显著提升查询性能，所以使用覆盖索引是性能优化的一种手段，文章有不当之处，欢迎指正~
+# 最左前缀匹配原则
+
+使用表中的多个字段创建索引，被称作联合索引
+
+我们在使用联合索引时，建议将区分度高的字段放在最左边，这样提高SQL过滤效率，这是因为
+- 在使用联合索引时，MySQL 会根据联合索引中的字段顺序，从左到右依次到查询条件中去匹配，
+- 如果查询条件中存在与联合索引中最左侧字段相匹配的字段，则就会使用该字段过滤一批数据，直至联合索引中全部字段匹配完成。
+
+如果创建了联合索引A和B，那么还需要单独创建索引A和索引B吗？答案如下：
+
+==总结一句话：如果单独索引是联合索引的第一个，就不需要了，其他位置的就需要单独建==
+- 根据最左前缀匹配规则，在匹配的时候始终会先去匹配a列的索引，所以a就不需要单独建索引了，
+- 如果a匹配成功，那么根据索引下推机制（默认开启），b也会继续匹配
+- 但是当a匹配失败失效时，b就不会生效了，因此需要创建单独的b索引，以供匹配
+# 索引下推（索引优化2）
+
+索引下推（index condition pushdown，简称ICP），是 MySQL5.6版本提供的一项索引优化功能（默认开启），将索引条件判断从服务层`Server`下推到存储引擎层`StorageEngine`，用于减少回表次数，MySQL的整体架构如下：
+![[Pasted image 20240118114243.png]]
+## 默认开启索引下推
+MySQL5.6版本及以后默认开启
+
+举例说明：如果现在有一个需求，要求检索出表中名字第一个字是张，而且年龄等于10岁的所有用户。示例SQL语句如下：其中对（name，age）建立了联合索引
+
+```Java
+select id,name,age,tel,addr from jxc_user where name like '张%'and age=10;
+```
+
+在MySQL 5.6之前，存储引擎根据联合索引的最左前缀匹配原则先找到name like ‘张%’ 的主键id（1、4），之后存储引擎`StorageEngine`并不会去按照age=10进行过滤，存储引擎需要回表两次去聚簇索引找到完整的行记录，最终存储引擎将两条行记录返回服务层，服务层拿到数据后再根据条件age=10对拿到的数据进行筛选，整个查询过程相当于联合索引的另一个字段age在存储引擎层浪费掉了
+![[Pasted image 20240118114357.png]]
+
+而MySQL 5.6 以后， 存储引擎会根据（name，age）联合索引，找到name like ‘张%’，由于联合索引中包含age列，所以存储引擎直接在联合索引里按照条件age=10进行过滤，然后根据过滤后的数据再进行少次回表扫描（下图实例中是1次）
+![[Pasted image 20240118114402.png]]
+## 如何确定数据库成功使用了索引下推呢？
+除此之外我们还可以看一下执行计划，看到Extra一列里Using index condition，就是用到了索引下推。
+![[Pasted image 20240118123717.png]]
+关闭索引下推可以使用如下命令，毕竟这么优秀的功能干嘛关闭呢：
+```shell
+set optimizer_switch='index_condition_pushdown=off';
+```
+# Explain分析执行计划
+使用explain执行计划查看索引使用情况。重点关注：
+- key（显示走的索引名称）：显示索引名称，比如I_name_age表示联合索引名称叫I_name_age
+- key_len（查看索引使用是否充分）：这里有个内置的计算公式
+- type（显示走的索引类型）：
+	- const：通过一次索引就能找到数据，一般用于主键或唯一索引作为条件的查询sql中
+	- eq_ref：常用于主键或唯一索引扫描。
+	- ref：常用于普通索引和唯一索引扫描。
+	- range：常用于范围查询，比如：between ... and 或 In ，like等操作
+	- index：全索引扫描。执行sql如下
+	- ALL：全表扫描。执行sql如下：
+- Extra查看附加信息：
+	- Using where：表示使用了where条件过滤。
+	- Using temporary：表示是否使用了临时表，一般多见于order by 和 group by语句。
+	- Using filesort：表示按文件排序，一般是SQL指定的排序字段和联合索引字段的排序顺序不一致的情况才会出现。比如我建立的是code和name的联合索引，顺序是code在前，name在后，这里直接按name排序，跟之前联合索引的顺序不一样。执行explain select code  from test1 order by name desc;附加信息中就会出现Using filesort
+	- Using index：表示是否用了覆盖索引，说白了它表示是否所有获取的列都走了索引
+	- Using index condition：默认开启了索引下推机制
+# 索引失效的情况
+创建一张user表，表中包含：`id`、`code`、`age`、`name`和`height`字段。
+```sql
+```text
+CREATE TABLE `user` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL,
+  `age` int DEFAULT '0',
+  `name` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL,
+  `height` int DEFAULT '0',
+  `address` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_code_age_name` (`code`,`age`,`name`),
+  KEY `idx_height` (`height`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
+```
+此外，还创建了三个索引：
+- `id`：数据库的主键  
+- `idx_code_age_name`：由code、age和name三个字段组成的联合索引。  
+- `idx_height`：普通索引
+为了方便给大家做演示，我特意向user表中插入了3条数据：
+```sql
+```text
+INSERT INTO sue.user (id, code, age, name, height) VALUES (1, '101', 21, '周星驰', 175,'香港');
+INSERT INTO sue.user (id, code, age, name, height) VALUES (2, '102', 18, '周杰伦', 173,'台湾');
+INSERT INTO sue.user (id, code, age, name, height) VALUES (3, '103', 23, '苏三', 174,'成都');
+```
+为了防止以后出现不必要的误会，在这里有必要查一下当前数据库的版本。
+
+```sql
+select version();
+```
+
+查出当前的mysql版本号为：`8.0.21`
+![[Pasted image 20240118145107.png]]
+## 1.舍弃了最左前缀的索引
+
+先看看哪些情况下，能走索引。
+
+```sql
+explain select * from user
+where code='101';
+
+explain select * from user
+where code='101' and age=21 
+
+explain select * from user
+where code='101' and age=21 and name='周星驰';
+
+explain select * from user
+where code = '101'  and name='周星驰';
+```
+
+执行结果：
+![[Pasted image 20240118124156.png]]
+
+上面四种情况，sql都能正常走索引。看到这里，不知道聪明的你，有没有发现这样一个规律：这4条sql中都有code字段，它是索引字段中的第一个字段，也就是最左边的字段。只要有这个字段在，该sql已经就能走索引。
+
+接下来，我们重点看看哪些情况下索引会失效。
+
+```sql
+explain select * from user
+where age=21;
+
+explain select * from user
+where name='周星驰';
+
+explain select * from user
+where age=21 and name='周星驰';
+```
+
+执行结果：从图中看出这3种情况下索引确实失效了。
+![[Pasted image 20240118124206.png]]
+
+说明以上3种情况不满足最左匹配原则，说白了是因为查询条件中，没有包含给定字段最左边的索引字段，即字段code。
+## 2.使用了select *
+
+在《阿里巴巴开发手册》中明确说过，查询sql中禁止使用`select *` 。
+```sql
+explain 
+select * from user where name='苏三';
+```
+
+执行结果：
+![[Pasted image 20240118134855.png]]
+
+在该sql中用了`select *`，从执行结果看，走了全表扫描，没有用到任何索引，查询效率是非常低的。
+
+如果查询的时候，只查我们真正需要的列，而不查所有列，结果会怎么样？
+
+将上面的sql改成只查了code和name列，太easy了：
+
+```sql
+explain 
+select code,name from user 
+where name='苏三';
+```
+
+执行结果：
+![[Pasted image 20240118134904.png]]
+
+从图中执行结果不难看出，该sql语句这次走了`全索引扫描`，比`全表扫描`效率更高。
+其实这里用到了：覆盖索引。如果select语句中的查询列，都是索引列，那么这些列被称为覆盖索引。
+查询过程如下：根据覆盖索引中的name字段查询成功，由于查询的目标code,name就涵盖在覆盖索引当中，因此没有回表
+
+而使用`select *`查询所有列的数据，大概率会查询非索引列的数据，非索引列不会走索引，查询效率非常低。
+## 3.索引列上有计算
+
+介绍本章节内容前，先跟大家一起回顾一下，根据id查询数据的sql语句：
+
+```sql
+explain select * from user where id=1;
+```
+
+执行结果：
+
+![[Pasted image 20240118145522.png]]
+
+从图中可以看出，由于id字段是主键，该sql语句用到了`主键索引`。
+
+但如果id列上面有计算，比如：
+
+```sql
+explain select * from user where id+1=2;
+```
+
+执行结果：
+![[Pasted image 20240118145543.png]]
+
+从上图中的执行结果，能够非常清楚的看出，该id字段的主键索引，在有计算的情况下失效了。
+
+## 4.索引列用了函数
+
+有时候我们在某条sql语句的查询条件中，需要使用函数，比如：截取某个字段的长度。
+
+假如现在有个需求：想查出所有身高是17开头的人，如果sql语句写成这样：
+
+```sql
+explain select * from user  where height=17;
+```
+
+该sql语句确实用到了普通索引：
+![[Pasted image 20240118145551.png]]
+但该sql语句肯定是有问题的，因为它只能查出身高正好等于17的，但对于174这种情况，它没办法查出来。
+
+为了满足上面的要求，我们需要把sql语句稍稍改造了一下：
+
+```sql
+explain select * from user  where SUBSTR(height,1,2)=17;
+```
+
+这时需要用到`SUBSTR`函数，用它截取了height字段的前面两位字符，从第一个字符开始。
+
+执行结果：
+![[Pasted image 20240118145600.png]]
+
+你有没有发现，在使用该函数之后，该sql语句竟然走了全表扫描，索引失效了。
+
+## 5.字段类型不同
+
+请大家注意观察一下t_user表中的code字段，它是`varchar`字符类型的。
+
+在sql语句中查询数据时，查询条件我们可以写成这样：
+
+```sql
+explain 
+select * from user where code="101";
+```
+
+执行结果：
+![[Pasted image 20240118145616.png]]
+从上图中看到，该code字段走了索引。
+
+> 温馨提醒一下，查询字符字段时，用双引号"和单引号`'`都可以。
+
+但如果你在写sql时，不小心把引号弄掉了，把sql语句变成了：
+
+```sql
+explain 
+select * from user where code=101;
+```
+
+执行结果：
+![[Pasted image 20240118145626.png]]
+你会惊奇的发现，该sql语句竟然变成了全表扫描。因为少写了引号，这种小小的失误，竟然让code字段上的索引失效了。
+
+
+但反过来有一个反常的现象，如果int类型的height字段，在查询时加了引号条件，却还可以走索引：
+```sql
+explain select * from user 
+where height='175';
+```
+
+执行结果：
+![[Pasted image 20240118145642.png]]
+从图中看出该sql语句确实走了索引。int类型的参数，不管在查询时加没加引号，都能走索引。
+
+这是变魔术吗？这不科学呀。
+
+答：mysql发现如果是`int`类型字段作为查询条件时，它会自动将该字段的传参进行`隐式转换`，把字符串转换成int类型。
+
+mysql会把上面列子中的字符串175，转换成数字175，所以仍然能走索引。
+
+所以，下面继续看一个更有趣的sql语句，它的执行结果是2
+```sql
+select 1 + '1';
+```
+
+mysql自动把字符串1，转换成了int类型的1，然后变成了：1+1=2。
+
+但如果你确实想拼接字符串该怎么办？
+
+答：可以使用`concat`关键字。
+
+具体拼接sql如下：
+
+```sql
+select concat(1,'1');
+```
+
+接下来，关键问题来了：**为什么字符串类型的字段，传入了int类型的参数时索引会失效呢？**
+
+答：根据mysql官网上解释，字符串'1'、' 1 '、'1a'都能转换成int类型的1，也就是说可能会出现多个字符串，对应一个int类型参数的情况。那么，mysql怎么知道该把int类型的1转换成哪种字符串，用哪个索引快速查值?
+
+感兴趣的小伙伴可以再看看官方文档：`https://dev.mysql.com/doc/refman/8.0/en/type-conversion.html`
+## 6.like左边包含%
+
+模糊查询，在我们日常的工作中，使用频率还是比较高的。
+
+比如现在有个需求：想查询姓李的同学有哪些?
+
+使用`like`语句可以很快的实现：
+
+```sql
+select * from user where name like '李%';
+```
+
+但如果like用的不好，就可能会出现性能问题，因为有时候它的索引会失效。
+
+不信，我们一起往下看。
+
+目前like查询主要有三种情况：
+- like '%a'  
+- like 'a%'  
+- like '%a%'  
+
+
+假如现在有个需求：想查出所有code是10开头的用户。
+
+这个需求太简单了吧，sql语句如下：
+
+```sql
+explain select * from user
+where code like '10%';
+```
+
+执行结果：
+![[Pasted image 20240118145654.png]]
+图中看出这种`%`在`10`右边时走了索引。
+
+而如果把需求改了：想出现出所有code是1结尾的用户。
+
+查询sql语句改为：
+
+```sql
+explain select * from user
+where code like '%1';
+```
+
+执行结果：
+![[Pasted image 20240118145707.png]]
+从图中看出这种`%`在`1`左边时，code字段上索引失效了，该sql变成了全表扫描。
+
+此外，如果出现以下sql：
+
+```sql
+explain select * from user
+where code like '%1%';
+```
+
+该sql语句的索引也会失效。
+
+下面用一句话总结一下规律：当`like`语句中的`%`，出现在查询条件的左边时，索引会失效。
+
+那么，为什么会出现这种现象呢？
+
+答：其实很好理解，索引就像字典中的目录。一般目录是按字母或者拼音从小到大，从左到右排序，是有顺序的。
+
+我们在查目录时，通常会先从左边第一个字母进行匹对，如果相同，再匹对左边第二个字母，如果再相同匹对其他的字母，以此类推。
+
+通过这种方式我们能快速锁定一个具体的目录，或者缩小目录的范围。
+
+但如果你硬要跟目录的设计反着来，先从字典目录右边匹配第一个字母，这画面你可以自行脑补一下，你眼中可能只剩下绝望了，哈哈。
+
+## 7.列对比
+
+上面的内容都是常规需求，接下来，来点不一样的。
+
+假如我们现在有这样一个需求：过滤出表中某两列值相同的记录。比如user表中id字段和height字段，查询出这两个字段中值相同的记录。
+
+这个需求很简单，sql可以这样写：
+
+```sql
+explain select * from user 
+where id=height
+```
+
+执行结果：
+![[Pasted image 20240118145717.png]]
+意不意外，惊不惊喜？索引失效了。
+
+为什么会出现这种结果？
+
+id字段本身是有主键索引的，同时height字段也建了普通索引的，并且两个字段都是int类型，类型是一样的。
+
+但如果把两个单独建了索引的列，用来做列对比时索引会失效。
+## 8.使用or关键字
+
+我们平时在写查询sql时，使用`or`关键字的场景非常多，但如果你稍不注意，就可能让已有的索引失效。
+
+不信一起往下面看。
+
+某天你遇到这样一个需求：想查一下id=1或者height=175的用户。
+
+你三下五除二就把sql写好了：
+
+```sql
+explain select * from user 
+where id=1 or height='175';
+```
+
+执行结果：
+![[Pasted image 20240118145724.png]]
+没错，这次确实走了索引，恭喜被你蒙对了，因为刚好id和height字段都建了索引。
+
+但接下来的一个夜黑风高的晚上，需求改了：除了前面的查询条件之后，还想加一个address='成都'。
+
+这还不简单，sql走起：
+
+```sql
+explain select * from user 
+where id=1 or height='175' or address='成都';
+```
+
+执行结果：
+![[Pasted image 20240118145733.png]]
+结果悲剧了，之前的索引都失效了。
+
+你可能一脸懵逼，为什么？我做了什么？
+
+答：因为你最后加的address字段没有加索引，从而导致其他字段的索引都失效了。
+
+> 注意：如果使用了`or`关键字，那么它前面和后面的字段都要加索引，不然所有的索引都会失效，这是一个大坑。
+## 9.not in和not exists
+
+
+假如我们想查出height在某些范围之内的用户，这时sql语句可以这样写：
+
+```sql
+explain select * from user
+where height in (173,174,175,176);
+```
+
+执行结果：
+![[Pasted image 20240118145746.png]]
+从图中可以看出，sql语句中用`in`关键字是走了索引的。
+有时候使用`in`关键字时性能不好，这时就能用`exists`关键字优化sql了，该关键字能达到in关键字相同的效果：
+
+```sql
+explain select * from user  t1
+where  exists (select 1 from user t2 where t2.height=173 and t1.id=t2.id)
+```
+
+执行结果：
+![[Pasted image 20240118145752.png]]
+从图中可以看出，用`exists`关键字同样走了索引。
+
+### not in关键字
+
+上面演示的两个例子是正向的范围，即在某些范围之内。
+
+那么反向的范围，即不在某些范围之内，能走索引不？
+
+话不多说，先看看使用`not in`的情况：
+
+```sql
+explain select * from user
+where height not in (173,174,175,176);
+```
+
+执行结果：
+![[Pasted image 20240118145801.png]]
+你没看错，索引失效了。
+
+看如果现在需求改了：想查一下id不等于1、2、3的用户有哪些，这时sql语句可以改成这样：
+
+```sql
+explain select * from user
+where id  not in (173,174,175,176);
+```
+
+执行结果：
+![[Pasted image 20240118145810.png]]
+你可能会惊奇的发现，主键字段中使用not in关键字查询数据范围，任然可以走索引。而普通索引字段使用了not in关键字查询数据范围，索引会失效。
+
+### not exists关键字
+
+除此之外，如果sql语句中使用`not exists`时，索引也会失效。具体sql语句如下：
+
+```sql
+explain select * from user  t1
+where not exists (select 1 from user t2 where t2.height=173 and t1.id=t2.id)
+```
+
+执行结果：
+![[Pasted image 20240118145816.png]]
+从图中看出sql语句中使用not exists关键后，t1表走了全表扫描，并没有走索引。
+## 10.order by的坑
+
+在sql语句中，对查询结果进行排序是非常常见的需求，一般情况下我们用关键字：`order by`就能搞定。
+
+但我始终觉得order by挺难用的，它跟`where`或者`limit`关键字有很多千丝万缕的联系，一不小心就会出问题。
+
+### 10.1 哪些情况走索引？
+
+首先当然要温柔一点，一起看看order by的哪些情况可以走索引。
+
+我之前说过，在code、age和name这3个字段上，已经建了联合索引：idx_code_age_name。
+
+#### 10.1.1 保留了最左前缀索引
+
+order by后面的条件，也要遵循联合索引的最左匹配原则。具体有以下sql：
+
+```sql
+explain select * from user
+order by code limit 100;
+
+explain select * from user
+order by code,age limit 100;
+
+explain select * from user
+order by code,age,name limit 100;
+```
+
+执行结果：
+![[Pasted image 20240118145826.png]]
+从图中看出这3条sql都能够正常走索引。
+
+除了遵循最左匹配原则之外，有个非常关键的地方是，后面还是加了`limit`关键字，如果不加它索引会失效。
+
+#### 10.1.2 配合where一起使用
+
+order by还能配合where一起遵循最左匹配原则。
+
+```sql
+explain select * from user
+where code='101'
+order by age;
+```
+
+执行结果：
+![[Pasted image 20240118145832.png]]
+code是联合索引的第一个字段，在where中使用了，而age是联合索引的第二个字段，在order by中接着使用。
+
+假如中间断层了，sql语句变成这样，执行结果会是什么呢？
+
+```sql
+explain select * from user
+where code='101'
+order by name;
+```
+
+执行结果：
+![[Pasted image 20240118145845.png]]
+虽说name是联合索引的第三个字段，但根据最左匹配原则，该sql语句依然能走索引，因为最左边的第一个字段code，在where中使用了。只不过order by的时候，排序效率比较低，需要走一次`filesort`排序罢了。extra信息当中的Using_filesort
+
+#### 10.1.3 相同的排序
+
+order by后面如果包含了联合索引的多个排序字段，只要它们的排序规律是相同的（要么同时升序，要么同时降序），也可以走索引。
+
+具体sql如下：
+
+```sql
+explain select * from user
+order by code desc,age desc limit 100;
+```
+
+执行结果：
+![[Pasted image 20240118145852.png]]
+该示例中order by后面的code和age字段都用了降序，所以依然走了索引。
+
+#### 10.1.4 两者都有
+
+如果某个联合索引字段，在where和order by中都有，结果会怎么样？
+
+```sql
+explain select * from user
+where code='101'
+order by code, name;
+```
+
+执行结果：
+![[Pasted image 20240118145859.png]]
+code字段在where和order by中都有，对于这种情况，从图中的结果看出，还是能走了索引的。
+
+### 10.2 哪些情况不走索引？
+
+前面介绍的都是正面的用法，是为了让大家更容易接受下面反面的用法。
+
+好了，接下来，重点聊聊order by的哪些情况下不走索引？
+
+#### 10.2.1 没加where或limit
+
+如果order by语句中没有加where或limit关键字，该sql语句将不会走索引。
+
+```sql
+explain select * from user
+order by code, name;
+```
+
+执行结果：
+![[Pasted image 20240118145906.png]]
+从图中看出索引真的失效了。
+
+#### 10.2.2 对不同的索引做order by
+
+前面介绍的基本都是联合索引，这一个索引的情况。但如果对多个索引进行order by，结果会怎么样呢？
+
+```sql
+explain select * from user
+order by code, height limit 100;
+```
+
+执行结果：
+![[Pasted image 20240118145914.png]]
+从图中看出索引也失效了。
+
+#### 10.2.3 舍弃了最左前缀索引
+
+前面已经介绍过，order by如果满足最左匹配原则，还是会走索引。下面看看，不满足最左匹配原则的情况：
+
+```sql
+explain select * from user
+order by name limit 100;
+```
+
+执行结果：
+![[Pasted image 20240118145921.png]]
+name字段是联合索引的第三个字段，从图中看出如果order by不满足最左匹配原则，确实不会走索引。
+
+#### 10.2.4 不同的排序
+
+前面已经介绍过，如果order by后面有一个联合索引的多个字段，它们具有相同排序规则，那么会走索引。
+
+但如果它们有不同的排序规则呢？
+
+```sql
+explain select * from user
+order by code asc,age desc limit 100;
+```
+
+执行结果：
+![[Pasted image 20240118145927.png]]
+从图中看出，尽管order by后面的code和age字段遵循了最左匹配原则，但由于一个字段是用的升序，另一个字段用的降序，最终会导致索引失效。

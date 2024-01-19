@@ -31,5 +31,6 @@
   "Servlet3.0&&SpringMVC": "FabEmpire",
   "SpringBoot": "FabEmpire",
   "Tomcat": "FabEmpire",
-  "手写框架系列handson_miniFramework": "FabEmpire"
+  "手写框架系列handson_miniFramework": "FabEmpire",
+  "线上部署实践": "FabEmpire"
 }

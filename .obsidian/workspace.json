@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Redis缓存/缓存一致性.md"
+                "file": "分布式锁/基于MySQL的分布式锁/MySQL实现分布式锁.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Redis缓存/缓存一致性.md",
+                "file": "分布式锁/基于MySQL的分布式锁/MySQL实现分布式锁.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Redis缓存/缓存一致性.md",
+                "file": "分布式锁/基于MySQL的分布式锁/MySQL实现分布式锁.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Redis缓存/缓存一致性.md",
+                "file": "分布式锁/基于MySQL的分布式锁/MySQL实现分布式锁.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,21 +159,32 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
+    "Attachments/pics/Pasted image 20240120221401.png",
+    "Attachments/pics/1606620944823.png",
+    "分布式锁/纸老虎“分布式锁”.md",
+    "分布式锁/基于MySQL的分布式锁/MySQL实现分布式锁.md",
+    "Attachments/pics/Pasted image 20240120220750.png",
+    "Attachments/pics/Pasted image 20240120220105.png",
+    "Attachments/pics/Pasted image 20240120220052.png",
+    "分布式锁/基于MySQL的分布式锁",
+    "SpringBoot/如何保证请求的幂等性（防止重复消费）.md",
+    "MySQL/MySQL的悲观锁与乐观锁的实现方式.md",
+    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+    "本地IDE与环境配置/jmeter.md",
+    "Attachments/pics/Pasted image 20240120201040.png",
+    "Attachments/pics/Pasted image 20240120201027.png",
+    "Attachments/pics/Pasted image 20240120201018.png",
+    "分布式锁/基于zookeeper的分布式锁",
+    "分布式锁/基于Redis的分布式锁",
+    "分布式锁/基于MySQL的分布式锁",
+    "Redis缓存/缓存一致性.md",
+    "分布式锁",
     "Attachments/pics/Pasted image 20240120193916.png",
     "Attachments/pics/Pasted image 20240120193725.png",
     "Attachments/pics/Pasted image 20240120193343.png",
-    "Attachments/pics/Pasted image 20240120193106.png",
     "Redis缓存/Redis客户端堆外内存溢出BUG.md",
-    "Attachments/pics/Pasted image 20240120175400.png",
-    "Redis缓存/缓存一致性.md",
     "Redis缓存/缓存失效场景.md",
-    "Attachments/pics/Pasted image 20240120174007.png",
-    "Attachments/pics/Pasted image 20240120174002.png",
-    "Attachments/pics/Pasted image 20240120173941.png",
-    "Attachments/pics/Pasted image 20240120173933.png",
-    "Attachments/pics/Pasted image 20240120173920.png",
     "分布式Session解决方案？还有待考证/SpringSession.md",
-    "Attachments/pics/Pasted image 20240120173545.png",
     "分布式Session解决方案？还有待考证",
     "Redis缓存/Redis持久化.md",
     "Redis缓存/Redis业务打点.md",
@@ -181,29 +192,18 @@
     "RocketMQ/RocketMQ常见问题.md",
     "Redis缓存",
     "RocketMQ/RocketMQ与Springboot3.2.1的整合启动报错.md",
-    "SpringBoot/如何保证请求的幂等性.md",
-    "线上服务器实践/如何排查服务器问题.md",
+    "服务器线上实践/如何排查服务器问题.md",
     "RocketMQ/RocketMQ结构.md",
-    "线上服务器实践/rocketmq4.9.2.md",
+    "服务器线上实践/rocketmq4.9.2.md",
     "README.md",
     "RocketMQ",
     "MySQL/SQL与优化.md",
-    "线上服务器实践",
+    "服务器线上实践",
     "MySQL/索引与优化.md",
     "MySQL/意向锁Intention.md",
-    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
     "MySQL/MyISAM已经被淘汰了.md",
     "MySQL/MySQL日志.md",
     "MySQL/数据库范式.md",
-    "MySQL/RBAC设计.md",
-    "MySQL/关系表设计.md",
-    "Servlet3.0&&SpringMVC/最新版Springmvc6如何接管可插拔的servlet3.0.md",
-    "Servlet3.0&&SpringMVC/可插拔servlet3.0 ServletContainerInitializer.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate",
-    "Attachments/pics/minisMVC-servlet.xml",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc"
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor"
   ]
 }

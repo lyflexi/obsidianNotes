@@ -34,6 +34,7 @@
   "MySQL": "FabEmpire",
   "RocketMQ": "FabEmpire",
   "Redis缓存": "FabEmpire",
-  "线上服务器实践": "FabEmpire",
-  "分布式Session解决方案？还有待考证": "FabEmpire"
+  "分布式Session解决方案？还有待考证": "FabEmpire",
+  "服务器线上实践": "FabEmpire",
+  "分布式锁": "FabEmpire"
 }

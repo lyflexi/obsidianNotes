@@ -24,7 +24,6 @@
     "iconsInNotesEnabled": true
   },
   "JavaSDK": "FabEmpire",
-  "DB数据库": "FabEmpire",
   "Attachments": "FabEnvira",
   "SpringFrameWork": "FabEmpire",
   "本地IDE与环境配置": "FabEmpire",
@@ -32,5 +31,9 @@
   "SpringBoot": "FabEmpire",
   "Tomcat": "FabEmpire",
   "手写框架系列handson_miniFramework": "FabEmpire",
-  "线上部署实践": "FabEmpire"
+  "MySQL": "FabEmpire",
+  "RocketMQ": "FabEmpire",
+  "Redis缓存": "FabEmpire",
+  "线上服务器实践": "FabEmpire",
+  "分布式Session解决方案？还有待考证": "FabEmpire"
 }

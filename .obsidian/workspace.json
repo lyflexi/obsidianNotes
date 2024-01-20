@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 17.705167173252278,
+        "dimension": 17.105263157894736,
         "children": [
           {
             "id": "0e2a48b30b90cdd5",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "README.md"
+                "file": "Redis缓存/缓存一致性.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -24,7 +24,7 @@
       {
         "id": "ad469fc731c35108",
         "type": "tabs",
-        "dimension": 82.29483282674772,
+        "dimension": 82.89473684210526,
         "children": [
           {
             "id": "83c4b3e02b4ccf9b",
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "Redis缓存/缓存一致性.md",
                 "mode": "source",
                 "source": false
               }
@@ -89,7 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 392.51103591918945
+    "width": 340.51103591918945
   },
   "right": {
     "id": "42bec07740fd88a4",
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "README.md",
+                "file": "Redis缓存/缓存一致性.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "README.md",
+                "file": "Redis缓存/缓存一致性.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,52 +157,53 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "ea39a6dcb23f12e2",
+  "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "线上部署实践/如何排查服务器问题.md",
-    "Attachments/pics/Pasted image 20240119131631.png",
-    "DB数据库/MySQL/SQL与优化.md",
-    "线上部署实践",
-    "DB数据库/MySQL/索引与优化.md",
-    "DB数据库/MySQL/意向锁Intention.md",
-    "DB数据库/MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
-    "Attachments/pics/Pasted image 20240118191950.png",
-    "Attachments/pics/Pasted image 20240118191939.png",
-    "Attachments/pics/Pasted image 20240118191933.png",
-    "Attachments/pics/Pasted image 20240118191926.png",
-    "Attachments/pics/Pasted image 20240118191919.png",
-    "Attachments/pics/Pasted image 20240118191903.png",
-    "Attachments/pics/Pasted image 20240118191847.png",
-    "Attachments/pics/Pasted image 20240118191553.png",
-    "Attachments/pics/Pasted image 20240118185321.png",
-    "DB数据库/MySQL/MyISAM已经被淘汰了.md",
-    "DB数据库/MySQL/MySQL日志.md",
-    "DB数据库/MySQL/数据库范式.md",
-    "DB数据库/MySQL/RBAC设计.md",
-    "DB数据库/MySQL/关系表设计.md",
+    "Attachments/pics/Pasted image 20240120193916.png",
+    "Attachments/pics/Pasted image 20240120193725.png",
+    "Attachments/pics/Pasted image 20240120193343.png",
+    "Attachments/pics/Pasted image 20240120193106.png",
+    "Redis缓存/Redis客户端堆外内存溢出BUG.md",
+    "Attachments/pics/Pasted image 20240120175400.png",
+    "Redis缓存/缓存一致性.md",
+    "Redis缓存/缓存失效场景.md",
+    "Attachments/pics/Pasted image 20240120174007.png",
+    "Attachments/pics/Pasted image 20240120174002.png",
+    "Attachments/pics/Pasted image 20240120173941.png",
+    "Attachments/pics/Pasted image 20240120173933.png",
+    "Attachments/pics/Pasted image 20240120173920.png",
+    "分布式Session解决方案？还有待考证/SpringSession.md",
+    "Attachments/pics/Pasted image 20240120173545.png",
+    "分布式Session解决方案？还有待考证",
+    "Redis缓存/Redis持久化.md",
+    "Redis缓存/Redis业务打点.md",
+    "Redis缓存/Redis数据类型.md",
+    "RocketMQ/RocketMQ常见问题.md",
+    "Redis缓存",
+    "RocketMQ/RocketMQ与Springboot3.2.1的整合启动报错.md",
+    "SpringBoot/如何保证请求的幂等性.md",
+    "线上服务器实践/如何排查服务器问题.md",
+    "RocketMQ/RocketMQ结构.md",
+    "线上服务器实践/rocketmq4.9.2.md",
+    "README.md",
+    "RocketMQ",
+    "MySQL/SQL与优化.md",
+    "线上服务器实践",
+    "MySQL/索引与优化.md",
+    "MySQL/意向锁Intention.md",
+    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+    "MySQL/MyISAM已经被淘汰了.md",
+    "MySQL/MySQL日志.md",
+    "MySQL/数据库范式.md",
+    "MySQL/RBAC设计.md",
+    "MySQL/关系表设计.md",
     "Servlet3.0&&SpringMVC/最新版Springmvc6如何接管可插拔的servlet3.0.md",
     "Servlet3.0&&SpringMVC/可插拔servlet3.0 ServletContainerInitializer.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/1.实现ThreadPoolTaskExecutor整合进IOC.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/3.增加@Async注解，更像Spring了.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/2.自定义拒绝策略.md",
-    "JavaSDK/MultiThread/Java线程池.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor",
-    "JavaSDK/JavaIO/序列化场景Serializable.md",
-    "SpringFrameWork/BeanFactory刷新机制（Bean生命周期与扩展点）/循环依赖与三级缓存.md",
-    "SpringFrameWork/AOP切面增强原理/AOP源码解析.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/4.添加配置化的AutoProxyCreator后置处理器，批量代理目标类.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/3.实现配置化的切入点表达式，批量增强目标方法.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/2.解耦Interceptor和Invocation，实现三种Interceptor.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/1.完成零代码侵入的动态代理的框架封装.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/5.再回首.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/4.通过 BeanPostProcessor 机制让容器支持注解.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate",
     "Attachments/pics/minisMVC-servlet.xml",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC",
-    "手写框架系列handson_miniFramework",
-    "Tomcat"
+    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc"
   ]
 }

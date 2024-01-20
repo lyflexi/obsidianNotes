@@ -1,7 +1,7 @@
 MySQL实现思路
-1. 创建mysql表tb_lock用于并发占坑，比如给lock_name字段创建唯一性索引，线程尝试同时获取tb_lock的锁（insert）
+1. 创建mysql表tb_lock用于并发占坑，比如给lock_name字段创建唯一性索引，线程尝试获取锁tb_lock（insert）
 2. 创建mysql表tb_service，这是我们真正的业务数据表
-3. 获取tb_lock的锁成功，则执行tb_service表的业务逻辑，执行完成释放锁（delete）
+3. 获取tb_lock的锁成功，则执行tb_service表的业务逻辑，执行完成释放锁tb_lock（delete）
 4. 其他线程等待重试
 
 ![[1606620944823.png]]

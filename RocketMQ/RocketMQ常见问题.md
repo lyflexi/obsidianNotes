@@ -209,11 +209,55 @@ consumer方消费消息存在两种模式：
 虽然顺序消息（Orderly模式是）前一个消费者先解锁，后一个消费者加锁再消费的模式，比起concurrently要严格了，但是加锁的线程和提交offset的线程不是同一个，所以还是会出现极端情况下的重复消费。
 
 还有在发送批量消息的时候，会被当做一条消息进行处理，那么如果批量消息中有一条业务处理成功，其他失败了，还是会被重新消费一次。
-## 解决方案1,MySQL唯一性索引
+
+## 幂等性原则
+无论是微服务中各个子系统相互之间的调用，还是客户端对服务端的调用，都存在网络延迟等问题，会导致重复请求接口
+1. 网络延时
+2. 消息丢失
+幂等性原则：
+- 重复的写操作必须保证操作只执行一次
+- 重复的读操作必须保证返回同一个结果
+==更宏观来说，多次执行请求不会对业务产生预期之外的后果，比如重复调用支付接口会导致多次扣钱。==
+
+幂等性的解决有以下方案：
+### MySQL唯一索引
+
+创建去重表，去重表设置为唯一索引，唯一性索引多次插入就会报错，从而保证幂等性。
+1. 创建mysql去重表表tb_lock用于并发占坑，比如给lock_name字段创建唯一性索引，线程尝试获取锁tb_lock（insert）
+2. 创建mysql表tb_service，这是我们真正的业务数据表
+3. 获取tb_lock的锁成功，则执行tb_service表的业务逻辑，执行完成释放锁tb_lock（delete）
+4. 其他线程等待重试
+### MySQL悲观锁for update
+### MySQL乐观版锁本号
+
+在业务表中新建一个版本字段version，int类型。
+
+服务A调用服务B需要更新的时候，需要提前查询到version，然后作为参数传过去。
+
+数据更新的时候将version + 1，接口如果发生重试的时候，version已经发生变更，那么也能保证幂等性。
+### MySQL支付状态位State，类似于乐观锁
+
+增加支付状态，0代表待支付 ， 1代表支付中 ， 2代表支付成功，3代表支付失败
+
+SQL语句通过查询并重设状态位State值来保证支付幂等
+
+```sql
+update order set status = 1 where status =0 and orderId = “201251487987”
+```
+
+- SQL返回影响数 1 代表修改成功，可以支付，继续执行支付业务代码
+    
+- SQL返回影响数 0 代表修改失败，该订单已经不是待支付订单了。
+
+## MQ场景下的幂等性
+### 解决方案1,MQ+MySQL存储唯一性索引
 那么如果在CLUSTERING（负载均衡）模式下，并且在同一个消费者组中，不希望一条消息被重复消费，改怎么办呢？
-==在MySQL中建立去重表order_oper_log，设置唯一索引字段order_sn==
+
+对于本身并发较低的场景，不会对MySQL服务造成压力，可以直接使用MySQL的唯一性索引保存
+
+==在MySQL中建立去重表order_oper_log，设置唯一索引字段order_sn，将key值映射到order_sn字段，多次插入重复的order_sn就会报错==
 ![[Pasted image 20240120124655.png]]
-==将key值映射到order_sn字段，多次插入重复的order_sn就会报错==
+业务表还不变，是我们的xxx_service，只是多了一个去重表order_oper_log
 ```java
 package org.lyflexi.arocketmqdemo;  
   
@@ -274,7 +318,7 @@ class ARocketmqDemoApplicationTests {
                 PreparedStatement statement = null;  
   
                 try {  
-                    // 先插入数据库 ，将key值映射到数据表的唯一索引字段order_sn
+                    // 先插入数据库 （去重表），将key值映射到数据表的唯一索引字段order_sn
                     statement = connection.prepareStatement("insert into order_oper_log(`type`, `order_sn`, `user`) values (1,'" + keys + "','123')");  
                 } catch (SQLException e) {  
                     e.printStackTrace();  
@@ -292,11 +336,11 @@ class ARocketmqDemoApplicationTests {
                     e.printStackTrace();  
                 }  
   
-                // 处理业务逻辑            
+                // 处理业务逻辑   （另外的业务表）         
                 System.out.println(new String(messageExt.getBody()));  
                 System.out.println(keys);  
-                //如果业务中报异常 则删除掉这个去重表记录 delete from order_oper_log where order_sn = keys;      
-                //回滚...
+
+                //解锁，删除掉这个去重表记录 delete from order_oper_log where order_sn = keys;      
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;  
             }  
         });  
@@ -307,7 +351,8 @@ class ARocketmqDemoApplicationTests {
   
 }
 ```
-## 解决方案2,并发量激增Redis
+### 解决方案2,MQ+Redis存储唯一key
+
 consumer面对两个重复的消息key，第一次拿到key之后先保存到redis中，接下来正常执行业务逻辑
 如果第二次再次拿到相同的消息key，则先去redis中比较，如果redis中存在这个key，则抛弃这个消息
 

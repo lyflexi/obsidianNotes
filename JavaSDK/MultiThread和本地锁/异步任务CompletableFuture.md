@@ -70,7 +70,7 @@
 
 ## CompletableFuture回调方法：
 
-### whenComplete
+### whenCompleteAsync
 
 ```Java
     public CompletableFuture<T> whenComplete(
@@ -90,13 +90,8 @@
 ```
 
 whenComplete和whenCompleteAsync的区别：
-
 - whenComplete：是当前线程执行当前任务，等待任务执行之后继续执行当前的whenComplete
-    
-- whenCompleteAsync：是执行把whenCompleteAsync这个任务提交给线程池中的其他线程来进行执行。
-    
-
-方法以Async结尾可能会使用其他线程执行
+- ==whenCompleteAsync：是把whenCompleteAsync这个任务提交给线程池中的其他线程来进行执行。只有异步回调才有意义==
 
 ```Java
 package com.bilibili.juc.cf;
@@ -126,7 +121,7 @@ public class CompletableFutureUseDemo
                     int i=10/0;
                 }
                 return result;
-            },threadPool).whenComplete((v,e) -> {
+            },threadPool).whenCompleteAsync((v,e) -> {
                 if (e == null) {
                     System.out.println("-----计算完成，更新系统UpdateValue："+v);
                 }
@@ -142,11 +137,6 @@ public class CompletableFutureUseDemo
         }finally {
             threadPool.shutdown();
         }
-
-
-        //主线程不要立刻结束，否则CompletableFuture默认使用的线程池会立刻关闭:暂停3秒钟线程
-        //try { TimeUnit.SECONDS.sleep(3); } catch (InterruptedException e) { e.printStackTrace(); }
-
     }
 
     private static void future1() throws InterruptedException, ExecutionException
@@ -196,7 +186,7 @@ exceptionally处理异常情况
     }
 ```
 
-handle
+### handle
 
 handle：whenComplete和exceptionally的结合版。方法执行后的处理，无论成功与失败都可处理
 
@@ -220,259 +210,386 @@ handle：whenComplete和exceptionally的结合版。方法执行后的处理，�
 代码示例：
 
 ```Java
-                /**
-                 * 方法执行完成后的处理
-                 */
-        CompletableFuture<Integer> completableFuture2 = CompletableFuture.supplyAsync(() -> {
-            System.out.println("当前线程：" + Thread.currentThread().getId());
-            System.out.println("CompletableFuture...");
-            return 10/1;
-        }, service).handle((t,u)->{ // R apply(T t, U u);
-            System.out.println("handle:");
-            if (t != null){
-                System.out.println("存在返回结果:" + t);
-                return 8;
-            }
-            if (u != null){
-                System.out.println("存在日常:" + u);
-                return 9;
-            }
-            return 5;
 
-        });
-        Integer integer = completableFuture2.get();
-        System.out.println(integer);
+CompletableFuture<Integer> completableFuture2 = CompletableFuture.supplyAsync(() -> {
+	System.out.println("当前线程：" + Thread.currentThread().getId());
+	System.out.println("CompletableFuture...");
+	return 10/1;
+}, service).handle((t,u)->{ // R apply(T t, U u);
+	System.out.println("handle:");
+	if (t != null){
+		System.out.println("存在返回结果:" + t);
+		return 8;
+	}
+	if (u != null){
+		System.out.println("存在异常:" + u);
+		return 9;
+	}
+	return 5;
+
+});
+Integer integer = completableFuture2.get();
+System.out.println(integer);
 ```
 
 # CompletableFuture定制化场景
 
-## 线程串行化
-![[Pasted image 20231225134120.png]]
-
-- thenRun：不能获取到上一步的执行结果，无返回值
-    
-- thenAcceptAsync 能接受上—步结果，但是无返回值
-    
-- **thenApplyAsync** 能接受上—步结果，有返回值
-    
-
-**我们即要能感知到上一步的执行结果，也要能有自己线程执行成功的自己的返回值**
-
-```Java
-我是B
-//        CompletableFuture<Integer> completableFuture2 = CompletableFuture.supplyAsync(() -> {
-//            System.out.println("当前线程：" + Thread.currentThread().getId());
-//            System.out.println("CompletableFuture...");
-//            return 10;//拿到A的返回值
-//        }, service).thenApplyAsync((u)->{
-//            System.out.println("返回值" + u);
-//            System.out.println("任务2启动");
-//            return 5;//自己的返回值再返回出去
-//        });
-//        System.out.println(completableFuture2.get());
-        /*
-        * main....start....
-        当前线程：11
-        CompletableFuture...
-        返回值10
-        任务2启动
-        5
-        main....end....
-                * */
+## 线程串行化thenApply
+```java
+//thenRun
+public CompletableFuture<Void> thenRun(Runnable action) {  
+    return uniRunStage(null, action);  
+}  
+public CompletableFuture<Void> thenRunAsync(Runnable action) {  
+    return uniRunStage(defaultExecutor(), action);  
+}  
+public CompletableFuture<Void> thenRunAsync(Runnable action,  
+                                            Executor executor) {  
+    return uniRunStage(screenExecutor(executor), action);  
+}
+//thenAccept
+public CompletableFuture<Void> thenAccept(Consumer<? super T> action) {  
+    return uniAcceptStage(null, action);  
+}   
+public CompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action) {  
+    return uniAcceptStage(defaultExecutor(), action);  
+}  
+public CompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action,  
+                                               Executor executor) {  
+    return uniAcceptStage(screenExecutor(executor), action);  
+}  
+//thenApply
+public <U> CompletableFuture<U> thenApply(  
+    Function<? super T,? extends U> fn) {  
+    return uniApplyStage(null, fn);  
+}  
+public <U> CompletableFuture<U> thenApplyAsync(  
+    Function<? super T,? extends U> fn) {  
+    return uniApplyStage(defaultExecutor(), fn);  
+}  
+public <U> CompletableFuture<U> thenApplyAsync(  
+    Function<? super T,? extends U> fn, Executor executor) {  
+    return uniApplyStage(screenExecutor(executor), fn);  
+}  
 ```
 
-## 双线程均完成才能后续
-
-![[Pasted image 20231225134135.png]]
-![[Pasted image 20231225134141.png]]
+- thenRun：不能获取到上一步的执行结果，无返回值
+- thenAccept 能接受上—步结果，但是无返回值
+- thenApply 能接受上—步结果，有返回值
+    
+thenApply示例如下
+```Java
+CompletableFuture<Integer> completableFuture2 = CompletableFuture.supplyAsync(() -> {
+	System.out.println("当前线程：" + Thread.currentThread().getId());
+	System.out.println("CompletableFuture...");
+	return 10;//拿到A的返回值
+}, service).thenApplyAsync((u)->{
+	System.out.println("返回值" + u);
+	System.out.println("任务2启动");
+	return 5;//自己的返回值再返回出去
+});
+System.out.println(completableFuture2.get());
+```
+打印如下：
+```java
+main....start....
+当前线程：11
+CompletableFuture...
+返回值10
+任务2启动
+5
+main....end....
+```
+## 双线程均完成才能后续thenCombine
+```java
+//runAfterBoth
+public CompletableFuture<Void> runAfterBoth(CompletionStage<?> other,  
+                                            Runnable action) {  
+    return biRunStage(null, other, action);  
+}  
+public CompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other,  
+                                                 Runnable action) {  
+    return biRunStage(defaultExecutor(), other, action);  
+}  
+public CompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other,  
+                                                 Runnable action,  
+                                                 Executor executor) {  
+    return biRunStage(screenExecutor(executor), other, action);  
+}
+//thenAcceptBoth
+public <U> CompletableFuture<Void> thenAcceptBoth(  
+    CompletionStage<? extends U> other,  
+    BiConsumer<? super T, ? super U> action) {  
+    return biAcceptStage(null, other, action);  
+}  
+public <U> CompletableFuture<Void> thenAcceptBothAsync(  
+    CompletionStage<? extends U> other,  
+    BiConsumer<? super T, ? super U> action) {  
+    return biAcceptStage(defaultExecutor(), other, action);  
+}  
+public <U> CompletableFuture<Void> thenAcceptBothAsync(  
+    CompletionStage<? extends U> other,  
+    BiConsumer<? super T, ? super U> action, Executor executor) {  
+    return biAcceptStage(screenExecutor(executor), other, action);  
+}  
+//thenCombine
+public <U,V> CompletableFuture<V> thenCombine(  
+    CompletionStage<? extends U> other,  
+    BiFunction<? super T,? super U,? extends V> fn) {  
+    return biApplyStage(null, other, fn);  
+}  
+public <U,V> CompletableFuture<V> thenCombineAsync(  
+    CompletionStage<? extends U> other,  
+    BiFunction<? super T,? super U,? extends V> fn) {  
+    return biApplyStage(defaultExecutor(), other, fn);  
+}  
+public <U,V> CompletableFuture<V> thenCombineAsync(  
+    CompletionStage<? extends U> other,  
+    BiFunction<? super T,? super U,? extends V> fn, Executor executor) {  
+    return biApplyStage(screenExecutor(executor), other, fn);  
+}
+```
 
 - runAfterBothAsync 两人任务组合，不能得到前任务的结果和无返回值
-    
 - thenAcceptBothAsync 两人任务组合，能得到前任务的结果和无返回值
-    
 - thenCombineAsync 两人任务组合，能得到前任务的结果和有返回值
     
 
-代码示例
-
+thenCombineAsync代码示例
 ```Java
-//        CompletableFuture<Integer> completableFuture3 = CompletableFuture.supplyAsync(() -> {
-//                    System.out.println("当前线程：" + Thread.currentThread().getId());
-//                    System.out.println("任务1...");
-//                    return 111;
-//                }, service);
-//        CompletableFuture<Integer> completableFuture4 = CompletableFuture.supplyAsync(() -> {
-//            System.out.println("当前线程：" + Thread.currentThread().getId());
-//            System.out.println("任务2...");
-//            return 222;
-//        }, service);
+CompletableFuture<Integer> completableFuture3 = CompletableFuture.supplyAsync(() -> {
+			System.out.println("当前线程：" + Thread.currentThread().getId());
+			System.out.println("任务1...");
+			return 111;
+		}, service);
+CompletableFuture<Integer> completableFuture4 = CompletableFuture.supplyAsync(() -> {
+	System.out.println("当前线程：" + Thread.currentThread().getId());
+	System.out.println("任务2...");
+	return 222;
+}, service);
 
 
+//测试runAfterBothAsync
+completableFuture3.runAfterBothAsync(completableFuture4,()->{
+		System.out.println("任务3...");
+},service);
 
-//        completableFuture3.runAfterBothAsync(completableFuture4,()->{
-//                System.out.println("任务3...");
-//        },service);
-        /*
-        * main....start....
-        main....end....
-        当前线程：11
-        任务1...
-        当前线程：12
-        任务2...
-        任务3...
-        * */
+//测试thenAcceptBothAsync
+completableFuture3.thenAcceptBothAsync(completableFuture4, (f1,f2) -> {
+	System.out.println("任务3...");
+	System.out.println("f1:" + f1 + ".f2:" + f2);
+}, service);
 
-//        completableFuture3.thenAcceptBothAsync(completableFuture4, (f1,f2) -> {
-//            System.out.println("任务3...");
-//            System.out.println("f1:" + f1 + ".f2:" + f2);
-//        }, service);
-        /*
-        * main....start....
-        main....end....
-        当前线程：11
-        任务1...
-        当前线程：12
-        任务2...
-        任务3...
-        f1:111.f2:222
-        * */
+//测试thenCombineAsync
+CompletableFuture<Integer> integerCompletableFuture = completableFuture3.thenCombineAsync(completableFuture4, (f1, f2) -> {
+	System.out.println("任务3...");
+	System.out.println("f1:" + f1 + ".f2:" + f2);
+	return 3;
+}, service);
+System.out.println(integerCompletableFuture.get());
 
-//        CompletableFuture<Integer> integerCompletableFuture = completableFuture3.thenCombineAsync(completableFuture4, (f1, f2) -> {
-//            System.out.println("任务3...");
-//            System.out.println("f1:" + f1 + ".f2:" + f2);
-//            return 3;
-//        }, service);
-//        System.out.println(integerCompletableFuture.get());
-        /*
-        * main....start....
-        当前线程：11
-        任务1...
-        当前线程：12
-        任务2...
-        任务3...
-        f1:111.f2:222
-        3
-        main....end....
-        * */
 ```
+打印信息：
+```java
+main....start....
+main....end....
+当前线程：11
+任务1...
+当前线程：12
+任务2...
+任务3...
 
+
+main....start....
+main....end....
+当前线程：11
+任务1...
+当前线程：12
+任务2...
+任务3...
+f1:111.f2:222
+
+
+main....start....
+当前线程：11
+任务1...
+当前线程：12
+任务2...
+任务3...
+f1:111.f2:222
+3
+main....end....
+
+```
 ## 双线程完成其一就能后续
-![[Pasted image 20231225134207.png]]
-![[Pasted image 20231225134212.png]]
+
+```java
+
+//runAfterEither
+public CompletableFuture<Void> runAfterEither(CompletionStage<?> other,  
+                                              Runnable action) {  
+    return orRunStage(null, other, action);  
+}  
+public CompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other,  
+                                                   Runnable action) {  
+    return orRunStage(defaultExecutor(), other, action);  
+}  
+public CompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other,  
+                                                   Runnable action,  
+                                                   Executor executor) {  
+    return orRunStage(screenExecutor(executor), other, action);  
+}
+//acceptEither
+public CompletableFuture<Void> acceptEither(  
+    CompletionStage<? extends T> other, Consumer<? super T> action) {  
+    return orAcceptStage(null, other, action);  
+}  
+public CompletableFuture<Void> acceptEitherAsync(  
+    CompletionStage<? extends T> other, Consumer<? super T> action) {  
+    return orAcceptStage(defaultExecutor(), other, action);  
+}  
+public CompletableFuture<Void> acceptEitherAsync(  
+    CompletionStage<? extends T> other, Consumer<? super T> action,  
+    Executor executor) {  
+    return orAcceptStage(screenExecutor(executor), other, action);  
+}  
+//applyToEither
+public <U> CompletableFuture<U> applyToEither(  
+    CompletionStage<? extends T> other, Function<? super T, U> fn) {  
+    return orApplyStage(null, other, fn);  
+}  
+public <U> CompletableFuture<U> applyToEitherAsync(  
+    CompletionStage<? extends T> other, Function<? super T, U> fn) {  
+    return orApplyStage(defaultExecutor(), other, fn);  
+}  
+public <U> CompletableFuture<U> applyToEitherAsync(  
+    CompletionStage<? extends T> other, Function<? super T, U> fn,  
+    Executor executor) {  
+    return orApplyStage(screenExecutor(executor), other, fn);  
+}
+```
 
 runAfterEither：两个任务有一个执行完成，不需要获取future的结果，处理任务，也没有返回值。
 
 acceptEither：两个任务有一个执行完成，获取它的返回值
 
-applyToEither：**两个任务有一个执行完成，获取它的返回值，处理任务并有新的返回值。
+applyToEither：两个任务有一个执行完成，获取它的返回值，处理任务并有新的返回值。
+用法示例：
 
 ```Java
-//        CompletableFuture<Integer> completableFuture5 = CompletableFuture.supplyAsync(() -> {
-//            System.out.println("当前线程：" + Thread.currentThread().getId());
-//            System.out.println("任务1...");
-//            return 111;
-//        }, service);
-//
-//        CompletableFuture<Integer> completableFuture6 = CompletableFuture.supplyAsync(() -> {
-//            System.out.println("当前线程：" + Thread.currentThread().getId());
-//            try {
-//                Thread.sleep(2000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            System.out.println("任务2结束...");
-//            return 222;
-//        }, service);
+CompletableFuture<Integer> completableFuture5 = CompletableFuture.supplyAsync(() -> {
+	System.out.println("当前线程：" + Thread.currentThread().getId());
+	System.out.println("任务1...");
+	return 111;
+}, service);
+
+CompletableFuture<Integer> completableFuture6 = CompletableFuture.supplyAsync(() -> {
+	System.out.println("当前线程：" + Thread.currentThread().getId());
+	try {
+		Thread.sleep(2000);
+	} catch (InterruptedException e) {
+		e.printStackTrace();
+	}
+	System.out.println("任务2结束...");
+	return 222;
+}, service);
+
+//runAfterEitherAsync
+completableFuture5.runAfterEitherAsync(completableFuture6, () -> {
+	System.out.println("任务3...");
+}, service);
+
+//acceptEitherAsync
+completableFuture5.acceptEitherAsync(completableFuture6, (f1) -> {
+	System.out.println("f1:" + f1);
+	System.out.println("任务3...");
+}, service);
+
+//applyToEitherAsync
+CompletableFuture<Integer> integerCompletableFuture = completableFuture5.applyToEitherAsync(completableFuture6, (f1) -> {
+	System.out.println("f1:" + f1);
+	System.out.println("任务3...");
+	return 6;
+}, service);
+System.out.println(integerCompletableFuture.get());
+
+```
+打印信息如下：
+```java
+main....start....
+main....end....
+当前线程：11
+任务1...
+当前线程：12
+任务3...
+任务2结束...
+
+main....start....
+当前线程：11
+任务1...
+当前线程：12
+main....end....
+f1:111
+任务3...
+任务2...
+
+main....start....
+当前线程：11
+任务1...
+当前线程：12
+f1:111
+任务3...
+6
+main....end....
+任务2结束...
 
 
-//        completableFuture5.runAfterEitherAsync(completableFuture6, () -> {
-//            System.out.println("任务3...");
-//        }, service);
-        /*
-        * main....start....
-        main....end....
-        当前线程：11
-        任务1...
-        当前线程：12
-        任务3...
-        任务2结束...
-        * */
-
-//        completableFuture5.acceptEitherAsync(completableFuture6, (f1) -> {
-//            System.out.println("f1:" + f1);
-//            System.out.println("任务3...");
-//        }, service);
-        /*
-        * main....start....
-        当前线程：11
-        任务1...
-        当前线程：12
-        main....end....
-        f1:111
-        任务3...
-        任务2...
-        * */
-
-//        CompletableFuture<Integer> integerCompletableFuture = completableFuture5.applyToEitherAsync(completableFuture6, (f1) -> {
-//            System.out.println("f1:" + f1);
-//            System.out.println("任务3...");
-//            return 6;
-//        }, service);
-//        System.out.println(integerCompletableFuture.get());
-        /*
-        * main....start....
-        当前线程：11
-        任务1...
-        当前线程：12
-        f1:111
-        任务3...
-        6
-        main....end....
-        任务2结束...
-        * */
 ```
 
-多任务组合
+## 多任务组合
 
 1、`allOf`：等待所有任务完成
 
 2、`anyOf`：只要有一个任务完成
 
 ```Java
-    CompletableFuture<String> img = CompletableFuture.supplyAsync(() -> {
-            System.out.println("查询商品图片信息");
-            return "1.jpg";
-    },service);
+CompletableFuture<String> img = CompletableFuture.supplyAsync(() -> {
+		System.out.println("查询商品图片信息");
+		return "1.jpg";
+},service);
 
-    CompletableFuture<String> attr = CompletableFuture.supplyAsync(() -> {
-            try {
-                    Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                    e.printStackTrace();
-            }
-            System.out.println("查询商品属性");
-            return "麒麟990 5G  钛空银";
-    },service);
+CompletableFuture<String> attr = CompletableFuture.supplyAsync(() -> {
+		try {
+				Thread.sleep(2000);
+		} catch (InterruptedException e) {
+				e.printStackTrace();
+		}
+		System.out.println("查询商品属性");
+		return "麒麟990 5G  钛空银";
+},service);
 
 
-    CompletableFuture<String> desc = CompletableFuture.supplyAsync(() -> {
-            System.out.println("查询商品介绍");
-            return "华为";
-    },service);
+CompletableFuture<String> desc = CompletableFuture.supplyAsync(() -> {
+		System.out.println("查询商品介绍");
+		return "华为";
+},service);
 
-    /**
-     * 等这三个都做完
-     */
+/**
+ * 等这三个都做完
+ */
 
-    CompletableFuture<Void> allOf = CompletableFuture.allOf(img, attr, desc);
-    allOf.join();
+CompletableFuture<Void> allOf = CompletableFuture.allOf(img, attr, desc);
+allOf.join();
 
 //                System.out.println("main....end"  + desc.get() + attr.get() + img.get());
 //                CompletableFuture<Object> anyOf = CompletableFuture.anyOf(img, attr, desc);
 //                anyOf.get();
 
-    System.out.println("main....end" + img.get()+attr.get()+desc.get());
+System.out.println("main....end" + img.get()+attr.get()+desc.get());
 
+```
+打印信息如下：
+```java
 main....start
 查询商品图片信息
 查询商品介绍
@@ -480,7 +597,6 @@ main....start
 查询商品属性
 main....end1.jpg麒麟990 5G  钛空银华为
 ```
-
 # CompletableFuture+自定义线程池
 
 ## MyThreadConfig

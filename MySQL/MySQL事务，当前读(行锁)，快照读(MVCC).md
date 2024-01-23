@@ -52,11 +52,13 @@ InnoDB 实现了标准的行锁，对行数据进行锁定，行锁包括共享�
 - 对于共享锁而言，对当前行加共享锁，不会阻塞其他事务对同一行的读请求，但会阻塞对同一行的写请求。只有当读锁释放后，才会执行其它写操作。共享锁的脚本是lock in share mode
 - 对于排它锁而言，会阻塞其他事务对同一行的读和写操作，只有当写锁释放后，才会执行其它事务的读写操作。排他锁的脚本是for update
 ```sql
--- 加共享锁（S）
+-- 加共享行锁（S）
 select * from table_name where ... lock in share mode
 
--- 加排它锁（X)，对于update、delete、insert语句， MySQL会自动给涉及数据集加排它锁X；
+-- select加排它行锁（X)，对于delete、insert语句MySQL会自动给涉及数据集加排它锁X
 select * from table_name where ... for update
+-- 对于delete、insert语句MySQL会自动给涉及数据集加排它行锁X，对于update语句必须类似于update  goods set total_stocks = total_stocks - 1 才能触发行锁
+update  goods set total_stocks = total_stocks - 1 ,update_time = now() where goods_id = #{value} and total_stocks - 1 >= 0
 ```
 
 对于排他锁而言，InnoDB又细分了以下三种锁：

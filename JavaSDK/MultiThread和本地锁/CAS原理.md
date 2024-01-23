@@ -121,8 +121,7 @@ cas失败：如果不等于5，说明i被其它线程改过了（比如现在i�
 
 当多个线程同时使用CAS操作一个变量时，只有一个会胜出，并成功更新，其余均会失败，但失败的线程并不会被挂起，仅是被告知失败，并且允许再次尝试，当然也允许失败的线程放弃操作。
 
-## AtomicX调用Unsafe的getAndAddInt自旋
-
+## AtomicX自旋执行compareAndSwapInt
 ```Java
     public final int getAndAddInt(Object var1, long var2, int var4) {
         int var5;

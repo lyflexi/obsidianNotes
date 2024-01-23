@@ -185,55 +185,100 @@ public class AQSDemo
 
 ReentrantLock默认为非公平锁，因为非公平锁有助于提高吞吐量
 
-- 若`state=0`，太好了没人占锁，直接CAS修改状态位state，然后当前线程占锁`setExclusiveOwnerThread(Thread.currentThread());`
+- 若`state=0`，太好了没人占锁，直接CAS修改状态位state，然后当前线程A占锁`setExclusiveOwnerThread(Thread.currentThread());`
     ![[Pasted image 20231225160547.png]]
     
 - 否则，调用acquire去尝试获得锁，分三步`tryAcquire`|`addWaiter`|`acquireQueued`
     ![[Pasted image 20231225160558.png]]
     
-
 ## acquire（独占模式）
 
 ### tryAcquire
 
-nonfairTryAcquire(acquires) return false
+nonfairTryAcquire(acquires)
+另外tryAcquire还会执行重入操作
 
+return false
 ![[Pasted image 20231225160621.png]]
 
-`if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))`，所以继续推进条件，走下一步方法`addWaiter`
+所以!tryAcquire(arg)为true
+
+所以`if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))`继续推进条件，走下一步方法`addWaiter`
 
 ### addWaiter
 
-`addWaiter`将线程包装为独占节点，尾插式加入到队列中，如队列为空，则会添加一个空的头节点。
+`addWaiter`将线程包装为独占节点，尾插式加入到队列中。==此时队列为空，当前线程是B，因此直接进入enq方法==
 ![[Pasted image 20231225160636.png]]
 
-值得注意的是`addWaiter`中的`enq`方法，通过`CAS+自旋`的方式处理尾节点添加冲突。
+线程A的时候enq会先添加一个空的头节点，用于创建队列，然后enq继续自旋将线程B入队
 ![[Pasted image 20231225160643.png]]
 
-将线程B添加到AQS队列
+将线程B添加到AQS队列，目前线程A持有锁，所以将线程B入队列，==而且线程B来的时候才刚开始创建队列==
 ![[Pasted image 20231225160650.png]]
 
 将线程C添加到AQS队列
-![[Pasted image 20231225160657.png]]
+![[Pasted image 20240123142148.png]]
+![[Pasted image 20240123142214.png]]
 ### acquireQueued
 
-`acquireQueued`方法核心逻辑为`shouldParkAfterFailedAcquire`和`parkAndCheckInterrupt`。
+`acquireQueued`方法意味着==线程B和线程C==加入阻塞队列后，再次尝试是否可以竞争到锁state，核心逻辑为`shouldParkAfterFailedAcquire`和`parkAndCheckInterrupt`
 ![[Pasted image 20231225160704.png]]
-
-- `acquireQueue`在线程节点加入队列后判断是否可再次尝试获取资源，如不能获取则进入`if(`_`shouldParkAfterFailedAcquire`_`(p, node) &&parkAndCheckInterrupt())`判断
-    
-- `tail`节点默认初始状态为0，当新节点被挂载到队列后，将其前驱即原`tail`节点状态设为`SIGNAL`，表示该节点需要被唤醒，返回`true`后继续向下推进`parkAndCheckInterrupt`方法，即被`park`陷入阻塞。
-    
-- `for`循环直到节点前驱为`head`后才尝试进行资源获取`unpack`。
-    
+线程C的前驱节点不是head，所以进入`if(`_`shouldParkAfterFailedAcquire`_`(p, node) &&parkAndCheckInterrupt())`判断
+- 前驱节点B默认初始状态等于0，此时线程C将其前驱节点B的状态设为SIGNAL是==-1<0==，表示前驱节点需要被唤醒，返回`true`后继续向下推进`parkAndCheckInterrupt`方法，线程C自身被`park`陷入阻塞。
+```java
+private final boolean parkAndCheckInterrupt() {  
+    LockSupport.park(this);  
+    return Thread.interrupted();  
+}
+```
+线程B的前驱节点是head，所以线程B再次尝试tryAcquire来竞争线程A持有的锁
 ![[Pasted image 20231225160945.png]]
 此时线程B，C均在阻塞队列，均等待被唤醒unpark。线程在阻塞队列等呀等，如果不想等了就直接走了，就会调用`cancelAcquire`方法将`node.waitStatus = Node.CANCELLED（1）;`
 ![[Pasted image 20231225160746.png]]
 
 ## release（独占模式）
-
 `release`流程较为简单，主要方法是`unparkSuccessor`，尝试释放`tryRelease`成功后，即从头结点开始唤醒其后继节点
 ![[Pasted image 20231225160806.png]]
+### tryRelease
+可重入次数--：int c = getState() - releases;  
+判断当前线程是否是锁持有线程，保证不会删错锁，否则抛出IllegalMonitorStateException异常
+```java
+protected final boolean tryRelease(int releases) {  
+    int c = getState() - releases;  
+    if (Thread.currentThread() != getExclusiveOwnerThread())  
+        throw new IllegalMonitorStateException();  
+    boolean free = false;  
+    if (c == 0) {  
+        free = true;  
+        setExclusiveOwnerThread(null);  
+    }  
+    setState(c);  
+    return free;  
+}
+```
+### unparkSuccessor
+```java
+private void unparkSuccessor(Node node) {  
+    /*  
+     * If status is negative (i.e., possibly needing signal) try     * to clear in anticipation of signalling.  It is OK if this     * fails or if status is changed by waiting thread.     */    
+    int ws = node.waitStatus;  
+    if (ws < 0)  
+        compareAndSetWaitStatus(node, ws, 0);  
+  
+    /*  
+     * Thread to unpark is held in successor, which is normally     * just the next node.  But if cancelled or apparently null,     * traverse backwards from tail to find the actual     * non-cancelled successor.     */    
+    Node s = node.next;  
+    if (s == null || s.waitStatus > 0) {  
+        s = null;  
+        for (Node t = tail; t != null && t != node; t = t.prev)  
+            if (t.waitStatus <= 0)  
+                s = t;  
+    }  
+    if (s != null)  
+        LockSupport.unpark(s.thread);  
+}
+```
+
 
 - if (ws < 0)，则_compareAndSetWaitStatus_(node, ws, 0);
     

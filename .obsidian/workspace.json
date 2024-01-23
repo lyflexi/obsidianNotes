@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "RocketMQ/rocketmq秒杀架构.md"
+                "file": "分布式锁/基于Redis的分布式锁/redisson框架解决方案.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "RocketMQ/rocketmq秒杀架构.md",
+                "file": "分布式锁/基于Redis的分布式锁/redisson框架解决方案.md",
                 "mode": "source",
                 "source": false
               }
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": " ",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "RocketMQ/rocketmq秒杀架构.md",
+                "file": "分布式锁/基于Redis的分布式锁/redisson框架解决方案.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "RocketMQ/rocketmq秒杀架构.md",
+                "file": "分布式锁/基于Redis的分布式锁/redisson框架解决方案.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,30 +159,36 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "Attachments/pics/Pasted image 20240123095931.png",
-    "Attachments/pics/Pasted image 20240123095827.png",
-    "Attachments/pics/Pasted image 20240123095624.png",
-    "Attachments/pics/Pasted image 20240123095529.png",
-    "Attachments/pics/Pasted image 20240123095357.png",
-    "Attachments/pics/Pasted image 20240123095305.png",
-    "Attachments/pics/Pasted image 20240123095100.png",
-    "Attachments/pics/Pasted image 20240123094811.png",
-    "Attachments/pics/Pasted image 20240123094757.png",
-    "Attachments/pics/Pasted image 20240123094703.png",
-    "服务器线上实践/rocketmq4.9.2.md",
+    "Attachments/pics/image-20220501155501783.png",
+    "分布式锁/基于Redis的分布式锁/setnx实现分布式锁.md",
+    "分布式锁/基于Redis的分布式锁/redisson框架解决方案.md",
+    "分布式锁/基于Redis的分布式锁/红锁算法.md",
+    "Attachments/pics/Pasted image 20240123185647.png",
+    "分布式锁/基于Redis的分布式锁/Redis乐观锁实现分布式锁.md",
+    "JavaSDK/MultiThread和本地锁/AbstractQueuedSynchronizer原理.md",
+    "Attachments/pics/Pasted image 20240123142214.png",
+    "Attachments/pics/Pasted image 20240123142148.png",
+    "JavaSDK/MultiThread和本地锁/CAS原理.md",
+    "Attachments/pics/1600612707202.png",
+    "Attachments/pics/1600610957600.png",
+    "Attachments/pics/1606707959639.png",
+    "Attachments/pics/Pasted image 20240123113140.png",
+    "Attachments/pics/1606626611922.png",
+    "Attachments/pics/Pasted image 20240123111146.png",
+    "Attachments/pics/Pasted image 20240123111144.png",
+    "分布式锁/基于MySQL的分布式锁/唯一性索引作分布式锁.md",
     "RocketMQ/rocketmq秒杀架构.md",
+    "服务器线上实践/rocketmq4.9.2.md",
     "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
     "Springcloud/关于分布式架构的几点思考.md",
     "JavaSDK/MultiThread和本地锁/异步任务CompletableFuture.md",
     "Springcloud",
-    "Attachments/pics/秒杀架构.png",
     "RocketMQ/QPS&&TPS.md",
     "RocketMQ/RocketMQ常见问题.md",
     "MySQL/共享锁，排他锁，悲观锁与乐观锁的实现方式.md",
     "分布式锁/基于MySQL的分布式锁/乐观锁实现分布式锁.md",
     "分布式锁/纸老虎“分布式锁”，从商品超卖入手.md",
     "分布式锁/基于MySQL的分布式锁/悲观锁实现分布式锁.md",
-    "分布式锁/基于MySQL的分布式锁/唯一性索引作分布式锁.md",
     "SpringBoot/Bean是线程不安全的.md",
     "RocketMQ/如何保证请求的幂等性（类似于分布式锁）.md",
     "分布式锁/基于MySQL的分布式锁",
@@ -196,13 +202,7 @@
     "Redis缓存/缓存失效场景.md",
     "分布式Session解决方案？还有待考证/SpringSession.md",
     "分布式Session解决方案？还有待考证",
-    "Redis缓存/Redis持久化.md",
-    "Redis缓存/Redis业务打点.md",
-    "Redis缓存/Redis数据类型.md",
     "Redis缓存",
-    "RocketMQ/RocketMQ与Springboot3.2.1的整合启动报错.md",
-    "服务器线上实践/如何排查服务器问题.md",
-    "RocketMQ/RocketMQ结构.md",
     "RocketMQ",
     "服务器线上实践"
   ]

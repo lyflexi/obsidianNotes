@@ -1,5 +1,76 @@
 
-# redis命令介绍setnx
+Redis并不是天生就默认实现了分布式锁，比如以下程序，即使使用了Redis，依然是有并发问题的，出现了超卖现象
+```java
+public void deduct(){  
+    //1,查询库存信息  
+    String stock = this.redisTemplate.opsForvalue().get ("stock");  
+    //2.判断库存是否充足  
+    if (stock !=null &&stock.length()!=0)(  
+            Integer st = Integer.valueOf(stock);  
+      
+    if (st > 0){  
+    //3.扣减库存  
+        this.redisTemplate.opsForvalue ().set ("stock",String.valueof(--st));  
+    }  
+}
+```
+上述代码只是简单的用redis存了一下数据，当然会有并发现象了，只不过性能肯定是比MySQL要好的
+# redis乐观锁实现分布式锁
+在当前事务执行期间：
+- 如果没有其他的并发事务修改，则当前事务执行成功
+- 如果没有其他的并发事务修改，则当前事务执行失败，但是其他并发事务的修改执行成功
+watch指令用于监控
+multi指令用于开启redis事务
+exec用于关闭redis事务
+如，正常情况没有其他的并发事务修改，当前事务执行成功返回ok
+![[Pasted image 20240123103052.png]]
+如，异常情况有其他的并发事务修改，会造成当前事务执行失败，取消当前事务并返回nil
+![[Pasted image 20240123105107.png]]
+![[Pasted image 20240123105137.png]]
+![[Pasted image 20240123105244.png]]
+redis乐观锁的Java代码
+```java
+public void deduct() {
+
+    this.redisTemplate.execute(new SessionCallback() {
+        @Override
+        public Object execute(RedisOperations operations) throws DataAccessException {
+            operations.watch("stock");
+            // 1. 查询库存信息
+            Object stock = operations.opsForValue().get("stock");
+            // 2. 判断库存是否充足
+            int st = 0;
+            if (stock != null && (st = Integer.parseInt(stock.toString())) > 0) {
+                // 3. 扣减库存
+                operations.multi();
+                operations.opsForValue().set("stock", String.valueOf(--st));
+                List exec = operations.exec();
+                if (exec == null || exec.size() == 0) {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    //重试，这里是递归重试
+                    deduct();
+                }
+                return exec;
+            }
+            return null;
+        }
+    });
+}
+```
+redis乐观锁解决了并发超卖问题，压测5000个并发
+```shell
+set stock 5000
+```
+![[Pasted image 20240123110026.png]]
+```shell
+get stock
+0
+```
+# 以下基于redis排他锁setnx实现分布式锁
 ![[Pasted image 20240123111146.png]]
 
 
@@ -718,3 +789,21 @@ public class StockService {
     }  
 }
 ```
+
+# 红锁算法
+生产中redis往往会做集群，在redis集群状态下，我们的分布式锁存在以下的问题：
+1. 并发线程A从master获取到锁，master会默认根据rdb或者aof向各个slave节点同步并发线程的锁信息
+2. 在master将锁同步到slave之前，master宕掉了。
+3. slave节点被晋级为master节点，
+4. 但由于步骤2，此时的新晋master并不知道锁已经被并发线程A拿到了，因此并发线程B又重复获取了并发线程A持有的锁，又会出现并发超卖问题
+
+解决集群下锁失效，参照redis官方网站针对redlock文档：https://redis.io/topics/distlock
+
+在算法的分布式版本中，我们假设有N个Redis服务器，这些节点是完全独立的。将N设置为5是一个合理的值，因此需要在不同的计算机或虚拟机上运行5个Redis主服务器，确保它们以独立的方式发生故障。
+![[Pasted image 20240123185647.png]]
+为了获取锁，应用程序并发线程执行以下操作：
+1. 并发线程以毫秒为单位获取当前时间的时间戳，作为起始时间。
+2. 并发线程尝试在所有N个实例中顺序使用相同的键名、相同的随机值来获取锁定。每个实例尝试获取锁都需要时间，客户端应该设置一个远小于总锁定时间的超时时间。例如，如果自动释放时间为30秒，则尝试获取锁的超时时间不能超过30秒。这样可以防止并发线程长时间与故障状态的Redis节点进行通信：如果某个实例不可用，尽快尝试与下一个实例进行通信。
+3. 计算获取锁所花费的时间，用当前时间（步骤3的当前时间），减去在步骤1中获得的起始时间。当且仅当客户端能够在半数以上实例（至少3个）中获取锁时，并且获取锁所花费的总时间小于锁有效时间，则认为已获取锁。
+4. 如果获取了锁，计算剩余锁定时间，用锁的有效时间，减去步骤3中计算出的获取锁所花费的时间。
+5. 如果客户端由于某种原因（无法锁定N / 2 + 1个实例或有效时间为负）而未能获得该锁，它将尝试解锁所有实例（即使没有锁定成功的实例）。

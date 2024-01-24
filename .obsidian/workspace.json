@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "分布式锁/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md"
+                "file": "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "分布式锁/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
+                "file": "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "分布式锁/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
+                "file": "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "分布式锁/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
+                "file": "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,13 +159,17 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
+    "JavaSDK/MultiThread和本地锁/CountDownLatch与CyclicBarrier栅栏.md",
+    "分布式锁/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
+    "分布式锁/基于Redis的分布式锁/redis原生客户端手动实现分布式锁.md",
+    "分布式锁/基于Redis的分布式锁/Redis乐观锁实现分布式锁.md",
+    "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
+    "分布式锁/基于Redis的分布式锁/红锁算法.md",
     "Attachments/pics/1607052541669.png",
     "Attachments/pics/1607051896117.png",
     "Attachments/pics/1607048783043.png",
     "Attachments/pics/1607048160051.png",
     "Attachments/pics/1607046072239.png",
-    "分布式锁/基于Redis的分布式锁/setnx客户端手动实现分布式锁.md",
-    "分布式锁/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
     "服务器线上实践/zookeeper3.7.0.md",
     "服务器线上实践/rocketmq4.9.2.md",
     "分布式锁/基于Redis的分布式锁/redisson框架解决方案.md",
@@ -176,9 +180,6 @@
     "Attachments/pics/Pasted image 20240124085416.png",
     "Attachments/pics/Pasted image 20240124085411.png",
     "Attachments/pics/image-20220501155501783.png",
-    "分布式锁/基于Redis的分布式锁/红锁算法.md",
-    "Attachments/pics/Pasted image 20240123185647.png",
-    "分布式锁/基于Redis的分布式锁/Redis乐观锁实现分布式锁.md",
     "JavaSDK/MultiThread和本地锁/AbstractQueuedSynchronizer原理.md",
     "JavaSDK/MultiThread和本地锁/CAS原理.md",
     "分布式锁/基于MySQL的分布式锁/唯一性索引作分布式锁.md",
@@ -199,7 +200,6 @@
     "分布式锁/基于zookeeper的分布式锁",
     "分布式锁/基于Redis的分布式锁",
     "分布式锁/基于MySQL的分布式锁",
-    "Redis缓存/缓存一致性.md",
     "分布式锁",
     "分布式Session解决方案？还有待考证",
     "Redis缓存",

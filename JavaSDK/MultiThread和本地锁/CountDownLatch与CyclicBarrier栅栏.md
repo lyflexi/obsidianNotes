@@ -44,30 +44,16 @@ CountDownLatch是基于AQS实现的，它的实现机制很简单：
 
 # CyclicBarrier原理介绍
 
-回到CyclicBarrier上，代码也不难，只有await方法。从源码不难发现的是：
-
-- 它没有像CountDownLatch和ReentrantLock使用AQS的state变量，而是使用CyclicBarrier内部维护的内部维护count变量
-    
-- 同时CyclicBarrier借助ReentrantLock加上Condition实现等待唤醒的功能
-    
-
-## parties变量和condition队列
-
-在构建CyclicBarrier时，传入的值是parties变量，同时也会赋值给CyclicBarrier内部维护count变量（这是可以复用的关键）
-
+回到CyclicBarrier上，代码也不难，只有await方法。从源码不难发现的是：它没有像CountDownLatch和ReentrantLock使用AQS的state变量，而是传入parties变量，同时也会赋值给CyclicBarrier内部维护count变量（这是可以复用的关键）
 ```Java
 //parties表示屏障拦截的线程数量，当屏障撤销时，先执行barrierAction，然后在释放所有线程
 public CyclicBarrier(int parties, Runnable barrierAction)
 //barrierAction默认为null
 public CyclicBarrier(int parties)
 ```
-
-1. 每次调用await时，会将count -1 ，操作count值是直接使用ReentrantLock来保证线程安全性
-    
-    1. 如果count不为0，则添加到condition队列中
-        
-    2. 如果count等于0时，则把节点从condition队列添加至AQS的队列中并进行全部唤醒，并且将parties的值重新赋值为count的值（实现复用）
-        
+同时CyclicBarrier借助ReentrantLock加上Condition实现等待唤醒的功能。每次调用await时，会将count -1 ，操作count值是直接使用ReentrantLock来保证线程安全性。
+- 如果count不为0，则添加到condition队列中
+- 如果count等于0时，则把节点从condition队列添加至AQS的队列中并进行全部唤醒，并且将parties的值重新赋值为count的值（实现复用）
 
 ## 阻塞任务线程而非主线程
 

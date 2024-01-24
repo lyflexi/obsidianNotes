@@ -536,6 +536,8 @@ public void test() {
 }
 ```
 # 自动续期-lua脚本+Timer
+问题：业务比较长，一开始设定的过期时间可能不够用
+解决：自动续期
 ## 自动续期脚本
 ```java
 if(redis.call('hexists', KEYS[1], ARGV[1]) == 1) then 

@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md"
+                "file": "分布式锁/常见锁分类.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
+                "file": "分布式锁/常见锁分类.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
+                "file": "分布式锁/常见锁分类.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
+                "file": "分布式锁/常见锁分类.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,11 +159,15 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
+    "JavaSDK/MultiThread和本地锁/synchronized锁升级过程.md",
+    "分布式锁/常见锁分类.md",
+    "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
+    "Attachments/pics/image-20220711225708066.png",
+    "Attachments/pics/1607069431523.png",
     "JavaSDK/MultiThread和本地锁/CountDownLatch与CyclicBarrier栅栏.md",
     "分布式锁/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
     "分布式锁/基于Redis的分布式锁/redis原生客户端手动实现分布式锁.md",
     "分布式锁/基于Redis的分布式锁/Redis乐观锁实现分布式锁.md",
-    "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
     "分布式锁/基于Redis的分布式锁/红锁算法.md",
     "Attachments/pics/1607052541669.png",
     "Attachments/pics/1607051896117.png",
@@ -178,8 +182,6 @@
     "JavaSDK/MultiThread和本地锁/jvm锁失效场景.md",
     "Attachments/pics/1606961296212.png",
     "Attachments/pics/Pasted image 20240124085416.png",
-    "Attachments/pics/Pasted image 20240124085411.png",
-    "Attachments/pics/image-20220501155501783.png",
     "JavaSDK/MultiThread和本地锁/AbstractQueuedSynchronizer原理.md",
     "JavaSDK/MultiThread和本地锁/CAS原理.md",
     "分布式锁/基于MySQL的分布式锁/唯一性索引作分布式锁.md",
@@ -194,9 +196,7 @@
     "分布式锁/基于MySQL的分布式锁/乐观锁实现分布式锁.md",
     "分布式锁/基于MySQL的分布式锁/悲观锁实现分布式锁.md",
     "SpringBoot/Bean是线程不安全的.md",
-    "RocketMQ/如何保证请求的幂等性（类似于分布式锁）.md",
     "分布式锁/基于MySQL的分布式锁",
-    "本地IDE与环境配置/jmeter.md",
     "分布式锁/基于zookeeper的分布式锁",
     "分布式锁/基于Redis的分布式锁",
     "分布式锁/基于MySQL的分布式锁",

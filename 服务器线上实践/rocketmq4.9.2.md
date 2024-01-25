@@ -343,7 +343,7 @@ console的部署就不说那么多了，直接上命令。
 # 同样在启动的时候指定同一个network
 # 注意修改rocketmq.namesrv.addr后面的地址为容器名称:端口号
 
-#左边是容器内端口，右边是映射的外部端口
+#左边是映射的外部端口，右边是容器内端口
 docker run -d --name rmqconsole -p 11111:8080 --network rocketmq \
  -e "JAVA_OPTS=-Drocketmq.namesrv.addr=rmqnamesrv:9876" styletang/rocketmq-console-ng
 

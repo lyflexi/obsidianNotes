@@ -16,6 +16,7 @@
 - cart-service，购物车模块，端口为8082
 购物车数据库表存储的只是用户加入商品到购物车那一时刻的快照，商品的价格在此后是存在浮动的，有可能涨价也有可能降价
 因此，用户进入购物车的时候，需要调用商品模块中该商品的最新价格，两价格之差需要展示到用户购物车中，以刺激用户消费，因此购物车模块需要如下设计：
+# feign远程调用
 购物车模块要声明ItemClient，用来远程调用item-service
 ```java
 @FeignClient("item-service")  
@@ -69,11 +70,121 @@ private void handleCartItems(List<CartVO> vos) {
     }  
 }
 ```
-# 执行调试
+# feign服务间user信息传递
+gateway解决了路由转发predicate以及过滤器filter，解决前端请求入口的问题。  
+但是还有个问题没解决，微服务之间feign如何传递用户信息?虽然每个微服务都引入了hm-common（UserInfoInterceptor+UserContext），但每个微服务都有各自的UserContext为自己所用，不同微服务之间用户信息无法传递。
+
+背景介绍：有些业务是比较复杂的，请求到达微服务后还需要调用其它多个微服务。比如下单业务trade的流程如下：
+![[Pasted image 20240126151304.png]]
+1. 创建订单，就位于当前服务
+2. 需要调用商品服务扣减库存，扣减库存无所谓，因为不需要用户信息
+3. 调用购物车服务清理用户购物车。而清理购物车时必须知道当前登录的用户身份。
+==但是，下单业务trade调用购物车时并没有传递用户信息，购物车服务从UserContex中获取到的用户信息为null，无法知道当前用户是谁！==
+```shell
+#购物车删除sql如下
+queryWrapper.lambda()  
+        .eq(Cart::getUserId, UserContext.getUser())  
+        .in(Cart::getItemId, itemIds);
+#购物车删除日志，可见user_id为null，sql返回0删除失败
+14:55:05:361 DEBUG 18456 --- [nio-8082-exec-1] com.hmall.cart.mapper.CartMapper.delete  : ==>  Preparing: DELETE FROM cart WHERE (user_id = ? AND item_id IN (?))
+14:55:05:361 DEBUG 18456 --- [nio-8082-exec-1] com.hmall.cart.mapper.CartMapper.delete  : ==> Parameters: null, 14741770661(Long)
+14:55:05:362 DEBUG 18456 --- [nio-8082-exec-1] com.hmall.cart.mapper.CartMapper.delete  : <==    Updates: 0
+```
+原因解释：现在只有从gateway过来的请求才会进行请求过滤、token解析用户以及用户信息的传递，传递给下游的Springmvc拦截器存入UserContext，微服务才能拿到用户信息。对于购物车服务而言，来自于gateway的请求肯定早就结束了或者就没开始，当前tomcat请求结束用户信息肯定已经被移除了UserContext.removeUser()
+```java
+package com.hmall.common.interceptor;  
+  
+  
+public class UserInfoInterceptor implements HandlerInterceptor {  
+    @Override  
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {  
+        // 1.获取请求头中的用户信息  
+        String userInfo = request.getHeader("user-info");  
+        // 2.判断是否为空  
+        if (StrUtil.isNotBlank(userInfo)) {  
+            // 不为空，保存到ThreadLocal  
+            UserContext.setUser(Long.valueOf(userInfo));  
+        }  
+        // 3.放行  
+        return true;  
+    }  
+  
+    @Override  
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {  
+        // 移除用户  
+        UserContext.removeUser();  
+    }  
+}
+```
+
+解决方案：由于微服务获取用户信息是通过Springmvc拦截器在请求头中读取，因此要想实现微服务之间的用户信息传递，就必须在微服务发起调用时把用户信息存入请求头。Feign的本质是restTemplate，也是http，这里要借助Feign中提供的一个拦截器接口：`feign.RequestInterceptor`，实现此接口给restTemplate中放入用户信息"user-info"
+```Java
+public interface RequestInterceptor {
+
+  /**
+   * Called for every request. 
+   * Add data using methods on the supplied {@link RequestTemplate}.
+   */
+  void apply(RequestTemplate template);
+}
+```
+在`com.hmall.api.config.DefaultFeignConfig`中添加一个Bean：RequestInterceptor
+```java
+package com.hmall.api.config;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/1/25 20:33  
+ */  
+import com.hmall.common.utils.UserContext;  
+import feign.Logger;  
+import feign.RequestInterceptor;  
+import feign.RequestTemplate;  
+import org.springframework.context.annotation.Bean;  
+public class DefaultFeignConfig {  
+    @Bean  
+    public Logger.Level feignLogLevel(){  
+        return Logger.Level.FULL;  
+    }  
+    @Bean  
+    public RequestInterceptor userInfoRequestInterceptor(){  
+        return new RequestInterceptor() {  
+            @Override  
+            public void apply(RequestTemplate template) {  
+                // 获取登录用户  
+                Long userId = UserContext.getUser();  
+                if(userId == null) {  
+                    // 如果为空则直接跳过  
+                    return;  
+                }  
+                // 如果不为空则放入请求头中，传递给下游微服务  
+                template.header("user-info", userId.toString());  
+            }  
+        };  
+    }  
+}
+```
+并且在trade-service（feign客户端使用方）启动类上指定feign配置类，让当前服务trade-service的用户信息添加到feign请求内部发送
+```java
+@EnableFeignClients(basePackages = "com.hmall.api.client", defaultConfiguration = DefaultFeignConfig.class)  
+@MapperScan("com.hmall.trade.mapper")  
+@SpringBootApplication  
+public class TradeApplication {  
+    public static void main(String[] args) {  
+        SpringApplication.run(TradeApplication.class, args);  
+    }  
+}
+```
+重启项目，测试下单，发现购物车删除成功
+```shell
+16:53:37:467 DEBUG 7832 --- [nio-8082-exec-8] com.hmall.cart.mapper.CartMapper.delete  : ==>  Preparing: DELETE FROM cart WHERE (user_id = ? AND item_id IN (?))
+16:53:37:468 DEBUG 7832 --- [nio-8082-exec-8] com.hmall.cart.mapper.CartMapper.delete  : ==> Parameters: 1(Long), 40305713537(Long)
+16:53:37:473 DEBUG 7832 --- [nio-8082-exec-8] com.hmall.cart.mapper.CartMapper.delete  : <==    Updates: 1
+```
+# FeignInvocationHandler
 我们在`List<ItemDTO> items = itemClient.queryItemByIds(itemIds)`这行打上断点，
 远程调用客户端itemClient是一个代理对象Proxy，里面实现了我们熟悉的老朋友InvocationHandler
 ![[Pasted image 20240125191350.png]]
-# FeignInvocationHandler
 进入FeignInvocationHandler的invoke方法
 ```java
 @Override  

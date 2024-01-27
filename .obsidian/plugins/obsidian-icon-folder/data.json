@@ -37,5 +37,9 @@
   "分布式Session解决方案？还有待考证": "FabEmpire",
   "分布式锁解决方案": "FabEmpire",
   "SpringCloud与分布式事务": "FabEmpire",
-  "Docker容器环境线上实践": "FabEmpire"
+  "Docker容器环境线上实践": "FabEmpire",
+  "Centos服务器配置": "FabEmpire",
+  "Nginx服务器": "FabEmpire",
+  "408计算机操作系统": "FabEmpire",
+  "408计算机网络": "FabEmpire"
 }

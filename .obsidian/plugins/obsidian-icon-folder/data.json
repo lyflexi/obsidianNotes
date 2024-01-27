@@ -35,7 +35,7 @@
   "RocketMQ": "FabEmpire",
   "Redis缓存": "FabEmpire",
   "分布式Session解决方案？还有待考证": "FabEmpire",
-  "服务器线上实践": "FabEmpire",
-  "分布式锁": "FabEmpire",
-  "Springcloud": "FabEmpire"
+  "分布式锁解决方案": "FabEmpire",
+  "SpringCloud与分布式事务": "FabEmpire",
+  "Docker容器环境线上实践": "FabEmpire"
 }

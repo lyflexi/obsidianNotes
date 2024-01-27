@@ -1,4 +1,12 @@
-引入依赖
+Feign是Spring Cloud组件中一个轻量级RESTful的HTTP服务客户端，Feign内置了Ribbon，用来做客户端负载均衡，去调用服务注册中心的服务。Feign的使用方式是：使用Feign的注解定义接口，调用接口，就可以调用服务注册中心的服务。
+
+2019年feign停更，springcloud F 及F版本以上 ，springboot 2.0 以上基本上使用openfeign，目前大多数新项目都用openfeign：
+- ==自SpringCloud2020版本开始，已经弃用内置的Ribbon，改用Spring自己开源的Spring Cloud LoadBalancer了，我们使用的OpenFeign的也已经与其整合。==
+-  ==OpenFeign在Feign的基础上支持了SpringMVC的注解，因此OpenFeign可以在FeignClient定义的远程调用接口上声明@RequestMapping等SpringMVC注解==
+- 作为消费者，OpenFeign通过动态代理的方式进行远程调用。
+- 作为生产者，OpenFeign通过反射的方式生成服务实例。
+
+引入openFeign依赖
 ```xml
 <!--openFeign-->  
 <dependency>  
@@ -333,7 +341,7 @@ public Response execute(Request request, Options options) throws IOException {
 }
 ```
 
-# 开启feign的连接池
+# 引入feign的连接池
 Feign底层发起http请求，依赖于其它的框架。其底层支持的http客户端实现包括：
 - HttpURLConnection：默认实现，不支持连接池
 - Apache HttpClient ：支持连接池
@@ -356,6 +364,100 @@ feign:
     enabled: true # 开启OKHttp功能
 ```
 重启`cart-service`服务，连接池就生效了。
-## 验证
+## 验证连接池
 `cart-service`再次向远程item-service服务发起请求
 ![[Pasted image 20240125195357.png]]
+# 回过头进入loadBalancerClient.choose
+所以feign负载均衡的关键就是FeignBlockingLoadBalancerClient#execute方法里调用了loadBalancerClient来通过lb的方式选择服务实例
+```java
+ServiceInstance instance = loadBalancerClient.choose(serviceId, lbRequest);
+```
+## loadBalancerClient
+loadBalancerClient的类型是`org.springframework.cloud.client.loadbalancer.LoadBalancerClient`，这是`Spring-Cloud-Common`模块中定义的接口，只有一个实现类：
+![[Pasted image 20240127142728.png]]
+而这里的`org.springframework.cloud.client.loadbalancer.BlockingLoadBalancerClient`正是`Spring-Cloud-LoadBalancer`模块下的一个类：
+![[Pasted image 20240127142915.png]]
+我们跟入`BlockingLoadBalancerClient#choose()`方法：发现feign的底层，用的是响应式负载均衡器ReactiveLoadBalancer：
+`ReactiveLoadBalancer`是`Spring-Cloud-Common`组件中定义的负载均衡器接口规范，而`Spring-Cloud-Loadbalancer`组件给出了两个个实现：
+- RoundRobinLoadBalancer
+- RoundLoadBalancer
+==这也印证了文章开头处，自SpringCloud2020版本开始，已经弃用内置的Ribbon，改用Spring自己开源的Spring Cloud LoadBalancer了，我们使用的OpenFeign的也已经与其整合。==
+![[Pasted image 20240127143210.png]]
+此处用的是默认实现`RoundRobinLoadBalancer`，即轮询负载均衡器：下图中代码的核心逻辑如下：
+- 根据serviceId找到这个服务采用的负载均衡器（`ReactiveLoadBalancer`），也就是说我们可以给每个服务配不同的负载均衡算法。
+- 利用负载均衡器（`ReactiveLoadBalancer`）中的负载均衡算法，选出一个服务实例
+![[Pasted image 20240127143141.png]]
+## RoundRobinLoadBalancer
+默认RoundRobinLoadBalancer的负载均衡器choose的核心逻辑如下：
+![[Pasted image 20240127143338.png]]
+核心流程就是两步：
+- 利用`ServiceInstanceListSupplier#get()`方法拉取服务的实例列表，这一步是采用响应式编程
+- 利用本类，也就是`RoundRobinLoadBalancer`的`getInstanceResponse()`方法挑选一个实例，这里采用了轮询算法来挑选。
+## ServiceInstanceListSupplier
+这里的ServiceInstanceListSupplier有很多实现：
+![[Pasted image 20240127143441.png]]
+其中CachingServiceInstanceListSupplier采用了装饰模式，加了服务实例列表缓存，避免每次都要去注册中心拉取服务实例列表。而其内部是基于`DiscoveryClientServiceInstanceListSupplier`来实现的。
+
+在这个DiscoveryClientServiceInstanceListSupplier类的构造函数中，就会异步的基于DiscoveryClient去拉取服务的实例列表：
+![[Pasted image 20240127143510.png]]
+# Feign的一些自定义配置
+
+## 超时时间设置
+
+OpenFeign默认超时时间为1s，超过1s就会返回错误页面。
+
+如果我们的接口处理业务确实超过1s，就需要对接口进行超时配置，如下：
+
+```YAML
+ribbon: #设置feign客户端连接所用的超时时间，适用于网络状况正常情况下，两端连接所用时间
+  ReadTimeout: 1500 #指的是建立连接所用时间
+  ConnectTimeout: 1500 #指建立连接后从服务读取到可用资源所用时间
+```
+
+## 日志级别设置
+
+Feign的日志级别分为四种：
+- NONE：不记录任何日志信息，默认
+- BASIC：仅记录请求的方法，URL以及响应状态和执行时间
+- HEADERS：在BASIC的基础上，加上请求与响应头信息
+- FULL：记录所有请求和响应的明细，包括头信息、请求体、响应信息，元数据
+
+基于配置文件修改feign的日志级别
+```YAML
+#针对单个服务：
+feign:  
+  client:
+    config: 
+      someservice: # 针对某个微服务的配置
+        loggerLevel: FULL #  日志级别
+#针对针对所有服务
+feign:  
+  client:
+    config: 
+      default: # 这里用default就是全局配置
+        loggerLevel: FULL #  日志级别
+```
+
+基于Java代码修改feign的日志级别，只需要创建自定义的@Bean覆盖默认Bean即可。基于代码方式修改feign的日志级别需要定义配置类比如`DefaultFeignConfiguration`
+```Java
+import feign.Logger;
+import org.springframework.context.annotation.Bean;
+
+public class DefaultFeignConfiguration {
+
+    @Bean
+    public Logger.Level logLevel() {
+        return Logger.Level.BASIC;
+    }
+}
+```
+接下来，要让日志级别生效，还需要配置这个类。有两种方式：
+- 局部生效：在某个`FeignClient`中配置，只对当前`FeignClient`生效
+```java
+```Java
+@FeignClient(value = "item-service", configuration = DefaultFeignConfig.class)
+```
+- 全局生效：在启动类上的`@EnableFeignClients`中配置，针对所有`FeignClient`生效。
+```Java
+@EnableFeignClients(defaultConfiguration = DefaultFeignConfig.class)
+```

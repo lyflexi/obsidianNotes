@@ -10,7 +10,6 @@ java -Dserver.port=8090 -Dcsp.sentinel.dashboard.server=localhost:8090 -Dproject
 ```
 访问http://localhost:8090页面，就可以看到sentinel的控制台了：登录密码sentinel/sentinel
 ![[Pasted image 20240126202605.png]]
-
 # sentinel服务整合
 我们在`cart-service`模块中整合sentinel，连接`sentinel-dashboard`控制台，步骤如下：
 1）引入sentinel依赖

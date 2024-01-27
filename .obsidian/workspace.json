@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 27.997076023391816,
+        "dimension": 27.997076023391813,
         "children": [
           {
             "id": "0e2a48b30b90cdd5",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Springcloud/sentinel.md"
+                "file": "SpringCloud与分布式事务/seata下订单业务.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Springcloud/sentinel.md",
+                "file": "SpringCloud与分布式事务/seata下订单业务.md",
                 "mode": "source",
                 "source": false
               }
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "qps",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Springcloud/sentinel.md",
+                "file": "SpringCloud与分布式事务/seata下订单业务.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Springcloud/sentinel.md",
+                "file": "SpringCloud与分布式事务/seata下订单业务.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,51 +159,50 @@
   },
   "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
-    "Attachments/pics/Pasted image 20240126214214.png",
-    "Attachments/pics/Pasted image 20240126214159.png",
-    "Attachments/pics/Pasted image 20240126214114.png",
-    "Attachments/pics/Pasted image 20240126213651.png",
-    "Attachments/pics/Pasted image 20240126213626.png",
-    "Attachments/pics/Pasted image 20240126213616.png",
-    "Attachments/pics/Pasted image 20240126213501.png",
-    "Attachments/pics/Pasted image 20240126213050.png",
-    "Attachments/pics/Pasted image 20240126213032.png",
-    "Attachments/pics/Pasted image 20240126213029.png",
-    "Attachments/pics/Pasted image 20240126213002.png",
+    "Docker容器环境线上实践/seata1.5.2.md",
+    "Attachments/pics/Pasted image 20240127162820.png",
+    "SpringCloud与分布式事务/seata下订单业务.md",
+    "Docker容器环境线上实践/未命名.yml.md",
+    "Attachments/pics/Pasted image 20240127153043.png",
+    "Centos服务器配置/VMware虚机安装.md",
+    "Attachments/pics/Pasted image 20240127152244.png",
+    "Attachments/pics/Pasted image 20240127152238.png",
+    "Attachments/pics/Pasted image 20240127152232.png",
+    "Attachments/pics/Pasted image 20240127152040.png",
+    "Attachments/pics/Pasted image 20240127152029.png",
+    "Attachments/pics/Pasted image 20240127152024.png",
+    "Attachments/pics/Pasted image 20240127151958.png",
+    "SpringCloud与分布式事务/限流器算法与应用.md",
+    "Centos服务器配置",
+    "Attachments/pics/Pasted image 20240127151400.png",
+    "SpringCloud与分布式事务/Hystix已过时.md",
+    "SpringCloud与分布式事务/sentinel刷新购物车业务.md",
+    "SpringCloud与分布式事务/openfeign源码.md",
+    "SpringCloud与分布式事务/gateway源码.md",
+    "SpringCloud与分布式事务/nacos源码.md",
+    "Redis缓存/Redis数据类型和结构.md",
+    "Redis缓存/Redis数据结构.md",
+    "JavaSDK/集合Collection/ConcurrentHashMap源码.md",
+    "SpringCloud与分布式事务/Eureka已过时.md",
+    "SpringCloud与分布式事务/RPC原理.md",
+    "SpringCloud与分布式事务/我关于分布式架构的一些思考.md",
+    "Springcloud/分布式理论篇.md",
+    "分布式事务Seata",
+    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+    "Docker容器环境线上实践/Nacosv2.1.0-slim.md",
+    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/services/io.seata.server.session.SessionManager",
+    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/services/io.seata.server.lock.LockManager",
+    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/services/io.seata.server.coordinator.AbstractCore",
+    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/services/io.seata.core.store.DistributedLocker",
+    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/services/io.seata.core.store.db.DataSourceProvider",
+    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/services/io.seata.core.rpc.RegisterCheckAuthHandler",
+    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/spring.factories",
+    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/spring-configuration-metadata.json",
+    "Docker容器环境线上实践/seata1.5.2/seata/README.md",
+    "Docker容器环境线上实践/seata1.5.2/seata/README-zh.md",
     "RocketMQ/QPS&&TPS&&RT等指标.md",
-    "Springcloud/sentinel.md",
-    "Springcloud/openfeign源码.md",
-    "Springcloud/nacos源码.md",
-    "Springcloud/gateway源码.md",
     "Redis缓存/缓存失效场景.md",
     "Servlet3.0&&SpringMVC/Filter和Intercepter的区别.md",
-    "Springcloud/。.md",
-    "服务器线上实践/Nacosv2.1.0-slim.md",
-    "服务器线上实践/MySQL8.0.27.md",
-    "服务器线上实践/rocketmq4.9.2.md",
-    "Springcloud/关于分布式架构的几点思考.md",
-    "本地IDE与环境配置/jmeter.md",
-    "分布式锁/常见锁分类.md",
-    "JavaSDK/MultiThread和本地锁/synchronized锁升级过程.md",
-    "分布式锁/基于zookeeper的分布式锁/Curator框架解决方案.md",
-    "JavaSDK/MultiThread和本地锁/CountDownLatch与CyclicBarrier栅栏.md",
-    "分布式锁/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
-    "分布式锁/基于Redis的分布式锁/redis原生客户端手动实现分布式锁.md",
-    "分布式锁/基于Redis的分布式锁/Redis乐观锁实现分布式锁.md",
-    "分布式锁/基于Redis的分布式锁/红锁算法.md",
-    "服务器线上实践/zookeeper3.7.0.md",
-    "分布式锁/基于Redis的分布式锁/redisson框架解决方案.md",
-    "分布式锁/纸老虎“分布式锁”，从商品超卖入手.md",
-    "JavaSDK/MultiThread和本地锁/jvm锁失效场景.md",
-    "Springcloud",
-    "分布式锁/基于MySQL的分布式锁",
-    "分布式锁/基于zookeeper的分布式锁",
-    "分布式锁/基于Redis的分布式锁",
-    "分布式锁/基于MySQL的分布式锁",
-    "分布式锁",
-    "分布式Session解决方案？还有待考证",
-    "Redis缓存",
-    "RocketMQ",
-    "服务器线上实践"
+    "Docker容器环境线上实践/MySQL8.0.27.md"
   ]
 }

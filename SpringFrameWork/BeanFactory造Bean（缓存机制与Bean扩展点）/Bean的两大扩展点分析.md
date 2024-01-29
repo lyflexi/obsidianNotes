@@ -25,9 +25,11 @@ SpringBean的创建入口是doCreate()方法方法，大家跟我来找找
 首先来到我们最熟悉的`AbstractApplicationContext#refresh`方法，IOC容器刷新，即初始化IOC容器。
 ![[Pasted image 20231228213943.png]]
 
-在初始化IOC容器的最后，来了一句`finishBeanFactoryInitialization`，也就是初始化剩下的单实例Bean，我们进入方法查看，最主要的调用就是从IOC容器中获取Bean：`beanFactory.getBean`
-![[Pasted image 20231228213952.png]]
-
+在初始化IOC容器的最后，来了一句finishBeanFactoryInitialization，也就是初始化剩下的单实例Bean，我们进入方法查看，
+来到finishBeanFactoryInitialization的最后一行beanFactory.preInstantiateSingletons();
+![[Pasted image 20240127184524.png]]
+继续跟踪，preInstantiateSingletons终于调用了getBean方法
+![[Pasted image 20240127184612.png]]
 ## AbstractBeanFactory#getBean！！！
 ![[Pasted image 20231228213958.png]]
 

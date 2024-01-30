@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md"
+                "file": "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md"
               }
             },
             "group": "99d4e8305e514d1e"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
+                "file": "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
+                "file": "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
+                "file": "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,25 +157,36 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "ea39a6dcb23f12e2",
+  "active": "83c4b3e02b4ccf9b",
   "lastOpenFiles": [
+    "Attachments/pics/Pasted image 20240130144626.png",
+    "SpringBoot3/AOT提前编译/JIT即时编译与分层编译优化.md",
+    "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
+    "JavaSDK/JVM/源代码的执行过程（执行引擎）.md",
+    "Attachments/pics/Pasted image 20240130135835.png",
+    "Attachments/pics/Pasted image 20240130132635.png",
+    "Attachments/pics/Pasted image 20240130132604.png",
+    "Attachments/pics/Pasted image 20240130132301.png",
+    "Attachments/pics/Pasted image 20240130130946.png",
+    "SpringBoot3/可观测性actuator/整合Prometheus和Grafana.md",
+    "SpringBoot3/AOT提前编译",
+    "SpringBoot3/可观测性actuator/快速入门.md",
+    "Centos服务器/容器环境/Docker应用安装/grafana.md",
+    "Centos服务器/容器环境/Docker应用安装/Prometheus.md",
+    "Attachments/pics/Pasted image 20240130113027.png",
+    "Attachments/pics/Pasted image 20240130112953.png",
+    "JavaSDK/Java设计模式/六种类间关系.md",
+    "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
+    "SpringBoot3/可观测性actuator",
     "SpringBoot3/全面接管SpringMVC.md",
     "SpringBoot3/如何将http请求转https请求.md",
     "Attachments/pics/Pasted image 20240129213220.png",
     "Attachments/pics/Pasted image 20240129213158.png",
     "Attachments/pics/Pasted image 20240129213131.png",
-    "Attachments/pics/Pasted image 20240129213123.png",
     "RocketMQ/RocketMQ常见问题.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
     "SpringBoot3/SpringBoot生命周期和九大事件与探针/4.SpringBoot与Spring整合大回环.md",
     "SpringBoot3/三层境界自定义robot-Starter.md",
     "SpringBoot3/SpringBoot事件驱动开发.md",
-    "Attachments/pics/Pasted image 20240129172246.png",
-    "Attachments/pics/Pasted image 20240129172128.png",
-    "Attachments/pics/Pasted image 20240129171808.png",
-    "Attachments/pics/Pasted image 20240129171625.png",
-    "Attachments/pics/Pasted image 20240129171356.png",
-    "Attachments/pics/Pasted image 20240129171153.png",
     "SpringBoot3/自动配置原理与SPI机制.md",
     "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.全生命周期六个过程介入RunListener.md",
     "SpringBoot3/SpringBoot生命周期和九大事件与探针/2.启动过程九大事件与探针监听Listener.md",
@@ -188,21 +199,11 @@
     "SpringBoot3/版本仲裁机制bom.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
     "Netty？待研究",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/4.通过 BeanPostProcessor 机制让容器支持注解.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/5.构建完整的工厂体系DefaultListableBeanFactory.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/3.实现依赖注入并解决循环依赖问题.md",
-    "SpringFrameWork/BeanDefination生效时机/Xml配置文件生效原理分析/1.ClassPathXmlApplicationContext定义bean.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/4.解耦WAC，引入父子容器.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/3.整合IoC，引入AnnotationConfigWebApplicationContext.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/8.再回首.md",
-    "SpringFrameWork/BeanFactory造Bean（缓存机制与Bean扩展点）/循环依赖与三级缓存.md",
     "408计网",
     "408操作系统",
-    "Centos服务器/Docker容器环境线上实践/Docker应用安装",
+    "Centos服务器/容器环境/Docker应用安装",
     "Nginx服务器",
     "Centos服务器",
-    "分布式事务Seata",
-    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/services/io.seata.server.session.SessionManager",
-    "Docker容器环境线上实践/seata1.5.2/seata/META-INF/services/io.seata.server.lock.LockManager"
+    "分布式事务Seata"
   ]
 }

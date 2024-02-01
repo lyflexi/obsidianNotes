@@ -37,11 +37,11 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
           initializers = new ArrayList<>(webAppInitializerClasses.size());  
           for (Class<?> waiClass : webAppInitializerClasses) {  
              // Be defensive: Some servlet containers provide us with invalid classes,  
-             // no matter what @HandlesTypes says...             if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&  
+             // no matter what @HandlesTypes says...             
+             if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&  
                    WebApplicationInitializer.class.isAssignableFrom(waiClass)) {  
                 try {  
-                   initializers.add((WebApplicationInitializer)  
-                         ReflectionUtils.accessibleConstructor(waiClass).newInstance());  
+                   initializers.add((WebApplicationInitializer)ReflectionUtils.accessibleConstructor(waiClass).newInstance());  
                 }  
                 catch (Throwable ex) {  
                    throw new ServletException("Failed to instantiate WebApplicationInitializer class", ex);  
@@ -66,7 +66,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 ```
 
 因此最终生效的是WebApplicationInitializer.class，我们只需要编写接口实现WebApplicationInitializer即可
-## WebApplicationInitializer.class（用于注册著名的WAC）
+## WebApplicationInitializer.class（用于注册著名的WAC父子容器）
 WebApplicationInitializer接口旗下三层抽象类，接下来依次分析AbstractContextLoaderInitializer，AbstractDispatcherServletInitializer，AbstractAnnotationConfigDispatcherServletInitializer分别干了什么事
 ![[Pasted image 20240110110802.png]]
 ### AbstractContextLoaderInitializer
@@ -157,7 +157,8 @@ protected abstract String[] getServletMappings();
 ```
 
 ==protected abstract WebApplicationContext createServletApplicationContext();留给子类实现==
-##### AbstractAnnotationConfigDispatcherServletInitializer：注解方式配置的DispatcherServlet初始化器  
+##### AbstractAnnotationConfigDispatcherServletInitializer
+注解方式配置的DispatcherServlet初始化器  
 1. 创建根容器：重写了createRootApplicationContext()  
 	1. getRootConfigClasses();传入一个配置类  
 1. 创建web的ioc容器： 重写了createServletApplicationContext();  

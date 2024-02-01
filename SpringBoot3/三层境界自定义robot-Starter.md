@@ -1,4 +1,10 @@
 
+梳理官方strater的依赖关系，比如spring-boot-starter-web的核心是引入了spring-boot-starter，我们称之为stater的starter，最终才会有spring-boot-autoconfigure的自动配置能力
+![[Pasted image 20240131113129.png]]
+自动配置类MultipartAutoConfiguration中的yam参数配置最终都是映射到某个类上，这个类由@EnableConfigurationProperties(MultipartProperties.class)指定，如文件上传相关的MultipartProperties，这个类会在容器中创建对象。
+![[Pasted image 20240131113644.png]]
+
+==因此我们要想自定义starter，只需引入关键中间人spring-boot-starter即可==
 官方starter命名规范：`spring-boot-starter-xxx
 民间starter命名规范：`xxx-spring-boot-starter`
 

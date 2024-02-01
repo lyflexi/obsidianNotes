@@ -6,38 +6,38 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 24.415204678362574,
+        "dimension": 21.052631578947366,
         "children": [
           {
-            "id": "0e2a48b30b90cdd5",
+            "id": "d079b05bbd2bd676",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md"
+                "file": "Centos服务器/DevOps/CICD.md"
               }
             },
-            "group": "99d4e8305e514d1e"
+            "group": "e65e8ecad3329a33"
           }
         ]
       },
       {
-        "id": "ad469fc731c35108",
+        "id": "48e60c444ef36431",
         "type": "tabs",
-        "dimension": 75.58479532163743,
+        "dimension": 78.94736842105263,
         "children": [
           {
-            "id": "83c4b3e02b4ccf9b",
+            "id": "cb04191d574d8c8b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
+                "file": "Centos服务器/DevOps/CICD.md",
                 "mode": "source",
                 "source": false
               }
             },
-            "group": "99d4e8305e514d1e"
+            "group": "e65e8ecad3329a33"
           }
         ]
       }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
+                "file": "Centos服务器/DevOps/CICD.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
+                "file": "Centos服务器/DevOps/CICD.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,53 +157,53 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "83c4b3e02b4ccf9b",
+  "active": "cb04191d574d8c8b",
   "lastOpenFiles": [
-    "Attachments/pics/Pasted image 20240130144626.png",
-    "SpringBoot3/AOT提前编译/JIT即时编译与分层编译优化.md",
-    "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
-    "JavaSDK/JVM/源代码的执行过程（执行引擎）.md",
-    "Attachments/pics/Pasted image 20240130135835.png",
-    "Attachments/pics/Pasted image 20240130132635.png",
-    "Attachments/pics/Pasted image 20240130132604.png",
-    "Attachments/pics/Pasted image 20240130132301.png",
-    "Attachments/pics/Pasted image 20240130130946.png",
-    "SpringBoot3/可观测性actuator/整合Prometheus和Grafana.md",
-    "SpringBoot3/AOT提前编译",
-    "SpringBoot3/可观测性actuator/快速入门.md",
-    "Centos服务器/容器环境/Docker应用安装/grafana.md",
-    "Centos服务器/容器环境/Docker应用安装/Prometheus.md",
-    "Attachments/pics/Pasted image 20240130113027.png",
-    "Attachments/pics/Pasted image 20240130112953.png",
-    "JavaSDK/Java设计模式/六种类间关系.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
-    "SpringBoot3/可观测性actuator",
-    "SpringBoot3/全面接管SpringMVC.md",
-    "SpringBoot3/如何将http请求转https请求.md",
-    "Attachments/pics/Pasted image 20240129213220.png",
-    "Attachments/pics/Pasted image 20240129213158.png",
-    "Attachments/pics/Pasted image 20240129213131.png",
-    "RocketMQ/RocketMQ常见问题.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/4.SpringBoot与Spring整合大回环.md",
-    "SpringBoot3/三层境界自定义robot-Starter.md",
-    "SpringBoot3/SpringBoot事件驱动开发.md",
-    "SpringBoot3/自动配置原理与SPI机制.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.全生命周期六个过程介入RunListener.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/2.启动过程九大事件与探针监听Listener.md",
-    "SpringFrameWork/BeanFactory造Bean（缓存机制与Bean扩展点）/Bean的两大扩展点分析.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针",
-    "SpringBoot3/函数式Web.md",
-    "JavaSDK/SPI机制.md",
-    "Servlet3.0&&SpringMVC6/全面接管servlet3.0.md",
-    "SpringBoot3/嵌入式Tomcat配置原理.md",
-    "SpringBoot3/版本仲裁机制bom.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/一、实现SpringIOC/6.构建完整的上下文体系并添加容器事件.md",
-    "Netty？待研究",
-    "408计网",
-    "408操作系统",
-    "Centos服务器/容器环境/Docker应用安装",
-    "Nginx服务器",
-    "Centos服务器",
-    "分布式事务Seata"
+    "Attachments/pics/Pasted image 20240201104959.png",
+    "Attachments/pics/Pasted image 20240201104940.png",
+    "Attachments/pics/Pasted image 20240201104913.png",
+    "Attachments/pics/Pasted image 20240201104821.png",
+    "Centos服务器/DevOps/弹性扩缩容.md",
+    "Centos服务器/DevOps/CICD.md",
+    "Centos服务器/DevOps/线上服务切换发布策略.md",
+    "Attachments/pics/Pasted image 20240201104326.png",
+    "Nginx负载均衡/转发分布式网关【上游服务器】.md",
+    "Nginx负载均衡/请求头Host丢失问题.md",
+    "Nginx负载均衡/CORS-403Forbidden.md",
+    "Attachments/pics/Pasted image 20240201104138.png",
+    "Centos服务器/K8s环境/DashBoard.md",
+    "Centos服务器/DevOps",
+    "408计网/计算机网络知识点总结.md",
+    "Attachments/pics/Pasted image 20240201103645.png",
+    "Attachments/pics/Pasted image 20240201103537.png",
+    "Attachments/pics/Pasted image 20240201103531.png",
+    "Attachments/pics/Pasted image 20240201103526.png",
+    "Attachments/pics/Pasted image 20240201103522.png",
+    "Centos服务器/K8s环境/分布式文件系统搭建/CephFS搭建.md",
+    "Centos服务器/K8s环境/分布式文件系统搭建/NFS搭建.md",
+    "Centos服务器/K8s环境/PVPVC细述/配置存储ConfigMap.md",
+    "Centos服务器/K8s环境/分布式文件系统搭建",
+    "Centos服务器/K8s环境/PVPVC细述/PVPVC.md",
+    "Centos服务器/K8s环境/Pod细述/Pod的调度规则.md",
+    "Centos服务器/K8s环境/Pod细述/Pod的资源清单.md",
+    "Centos服务器/K8s环境/Pod细述/Pod五大状态分析.md",
+    "Centos服务器/K8s环境/Pod细述/Pod生命周期监控.md",
+    "Centos服务器/K8s环境/服务暴露与负载均衡细述/Service.md",
+    "Centos服务器/K8s环境/服务暴露与负载均衡细述/Ingress.md",
+    "Centos服务器/K8s环境/PVPVC细述",
+    "Centos服务器/K8s环境/服务暴露与负载均衡细述",
+    "Centos服务器/K8s环境/Deployment控制器细述/Pod各种控制器.md",
+    "Centos服务器/K8s环境/Deployment控制器细述",
+    "Centos服务器/K8s环境/未命名.md",
+    "Centos服务器/K8s环境/Pod细述",
+    "Centos服务器/K8s环境/K8S节点故障排查.md",
+    "Centos服务器/K8s环境/K8S环境部署/单节点快速部署.md",
+    "Centos服务器/K8s环境/K8S环境部署/多主多从集群部署.md",
+    "Centos服务器/K8s环境/K8S环境部署/一主多从集群部署.md",
+    "Centos服务器/K8s环境/K8S简单命令手册.md",
+    "Centos服务器/K8s环境/K8S环境部署",
+    "Centos服务器/K8s环境",
+    "MyBatis",
+    "Servlet3.0&&SpringMVC6/servlet3.0"
   ]
 }

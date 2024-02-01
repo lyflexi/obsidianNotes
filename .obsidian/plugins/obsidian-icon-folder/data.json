@@ -33,7 +33,6 @@
   "分布式Session解决方案？还有待考证": "FabEmpire",
   "分布式锁解决方案": "FabEmpire",
   "SpringCloud与分布式事务": "FabEmpire",
-  "Nginx服务器": "FabEmpire",
   "SpringBoot3": "FabEmpire",
   "Servlet3.0&&SpringMVC6": "FabEmpire",
   "SpringFrameWork": "FabEmpire",
@@ -41,5 +40,7 @@
   "Netty？待研究": "FabEmpire",
   "408操作系统": "FabEmpire",
   "408计网": "FabEmpire",
-  "Tomcat源码？待研究": "FabEmpire"
+  "Tomcat源码？待研究": "FabEmpire",
+  "MyBatis": "FabEmpire",
+  "Nginx负载均衡": "FabEmpire"
 }

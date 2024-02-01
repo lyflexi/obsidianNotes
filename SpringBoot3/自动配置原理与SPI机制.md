@@ -176,7 +176,8 @@ loadSpringFactories方法
 - 主人定义一个接口或抽象类，
 - 然后各大厂商（starter）通过在classpath（META-INF/spring.factories）中声明该实现类
 - 最后主人引入各大厂商（starter），来实现对组件的动态发现和加载。
-![[Pasted image 20240129100749.png]]==需要注意的是，全场景的自动配置都在 `spring-boot-autoconfigure`这个包，在这个包的org目录中已经把所有的场景的自动配置类都写好了，但是这些实现的自动配置类都是条件生效的，因此默认不是全都开启的，只有导入哪个场景就开启哪个场景相关的自动配置==
+![[Pasted image 20240129100749.png]]==需要注意的是，全场景的自动配置都在 `spring-boot-autoconfigure`这个包，在这个包的org目录中已经把所有的场景的自动配置类都写好了，但是这些实现的自动配置类都是条件生效的，因此默认不是全都开启的，只有导入哪个场景就开启哪个场景相关的自动配置==，比如我们没有引入batch批处理场景spring-boot-starter-batch，batch相关不会生效
+![[Pasted image 20240131112937.png]]
 # 以web场景为例分析自动配置
 
 ![[Pasted image 20240129121329.png]]

@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  * @description:
  * @author: hasee
  * @create: 2022-04-24 18:16
- /
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -124,6 +124,8 @@ public class AiPassiveMsgAspect {
     @Transactional("inferenceTransactionManager")
     @AiPassiveMsg(sceneType = "audit.serviceVersion.publish.audit")
     public void approvePublish(AirInferenceApprovedInfo request) {
+    ...
+    }
 ```
 
 # 策略模式
@@ -252,17 +254,19 @@ import java.util.Map;
  * @description:
  * @author: hasee
  * @create: 2019-06-14 15:02
- /
+ */
+ 
 @Component
 public class MsgHandlerProcessor implements BeanFactoryPostProcessor {
 
     private static final String HANDLER_PACKAGE = "com.iwhalecloud.aiFactory.aspect.msghandler.process";
 
-    /
+    /*
      * 扫描@PassiveMsgHandlerType，MsgHandlerContext，将其注册到spring容器
      *
      * @param beanFactory bean工厂
      */
+     
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         Map<String, Class> handlerMap = Maps.newHashMapWithExpectedSize(3);
@@ -485,8 +489,10 @@ import java.util.Map;
  * @author: hasee
  * @create: 2022-04-25 09:13
  **/
+//单实例MsgHandlerContext
 public class MsgHandlerContext {
 
+	//里面也是单实例handlerMap
     private Map<String, Class> handlerMap;
 
     public MsgHandlerContext(Map<String, Class> handlerMap) {

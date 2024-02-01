@@ -23,7 +23,7 @@ Feign是Spring Cloud组件中一个轻量级RESTful的HTTP服务客户端，Feig
 - item-service，商品模块，集群部署，假设有两个item-service应用实例，端口分别为8081和8083
 - cart-service，购物车模块，端口为8082
 购物车数据库表存储的只是用户加入商品到购物车那一时刻的快照，商品的价格在此后是存在浮动的，有可能涨价也有可能降价
-因此，用户进入购物车的时候，需要调用商品模块中该商品的最新价格，两价格之差需要展示到用户购物车中，以刺激用户消费，因此购物车模块需要如下设计：
+因此，用户进入购物车的时候，需要额外调用商品模块查询该商品的最新价格，两价格之差需要展示到用户购物车中，以刺激用户消费，因此购物车模块需要如下设计：
 # feign远程调用
 购物车模块要声明ItemClient，用来远程调用item-service
 ```java
@@ -79,14 +79,15 @@ private void handleCartItems(List<CartVO> vos) {
 }
 ```
 # feign服务间user信息传递
-gateway解决了路由转发predicate以及过滤器filter，解决前端请求入口的问题。  
-但是还有个问题没解决，微服务之间feign如何传递用户信息?虽然每个微服务都引入了hm-common（UserInfoInterceptor+UserContext），但每个微服务都有各自的UserContext为自己所用，不同微服务之间用户信息无法传递。
+gateway通过路由转发解决了前端请求入口的问题。  
+gateway还通过gateway过滤器解决了后端统一认证鉴权的问题。
+但是还有个问题gateway是无法解决的，那就是微服务之间feign如何传递用户信息?虽然每个微服务都引入了hm-common（SpringMvc：UserInfoInterceptor+UserContext），但每个微服务都有各自的UserContext为自己所用，不同微服务之间用户信息无法传递。
 
 背景介绍：有些业务是比较复杂的，请求到达微服务后还需要调用其它多个微服务。比如下单业务trade的流程如下：
 ![[Pasted image 20240126151304.png]]
-1. 创建订单，就位于当前服务
-2. 需要调用商品服务扣减库存，扣减库存无所谓，因为不需要用户信息
-3. 调用购物车服务清理用户购物车。而清理购物车时必须知道当前登录的用户身份。
+1. 创建订单，就位于当前交易服务trade-service
+2. trade-service需要调用商品服务扣减库存，扣减库存无所谓，因为不需要用户信息
+3. trade-service还需要调用购物车服务清理用户购物车。而清理购物车时必须知道当前登录的用户身份。
 ==但是，下单业务trade调用购物车时并没有传递用户信息，购物车服务从UserContex中获取到的用户信息为null，无法知道当前用户是谁！==
 ```shell
 #购物车删除sql如下
@@ -98,7 +99,7 @@ queryWrapper.lambda()
 14:55:05:361 DEBUG 18456 --- [nio-8082-exec-1] com.hmall.cart.mapper.CartMapper.delete  : ==> Parameters: null, 14741770661(Long)
 14:55:05:362 DEBUG 18456 --- [nio-8082-exec-1] com.hmall.cart.mapper.CartMapper.delete  : <==    Updates: 0
 ```
-原因解释：现在只有从gateway过来的请求才会进行请求过滤、token解析用户以及用户信息的传递，传递给下游的Springmvc拦截器存入UserContext，微服务才能拿到用户信息。对于购物车服务而言，来自于gateway的请求肯定早就结束了或者就没开始，当前tomcat请求结束用户信息肯定已经被移除了UserContext.removeUser()
+原因解释：现在只有从gateway过来的请求才会进行请求过滤、token解析用户以及用户信息的传递，传递给下游的Springmvc拦截器存入UserContext，微服务才能拿到用户信息。对于购物车服务而言，来自于gateway的请求肯定早就结束了或者就没开始，归属于各自服务的tomcat请求结束后用户信息肯定已经被移除了UserContext.removeUser()
 ```java
 package com.hmall.common.interceptor;  
   
@@ -172,7 +173,7 @@ public class DefaultFeignConfig {
     }  
 }
 ```
-并且在trade-service（feign客户端使用方）启动类上指定feign配置类，让当前服务trade-service的用户信息添加到feign请求内部发送
+并且在trade-service（feign客户端使用方）主启动类上指定feign配置类，让当前服务trade-service的用户信息添加到feign请求内部发送
 ```java
 @EnableFeignClients(basePackages = "com.hmall.api.client", defaultConfiguration = DefaultFeignConfig.class)  
 @MapperScan("com.hmall.trade.mapper")  

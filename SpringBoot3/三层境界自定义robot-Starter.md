@@ -206,6 +206,9 @@ robot.email=haha@qq.com
 # 3.利用SpringBoot的SPI机制-secondlevel
 
 依赖SpringBoot的SPI机制，自定义starter中创建META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports 文件，spi文件指定我们自动配置类的全类名org.lyflexi.RobotAutoConfiguration即可
+```shell
+org.lyflexi.RobotAutoConfiguration
+```
 其他项目引入`starter`之后，完全自动化获得自定义starter的功能，任何配置都不需要，达到原生springboot-starter一样的效果
 ```java
 package org.lyflexi.debug_springboot;  

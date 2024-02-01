@@ -13,7 +13,7 @@
 1. 由于每个微服务都有不同的地址或端口，入口不同，请求不同数据时要访问不同的入口，需要维护多个入口地址，麻烦  
 2. 而微服务拆分后，每个微服务都独立部署，每个微服务都需要编写登录校验、用户信息获取的功能吗？回顾单体架构时我们只需要完成一次用户登录、身份校验，就可以在所有业务中获取到用户信息，单体架构的用户信息传递方案是springmvc拦截器和ThreadLocal存储
 	- 定义用户上下文UserContext，持有ThreadLocal引用
-	- 定义springmvc拦截器，将保存在用户上下文中的UserContext的ThreadLocal中
+	- 定义springmvc拦截器，将登录信息比如userId保存在用户上下文中的UserContext的ThreadLocal中
 	- 在Controller层获取UserContext的ThreadLocal信息
 ```java
 package com.hmall.interceptor;  
@@ -33,7 +33,8 @@ public class LoginInterceptor implements HandlerInterceptor {
   
     @Override  
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {  
-        // 1.获取请求头中的 token        String token = request.getHeader("authorization");  
+        // 1.获取请求头中的 token        
+        String token = request.getHeader("authorization");  
         // 2.校验token  
         Long userId = jwtTool.parseToken(token);  
         // 3.存入上下文  
@@ -58,14 +59,16 @@ public class UserContext {
     /**  
      * 保存当前登录用户信息到ThreadLocal  
      * @param userId 用户id  
-     */    public static void setUser(Long userId) {  
+     */    
+    public static void setUser(Long userId) {  
         tl.set(userId);  
     }  
   
     /**  
      * 获取当前登录用户信息  
      * @return 用户id  
-     */    public static Long getUser() {  
+     */    
+    public static Long getUser() {  
         return tl.get();  
     }  
   
@@ -91,14 +94,14 @@ public List<AddressDTO> findMyAddresses() {
 }
 ```
 我们会通过分布式网关技术解决上述问题，新建hm-gateway微服务模块
-1. 网关鉴权，解决统一登录校验和用户信息获取的问题。  
-2. 网关路由转发，解决前端请求入口的问题。  
+1. 网关路由转发，解决前端请求入口的问题。  
+2. 网关鉴权，解决统一登录校验和用户信息获取的问题。  
 还有一点，对于每一个模块比如商品模块item-service，生产环境往往会对这个模块做集群部署，此时==网关还能够在后端进行负载均衡寻址==
 # uri+predicates解决请求转发问题
 网关调用nacos，实时更新服务列表  
 ![[Pasted image 20240126104602.png]]
 ## gate为我们提供好的predicates
-查看gateway的自动配置属性GatewayProperties
+查看gateway的自动配置属性源码GatewayProperties
 ```java
 
 package org.springframework.cloud.gateway.config;  
@@ -119,10 +122,12 @@ public class GatewayProperties {
      * List of Routes.     */    
     @NotNull  
     @Valid    
+    //路由配置列表
     private List<RouteDefinition> routes = new ArrayList<>();  
   
     /**  
-     * List of filter definitions that are applied to every route.     */    
+     * List of filter definitions that are applied to every route.     */ 
+    //全局路由配置defaultFilters
     private List<FilterDefinition> defaultFilters = new ArrayList<>();  
   
     private List<MediaType> streamingMediaTypes = Arrays.asList(MediaType.TEXT_EVENT_STREAM,  
@@ -157,9 +162,11 @@ public class RouteDefinition {
     private String id;  
   
     @NotEmpty  
-    @Valid    private List<PredicateDefinition> predicates = new ArrayList<>();  
+    @Valid    
+    private List<PredicateDefinition> predicates = new ArrayList<>();  
   
     @Valid  
+    //局部过滤器配置defaultFilters，对当前路由生效
     private List<FilterDefinition> filters = new ArrayList<>();  
   
     @NotNull  
@@ -189,7 +196,7 @@ public class RouteDefinition {
 |weight|权重处理||
 ## 使用内置predicates解决请求转发问题
 该项目路由配置如下：
-```shell
+```yaml
 server:  
   port: 8080  
 spring:  
@@ -438,10 +445,10 @@ hm:
       - /items/**
 ```
 
-==我们需要在网关转发之前做请求过滤==，对于不需要权限的请求全部放行，对于需要权限的请求进行过滤
-==我们还需要在网关转发之前做登录校验==，所谓登录校验就是解析token，步骤如下：
+==我们需要在网关转发之前做登录校验==，所谓登录校验就是解析token，步骤如下：
 - 网关拦截器取出请求头中的authorization即token
 - 网关调用jwtTool解析token生成userid
+==我们还需要在网关转发之前做请求过滤==，对于不需要权限的请求全部放行，对于需要权限的请求进行过滤
 ```Java
 package com.hmall.gateway.filter;
 
@@ -475,6 +482,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
+	//gateway底层用的是webflux响应式编程
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 1.获取Request
@@ -584,7 +592,7 @@ public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 #### 2.2 下游定义springmvc拦截器，接收filter请求
 编写springmvc拦截器以及UserContext，拦截请求获取用户信息，保存到ThreadLocal后放行。直接放行，此处不做拦截，因为前面的gateway的filter相当于已经帮我们拦截过了
 
-由于下游微服务众多，所以要把springmvc拦截器的逻辑抽取到公共模块hm-common，其他微服务模块均引入公共模块即可
+由于下游微服务众多，不可能每个微服务都要单独实现一遍springmvc拦截器，所以要把springmvc拦截器的逻辑抽取到公共模块hm-common，其他微服务模块均引入公共模块即可
 
 ![[Pasted image 20240126131802.png]]
 springmvc拦截器UserInfoInterceptor如下

@@ -11,13 +11,13 @@ server:
 技术选型:springBoot + Redis + Mysql + RocketMq + Security ...  
   
 设计: (秒杀抢优惠券..)  
-- 设计seckill-web接收处理秒杀请求  
-- 设计seckill-service处理秒杀真实业务的  
+- 设计seckill-web接收处理秒杀请求  ，对用户进行去重，并预扣减库存
+- 设计seckill-service处理秒杀真实业务的  ，redis分布式锁
   
 TOC项目部署细节:  
 - 用户量: 50w  
 - 日活量: 1w-2w   1%-5%  ，这个统计数据库用户表的登录时间
-- QPS: 2w+   这个统计方式是自己打日志 或者统计nginx的访问日志(access.log) ，堆相同的时间log 2023-4-24 16:58:11 进行分组统计
+- QPS: 2w+   这个统计方式是自己打日志 或者统计nginx的访问日志(access.log) ，对相同的时间log 2023-4-24 16:58:11 进行分组统计
 - 几台服务器(什么配置):8核16G  4台    seckill-web : 4台    seckill-service 2台  
 - 带宽: 100M  
   
@@ -26,7 +26,7 @@ TOC项目部署细节:
 2.每天晚上8点通过定时任务 把mysql中参与秒杀的库存商品，同步到redis中去，做库存的预扣减，提升接口性能  
 3.通过RocketMq消息中间件的异步消息，来将秒杀的业务异步化，进一步提升性能  
 4.seckill-service使用MQ的并发消费模式将消息并发的取到Java程序，并且设置合理的线程数量，快速处理队列中堆积的消息  
-5.使用redis的分布式锁+自旋锁，对商品的库存进行并发控制，把并发压力转移到程序中和redis中去，减少db压力  
+5.使用redis的分布式锁+自旋锁，对商品的库存进行并发控制，真正的减少db压力  
 6.使用声明式事务注解Transactional，并且设置异常回滚类型，控制数据库的原子性操作  
 7.使用jmeter压测工具，对秒杀接口进行压力测试，在8C16G的服务器上，qps2k+，达到压测预期  
 8.使用sentinel的热点参数限流规则，针对爆款商品和普通商品的区别，区分限制
@@ -219,7 +219,7 @@ public void realSeckill(Integer userId, Integer goodsId) {
 	}  
 	goods.setTotalStocks(finalStock);  
 	goods.setUpdateTime(new Date());  
-	// update goods set stocks =  1 where id = 1  没有行锁  
+	// update goods set stocks =  1 where id = 1  没有行锁，完全靠完全的jvm锁控制  
 	int i = goodsMapper.updateByPrimaryKey(goods);  
 	if (i > 0) {  
 		Order order = new Order();  
@@ -375,7 +375,7 @@ public class SeckillListener implements RocketMQListener<MessageExt> {
 然后jmeter压测3000并发给到seckill-web模块：
 - seckill-web模块用户去重
 - seckill-web模块预处理redis库存
-- seckill-web模块发送成功用户信息商品信息消息给seckill-service模块
+- seckill-web模块发送成功”用户id+商品id“消息给seckill-service模块
 ![[Pasted image 20240123095624.png]]
 ![[Pasted image 20240123095100.png]]
 ![[Pasted image 20240123095357.png]]

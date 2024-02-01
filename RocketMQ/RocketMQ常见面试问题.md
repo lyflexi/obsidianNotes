@@ -1,13 +1,14 @@
-# 如何保证消息的顺序？
+# 一、如何保证消息的顺序？
 RocketMQ的生产者支持发送非常多类型的消息：
 - 同步消息（默认），Producer每发送一个消息，都要等待broker的回复SendResult，send(Message msg)
 - 异步消息：Producer发送消息之后，无需等待broker回复，send(Message msg,  SendCallback sendCallback)
 - 单向消息：这种方式主要用在不关心发送结果的场景例如日志信息的发送，这种方式吞吐量很大，但是存在消息丢失的风险sendOneway(Message msg)
 - 延时消息：发送消息前可以给消息设置延时时间，message.setDelayTimeLevel(3)，表示延时3秒后才能够被消费。用于下订单业务，提交了一个订单就可以发送一个延时消息，30min后去检查这个订单的状态，如果还是未付款就重置订单状态，表示取消订单释放库存。
 - 批量消息：将多条消息发送到broker里面相同的队列中集中存放，`send(Collection<Message> msgs)`
-- ==顺序消息==：模拟一个订单的发送流程，发送的消息顺序是订单号111 消息流程 下订单->物流->签收  ，如何保证顺序性？
-	- 要求发送方必须，把属于同一个订单的多条消息，强制放在同一个队列当中
-	- 要求接收方必须，禁用并发接收方式，启用单线程接收模式
+==MQ自带的发送策略都无法保证消息的顺序性，顺序性只有我们开发人员自己保证！==
+模拟一个订单的发送流程，发送的消息顺序是订单号111 消息流程 下订单->物流->签收  ，如何保证顺序性？
+- 要求发送方必须，把属于同一个订单的多条消息，强制放在同一个队列当中
+- 要求接收方必须，禁用并发接收方式，启用单线程接收模式
 ## 发送方保证发送的顺序
 创建个消息实体类：MsgModel
 ```java
@@ -34,7 +35,7 @@ private List<MsgModel> msgModels = Arrays.asList(
 ); 
 ```
 
-发送方：send(Message msg, MessageQueueSelector selector, Object arg)
+发送方：send(Message msg, MessageQueueSelector selector, Object arg)，其中selector会读到Object arg参数的值，利用这个特点，我们可以给Object arg传入订单号
 ```java
 @Test  
 public void orderlyProducer() throws Exception {  
@@ -88,7 +89,8 @@ public void orderlyConsumer() throws Exception {
 }
 ```
 
-# 消息过滤场景，Tag与Topic区分？
+# 二、消息过滤场景，Tag与Topic区分？
+
 ==一个应用尽可能用一个Topic，而消息子类型则可以用tags来标识==。
 
 tags主要用于以下场景：我们往一个Topic里面发送消息的时候，根据业务逻辑，有可能可能需要更进一步的区分，比如带有tagA标签的被A消费，带有tagB标签的被B消费。还有在事务监听的类里面，只要是事务消息都要走同一个监听，我们也需要通过Tag过滤才区别对待
@@ -177,18 +179,105 @@ C1、C2、C3的订阅关系一致，即C1、C2、C3订阅消息的代码必须�
 - 同一Group ID下的Consumer实例订阅的Topic相同，但订阅的Tag不一致
 ## 什么时候该用 Topic，什么时候该用 Tag？粒度怎么把控
 
-总结：不同的业务应该使用不同的Topic，那么我们还要使用tag进行区分
-
 1.消息类型是否一致：如普通消息、事务消息、定时（延时）消息、顺序消息，不同的消息类型使用不同的 Topic，无法通过 Tag 进行区分。
 
-2.业务是否相关联：没有直接关联的消息，如淘宝交易消息，京东物流消息使用不同的 Topic 进行区分；而同样是天猫交易消息，电器类订单、女装类订单、化妆品类订单的消息可以用 Tag 进行区分。
+2.消息优先级是否一致：如同样是物流消息，盒马必须小时内送达，天猫超市 24 小时内送达，淘宝物流则相对会慢一些，不同优先级的消息用不同的 Topic 进行区分。
 
-3.消息优先级是否一致：如同样是物流消息，盒马必须小时内送达，天猫超市 24 小时内送达，淘宝物流则相对会慢一些，不同优先级的消息用不同的 Topic 进行区分。
+3.消息量级是否相当：有些业务消息虽然量小但是实时性要求高，如果跟某些万亿量级的消息使用同一个 Topic，则有可能会因为过长的等待时间而“饿死”，此时需要将不同量级的消息进行拆分，使用不同的 Topic。
 
-4.消息量级是否相当：有些业务消息虽然量小但是实时性要求高，如果跟某些万亿量级的消息使用同一个 Topic，则有可能会因为过长的等待时间而“饿死”，此时需要将不同量级的消息进行拆分，使用不同的 Topic。
+总结：不同的业务应该使用不同的Topic，那么我们还要使用tag进行区分
+
+4.业务是否相关联：没有直接关联的消息，如淘宝交易消息，京东物流消息使用不同的 Topic 进行区分；而同样是天猫交易消息，电器类订单、女装类订单、化妆品类订单的消息可以用 Tag 进行区分。
 
 总的来说，针对消息分类，您可以选择创建多个 Topic，或者在同一个 Topic 下创建多个 Tag。但通常情况下，不同的 Topic 之间的消息没有必然的联系，而 Tag 则用来区分同一个 Topic 下相互关联的消息，例如全集和子集的关系、流程先后的关系。
-# 重复消费解决方案，key与messageID区分？
+# 三、死信消息解决方案？
+在消费者return ConsumeConcurrentlyStatus.RECONSUME_LATER;后就会执行重试，当前msg会重新被放回消息队列，等待下一次被消费
+## 死信消息模拟
+==但是如果consumer重试次数达到默认的重试次数，该消息就会直接被扔到信队列DLQ中去，DLQ中的消息topic名字为%DLQ%consumergrouopname==
+```java
+@Test  
+public void retryConsumer() throws Exception {  
+    DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("retry-consumer-group");  
+    consumer.setNamesrvAddr(MqConstant.NAME_SRV_ADDR);  
+    consumer.subscribe("retryTopic", "*");  
+    // 设定重试次数  
+    consumer.setMaxReconsumeTimes(2);  
+    consumer.registerMessageListener(new MessageListenerConcurrently() {  
+        @Override  
+        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {  
+            MessageExt messageExt = msgs.get(0);  
+            System.out.println(new Date());  
+            System.out.println(messageExt.getReconsumeTimes());  
+            System.out.println(new String(messageExt.getBody()));  
+            // 业务报错了 返回null 返回 RECONSUME_LATER 都会重试  
+            return ConsumeConcurrentlyStatus.RECONSUME_LATER;  
+        }  
+    });  
+    consumer.start();  
+    System.in.read();  
+}
+
+
+@Test  
+public void retryDeadConsumer() throws Exception {  
+    DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("retry-dead-consumer-group");  
+    consumer.setNamesrvAddr(MqConstant.NAME_SRV_ADDR);  
+    consumer.subscribe("%DLQ%retry-consumer-group", "*");  
+    consumer.registerMessageListener(new MessageListenerConcurrently() {  
+        @Override  
+        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {  
+            MessageExt messageExt = msgs.get(0);  
+            System.out.println(new Date());  
+            System.out.println(new String(messageExt.getBody()));  
+            System.out.println("死信队列，兜底方案，记录到特别的位置 文件 mysql 通知人工处理");  
+            // 业务报错了 返回null 返回 RECONSUME_LATER 都会重试  
+            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;  
+        }  
+    });  
+    consumer.start();  
+    System.in.read();  
+}
+```
+## 解决方案
+因此，我们在实际生产过程中对死信消息的解决方案是，一般重试3-5次，如果还没有消费成功，则可以把消息签收了，通知人工等处理
+```java
+@Test  
+public void retryConsumer2() throws Exception {  
+    DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("retry-consumer-group");  
+    consumer.setNamesrvAddr(MqConstant.NAME_SRV_ADDR);  
+    consumer.subscribe("retryTopic", "*");  
+    // 设定重试次数  
+    consumer.registerMessageListener(new MessageListenerConcurrently() {  
+        @Override  
+        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {  
+            MessageExt messageExt = msgs.get(0);  
+            System.out.println(new Date());  
+            // 业务处理  
+            try {  
+                handleDb();  
+            } catch (Exception e) {  
+                // 重试  
+                int reconsumeTimes = messageExt.getReconsumeTimes();  
+                if (reconsumeTimes >= 3) {  
+                    // 不要重试了  
+                    System.out.println("记录到特别的位置 文件 mysql 通知人工处理");  
+                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;  
+                }  
+                return ConsumeConcurrentlyStatus.RECONSUME_LATER;  
+            }  
+            // 业务报错了 返回null 返回 RECONSUME_LATER 都会重试  
+            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;  
+        }  
+    });  
+    consumer.start();  
+    System.in.read();  
+}  
+  
+private void handleDb() {  
+    int i = 10 / 0;  
+}
+```
+# 四、重复消费解决方案，key与messageID区分？
 
 messageID是rocketmq默认给消息生成的ID，我们也可以自己手动的去给消息添加key，最好使用自己定义的key，原因如下：
 - 虽然说messageID一定是全局唯一标识符，但是实际使用中，可能会存在相同的消息有两个不同messageID的情况，比如producer主动重发、或因客户端重投机制导致的重发等，这种情况就需要使业务字段进行重复消费。
@@ -202,13 +291,10 @@ Message(String topic, String tags, String keys, byte[] body)
 producer重发是小概率事件，==因此，消息的重复消费一定是在consumer方==
 
 consumer方消费消息存在两种模式：
-- BROADCASTING(广播)模式下，所有注册的消费者都会消费，而这些消费者通常是集群部署的一个个微服务，这样就会多台机器重复消费，当然这个是根据需要来选择。
+- BROADCASTING(广播)模式下，所有注册的消费者都会消费，而这些消费者通常是集群部署的一个个微服务，这样就会多台机器重复消费。
 - CLUSTERING（负载均衡）模式下，有可能一个topic被多个consumerGroup订阅，也会重复消费。
 ==另外在CLUSTERING（负载均衡）模式下还存在重新负载均衡情况==，即使同一个consumerGroup下，broker中的一个队列只会分配给同一个consumerGroup，看起来好像是不会重复消费。但是，有个特殊情况：一个消费者新上线后，同组的所有消费者要重新负载均衡（反之一个消费者掉线后，也会重新负载）。一个队列所对应的新的消费者要获取之前消费的offset（偏移量，也就是消息消费的点位），但是消费者消费消息，和broker更新offset是分两步操作，此时之前的消费者可能已经消费了一条消息，但是并没有把offset提交给broker，那么新的消费者可能会重新消费一次。
 ![[Pasted image 20240119214159.png]]
-虽然顺序消息（Orderly模式是）前一个消费者先解锁，后一个消费者加锁再消费的模式，比起concurrently要严格了，但是加锁的线程和提交offset的线程不是同一个，所以还是会出现极端情况下的重复消费。
-
-还有在发送批量消息的时候，会被当做一条消息进行处理，那么如果批量消息中有一条业务处理成功，其他失败了，还是会被重新消费一次。
 
 ## 幂等性原则
 无论是微服务中各个子系统相互之间的调用，还是客户端对服务端的调用，都存在网络延迟等问题，会导致重复请求接口
@@ -217,7 +303,8 @@ consumer方消费消息存在两种模式：
 幂等性原则：
 - 重复的写操作必须保证操作只执行一次
 - 重复的读操作必须保证返回同一个结果
-==更宏观来说，多次执行请求不会对业务产生预期之外的后果，比如重复调用支付接口会导致多次扣钱。==
+
+==但是，多次执行请求有可能会对业务产生预期之外的后果，比如重复调用支付接口会导致多次扣钱。==
 
 幂等性的解决有以下方案：
 ### MySQL唯一索引
@@ -225,9 +312,11 @@ consumer方消费消息存在两种模式：
 创建去重表，去重表设置为唯一索引，唯一性索引多次插入就会报错，从而保证幂等性。
 1. 创建mysql去重表表tb_lock用于并发占坑，比如给lock_name字段创建唯一性索引，线程尝试获取锁tb_lock（insert）
 2. 创建mysql表tb_service，这是我们真正的业务数据表
-3. 获取tb_lock的锁成功，则执行tb_service表的业务逻辑，执行完成释放锁tb_lock（delete）
+3. 获取tb_lock的锁成功，则执行tb_service表的业务逻辑，执行完成释放锁tb_lock（delete再删除去重表中的这条数据）
 4. 其他线程等待重试
 ### MySQL悲观锁for update
+
+加行锁，互斥锁
 ### MySQL乐观版锁本号
 
 在业务表中新建一个版本字段version，int类型。
@@ -340,7 +429,7 @@ class ARocketmqDemoApplicationTests {
                 System.out.println(new String(messageExt.getBody()));  
                 System.out.println(keys);  
 
-                //解锁，删除掉这个去重表记录 delete from order_oper_log where order_sn = keys;      
+                //最后别忘了解锁，删除掉这个去重表记录 delete from order_oper_log where order_sn = keys;      
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;  
             }  
         });  
@@ -394,94 +483,8 @@ consumer面对两个重复的消息key，第一次拿到key之后先保存到red
         //执行业务逻辑
     }
 ```
-# 死信消息解决方案？
-在消费者return ConsumeConcurrentlyStatus.RECONSUME_LATER;后就会执行重试，当前msg会重新被放回消息队列，等待下一次被消费
-## 死信消息模拟
-==但是如果consumer重试次数达到默认的重试次数，该消息就会直接被扔到信队列DLQ中去，DLQ中的消息topic名字为%DLQ%consumergrouopname==
-```java
-@Test  
-public void retryConsumer() throws Exception {  
-    DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("retry-consumer-group");  
-    consumer.setNamesrvAddr(MqConstant.NAME_SRV_ADDR);  
-    consumer.subscribe("retryTopic", "*");  
-    // 设定重试次数  
-    consumer.setMaxReconsumeTimes(2);  
-    consumer.registerMessageListener(new MessageListenerConcurrently() {  
-        @Override  
-        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {  
-            MessageExt messageExt = msgs.get(0);  
-            System.out.println(new Date());  
-            System.out.println(messageExt.getReconsumeTimes());  
-            System.out.println(new String(messageExt.getBody()));  
-            // 业务报错了 返回null 返回 RECONSUME_LATER 都会重试  
-            return ConsumeConcurrentlyStatus.RECONSUME_LATER;  
-        }  
-    });  
-    consumer.start();  
-    System.in.read();  
-}
 
-
-@Test  
-public void retryDeadConsumer() throws Exception {  
-    DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("retry-dead-consumer-group");  
-    consumer.setNamesrvAddr(MqConstant.NAME_SRV_ADDR);  
-    consumer.subscribe("%DLQ%retry-consumer-group", "*");  
-    consumer.registerMessageListener(new MessageListenerConcurrently() {  
-        @Override  
-        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {  
-            MessageExt messageExt = msgs.get(0);  
-            System.out.println(new Date());  
-            System.out.println(new String(messageExt.getBody()));  
-            System.out.println("死信队列，兜底方案，记录到特别的位置 文件 mysql 通知人工处理");  
-            // 业务报错了 返回null 返回 RECONSUME_LATER 都会重试  
-            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;  
-        }  
-    });  
-    consumer.start();  
-    System.in.read();  
-}
-```
-## 解决方案
-因此，我们在实际生产过程中对死信消息的解决方案是，一般重试3-5次，如果还没有消费成功，则可以把消息签收了，通知人工等处理
-```java
-@Test  
-public void retryConsumer2() throws Exception {  
-    DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("retry-consumer-group");  
-    consumer.setNamesrvAddr(MqConstant.NAME_SRV_ADDR);  
-    consumer.subscribe("retryTopic", "*");  
-    // 设定重试次数  
-    consumer.registerMessageListener(new MessageListenerConcurrently() {  
-        @Override  
-        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {  
-            MessageExt messageExt = msgs.get(0);  
-            System.out.println(new Date());  
-            // 业务处理  
-            try {  
-                handleDb();  
-            } catch (Exception e) {  
-                // 重试  
-                int reconsumeTimes = messageExt.getReconsumeTimes();  
-                if (reconsumeTimes >= 3) {  
-                    // 不要重试了  
-                    System.out.println("记录到特别的位置 文件 mysql 通知人工处理");  
-                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;  
-                }  
-                return ConsumeConcurrentlyStatus.RECONSUME_LATER;  
-            }  
-            // 业务报错了 返回null 返回 RECONSUME_LATER 都会重试  
-            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;  
-        }  
-    });  
-    consumer.start();  
-    System.in.read();  
-}  
-  
-private void handleDb() {  
-    int i = 10 / 0;  
-}
-```
-# 消息堆积问题的解决方案？
+# 五、消息堆积问题的解决方案？
 一般认为单条队列消息差值>=1w时算堆积，消息堆积产生的原因与解决方案
 1. 生产太快了，生产方可以做业务限流
 2. 增加消费者数量，但是超过队列数量的消费者是没有意义的，因此
@@ -489,7 +492,7 @@ private void handleDb() {
 	2. 适当的设置最大的消费线程数量，如果是IO密集型程序线程数设置为2n，如果是计算密集型程序线程数设置为n+1)
 最后还有可能是消费者程序出现问题，排查消费者程序的问题
 
-# 消息丢失问题的解决方案？
+# 六、消息丢失问题的解决方案？
 1. 方案一：producer在发送消息的同时会向磁盘进行刷盘（硬盘），rocketmq有两种刷盘机制，同步刷盘和异步刷盘。要想减少消息的丢失情况，最好将mq的刷盘机制设置为同步刷盘，因为异步刷盘会利用buffer进行缓冲，buffer属于内存是不稳定的
 2. 方案二：记录消息日志
 	1. producer每发一次消息，都最好将发送日志保存下来，比如MySQL ，mq_log表【key，creatTime，status】初始status=0

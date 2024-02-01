@@ -24,7 +24,7 @@ multi指令用于开启redis事务
 exec用于关闭redis事务
 如，正常情况没有其他的并发事务修改，当前事务执行成功返回ok
 ![[Pasted image 20240123103052.png]]
-如，异常情况有其他的并发事务修改，会造成当前事务执行失败，取消当前事务并返回nil
+如，异常情况有其他的并发事务修改，会造成当前事务执行失败，取消当前事务并返回nil（这个逻辑跟MySQL事务的逻辑正好相反）
 ![[Pasted image 20240123105107.png]]
 ![[Pasted image 20240123105137.png]]
 ![[Pasted image 20240123105244.png]]
@@ -218,7 +218,7 @@ public class StockService {
 ```
 
 # 防误删-解铃还须系铃人
-问题：可能会释放其他服务器的锁。
+问题：虽然锁是同一把锁，但是加锁的人可不是同一个人，因此解锁的时候可能会释放其他服务器的锁。
 场景：如果业务逻辑的执行时间是7s。锁过期时间是3s，执行流程如下
 1. index1业务逻辑没执行完，3秒后锁被自动释放。
 2. index2获取到锁，执行业务逻辑，3秒后锁被自动释放。
@@ -376,9 +376,10 @@ public synchronized void b() {
 可以看到可重入锁最大特性就是计数，计算加锁的次数。所以当可重入锁需要在分布式环境实现时，我们也就需要统计加锁次数。
 
 解决方案：redis + Hash
-Hash的key还是lock
-Hash的field1就是可重入计数
-Hash的field2就是过期时间
+key: lock，Hash的key
+arg1: uuid+threadID，Hash的Hash1，可重入计数
+arg2: expire 30
+
 ### 加锁脚本
 
 Redis 提供了 Hash （哈希表）这种可以存储键值对数据结构。所以我们可以使用 Redis Hash 存储的锁的重入次数，然后利用 lua 脚本判断逻辑。
@@ -410,14 +411,12 @@ else
     return 0;  
 end
 ```
-
-假设值为：KEYS为lock， ARGV为uuid, expire
 ## 解锁脚本
 ```shell
 -- 判断 hash set 可重入 key 的值是否等于 0
--- 如果为 nil 代表 自己的锁已不存在，在尝试解其他线程的锁，解锁失败
--- 如果为 0 代表 可重入次数被减 1
--- 如果为 1 代表 该可重入 key 解锁成功
+-- 返回 nil 代表 自己的锁已不存在，在尝试解其他线程的锁，解锁失败
+-- 返回 0 代表 可重入次数被减 1
+-- 返回 1 代表 该可重入 key 解锁成功
 if(redis.call('hexists', KEYS[1], ARGV[1]) == 0) then 
     return nil; 
 else if(redis.call('hincrby', KEYS[1], ARGV[1], -1) > 0) then 

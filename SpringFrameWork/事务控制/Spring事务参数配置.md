@@ -104,13 +104,9 @@ public enum Propagation {
 ```
 
 下面重点讲解三类传播行为：
-
 - REQUIRED
-    
 - REQUIRES_NEW
-    
 - NESTED
-    
 
 ## REQUIRED
 
@@ -121,20 +117,15 @@ REQUIRED：Spring事务默认传播行为，默认情况下内外部事务都被
 REQUIRES_NEW：内部事务被REQUIRES_NEW修饰
 
 - 外部事务回滚不影响内部REQUIRES_NEW事务回滚，内部REQUIRES_NEW事务属于独立新事务
-    
 - 当内部REQUIRES_NEW事务出现异常不仅自己的内容回滚，也会导致外层事务也回滚，此时REQUIRES_NEW退化为REQUIRED
-    
 
 如果某个特殊的业务方法和其他业务不关联，我们可以给它单独设置REQUIRES_NEW，这样就能保证其他业务有异常时，它也不会被回滚。
 
 ## NESTED
 
 NESTED：内部事务被NESTED修饰
-
 - 内部NESTED事务失败不影响外部事务，整体事务仅回滚到内部事务的SavePoint点
-    
 - 外部事务需要手动`try-catch`异常来保证外部事务自身不回滚
-    
 
 伪代码如下：
 
@@ -168,7 +159,6 @@ ServiceB {
 这里有人会说，外部事务没有回滚是因为手动吃了异常，没有被Spring事务捕获到，是不是和嵌套事务没关系？
 
 那我们改一下内部NESTED事务行为，也使用默认方式，伪代码如下
-
 ```Java
 ServiceA {  
     /** 
@@ -197,6 +187,8 @@ ServiceB {
 ```
 
 在这种REQUIRED的情况下内外公用一个事务，随后内层事务出现异常，Spring会把内部事务标记为==`rollback-only`==；同时外部事务手动捕获并处理异常，直到外部事务结束时，这时外部事务以为catch了万事大吉最后想要commit。但是内外部事务是同一个事务，事务已经被内层方法标记为`rollback-only`必须回滚，从而导致外部事务无法commit，这时Spring就会抛出`org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only`异常
+
+可见在内部事务为NESTED的情况下，外部事务手动try-catch并不是多余的操作。
 
 SavePoint是数据库事务中的一个概念，可以将整个事务切割为不同的小事务，可以选择将状态回滚到某个小事务发生时的样子
 

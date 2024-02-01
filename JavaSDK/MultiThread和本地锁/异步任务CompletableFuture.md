@@ -1,11 +1,8 @@
 # CompletableFuture启动异步任务
 
 ## CompletableFuture创建方式：
-
 - runAsync方法不支持返回值。其中Executor指的是可以传入我们的线程池对象
-    
 - supplyAsync支持返回值。其中Executor指的是可以传入我们的线程池对象
-    
 
 ```Java
 
@@ -667,7 +664,7 @@ public class ThreadPoolConfigProperties {
             SkuInfoEntity info = this.getById(skuId);
             skuItemVo.setInfo(info);
             return info;
-        }, executor);
+        }, executor);//executor就是上文提到的线程池，已经被提前注册到容器中了
 
 
         CompletableFuture<Void> saleAttrFuture = infoFuture.thenAcceptAsync((res) -> {

@@ -79,7 +79,7 @@ public class ServerTcpSocket {
 
 多线程情况下，JavaNIO有三大组成部分：`Buffer`、`Channel`、`Selector`，通过事件驱动模式实现了什么时候有数据可读的问题。
 
-- Buffer：缓冲区本质上是一块可以写入数据，然后可以从中读取数据的内存。这块内存被包装成NIO Buffer对象，并提供了一组方法，用来方便的访问该块内存。用于和Channel通道进行交互。如你所知，数据是从通道读入缓冲区，从缓冲区写入到通道中的。
+- Buffer：缓冲区本质上是一块可以写入数据，然后可以从中读取数据的内存。这块内存被包装成NIO Buffer对象，并提供了一组方法，用来方便的访问该块内存。用于和Channel通道进行双向交互。如你所知，数据是从通道读入缓冲区，从缓冲区写入到通道中的。
     
 - Channel：有ServerSocketChannel、SocketChannel、FileChannel、DatagramChannel，只有FileChannel无法设置成非阻塞模式，其他Channel都可以设置为非阻塞模式。
     

@@ -24,7 +24,7 @@
 MySQL为了解决并发事务产生的问题，支持以下的隔离级别：
 
 - RU，READ-UNCOMMITTED(读取未提交)： 最低的隔离级别，允许读取尚未提交的数据变更，可能会导致脏读、不可重复读、幻读。
-- RC，READ-COMMITTED(读取已提交)： 允许读取并发事务已经提交的数据，可以阻止脏读，但是幻读或不可重复读仍有可能发生。
+- RC，READ-COMMITTED(读取已提交)： 读取并发事务已经提交的数据，字如其名避免了丢失修改，另外还可以阻止脏读，但是幻读或不可重复读仍有可能发生。
 - RR，REPEATABLE-READ(保证可重读)： 对同一字段的多次读取结果都是一致的，除非数据是被本身事务自己所修改，可以阻止脏读和不可重复读，但幻读仍有可能发生。==MySQL默认隔离级别就是可重读RR==
 - SERIALIZABLE(可串行化)： 最高的隔离级别，完全服从ACID的隔离级别。所有的事务依次逐个执行，这样事务之间就完全不可能产生干扰，也就是说，该级别可以防止脏读、不可重复读以及幻读。在 分布式事务 的情况下一般会用到 SERIALIZABLE(可串行化) 隔离级别
 
@@ -57,7 +57,8 @@ select * from table_name where ... lock in share mode
 
 -- select加排它行锁（X)，对于delete、insert语句MySQL会自动给涉及数据集加排它锁X
 select * from table_name where ... for update
--- 对于delete、insert语句MySQL会自动给涉及数据集加排它行锁X，对于update语句必须类似于update  goods set total_stocks = total_stocks - 1 才能触发行锁
+-- 对于delete、insert语句MySQL会自动给涉及数据集加排它行锁X，
+-- 对于update语句必须类似于update  goods set total_stocks = total_stocks - 1 才能触发行锁
 update  goods set total_stocks = total_stocks - 1 ,update_time = now() where goods_id = #{value} and total_stocks - 1 >= 0
 ```
 
@@ -111,7 +112,7 @@ SELECT * FROM emp WHERE empid > 100 FOR UPDATE
 
 MySQL中，在每一行记录中除了自定义的字段，还有一些隐藏字段：
 - 隐藏主键row_id：当数据库表没定义主键时，InnoDB会以row_id为主键生成一个聚集索引。
-- ==历史事务trx_id==：递增的事务id。只有在对表中的记录做改动时（执行INSERT、DELETE、UPDATE这些语句时）才会为事务分配事务id，只读事务中的事务id值都默认为0。
+- 历史事务==trx_id==：递增的事务id。只有在对表中的记录做改动时（执行INSERT、DELETE、UPDATE这些语句时）才会为事务分配事务id，只读事务中的事务id值都默认为0。
 - 回滚指针 roll_pointer：回滚指针指向当前记录的上一个版本（在 undo log 中），形成版本链。
 用一个简单的例子来画一下MVCC中用到的undo log版本链的逻辑图：
 ```sql
@@ -136,8 +137,8 @@ ReadView中有4个比较重要的变量：
 （1）当trx_id < min_trx_id，说明==历史事务trx_id==已经提交了，提交了就结束了，所以其版本记录对当前事务可见。
 （2）trx_id > max_trx_id时，说明==历史事务trx_id==还未开始，其版本记录对当前事务不可见。
 （3）当min_trx_id<= trx_id < max_trx_id时，判断==历史事务trx_id==是不是在当前事务ID集合（m_ids）里面
-- 如果==历史事务trx_id== in (m_ids)则说明这个历史事务trx_id在ReadView生成之前就已经Commit了，其版本记录对当前事务可见
-- 如果==历史事务trx_id== not in (m_ids)则代表ReadView生成时刻，这个历史事务trx_id还在活跃，还没有Commit，其版本记录对当前事务不可见
+- 如果==历史事务trx_id== in (m_ids)，相当于这个历史事务trx_id还在活跃，即使执行了Commit还不算Commit，其版本记录对当前事务不可见
+- 如果==历史事务trx_id== not in (m_ids)则说明这个历史事务trx_id已经Commit了，其版本记录对当前事务可见
 （4）特别的，当trx_id = creator_trx_id，说明版本链中的这个版本是==历史事务trx_id==修改的，所以其版本记录对当前事务可见。
 
 #### RC和RR两种场景区分
@@ -146,7 +147,7 @@ ReadView中有4个比较重要的变量：
 - 在RR隔离级别下，事务第一次select时创建ReadView，之后一直使用。==这就是RR解决了RR的真正原因==
 
 ##### RC
-来看示例流程，事务A，B几乎同事查询一条记录，因为是read committed (读已提交) 隔离级别，所以每次select都会生成不同的ReadView
+来看示例流程，事务A，B几乎同时查询一条记录，因为是read committed (读已提交) 隔离级别，所以每次select都会生成不同的ReadView
 ![[Pasted image 20240118191903.png]]
 
 事务A、B查询流程图如下：
@@ -156,7 +157,7 @@ ReadView中有4个比较重要的变量：
 ![[Pasted image 20240118191926.png]]
 此时事务A能查询到point值为100， 符合db_trx_id < min_trx_id规则，说明历史事务26已经提交，所以当前事务27能查询到历史事务26的版本记录（100）， 但是第二次读之前事务B对数据进行了修改，并提交了事务，此时可见的版本链数据如下图：
 ![[Pasted image 20240118191933.png]]
-此时“历史事务ID”变成了28，符合规则 min_trx_id <= db_trx_id < maxtrxid（27<=28<29），并且db_trx_id=28不在当前系统中活跃的事务m_ids集合，因此当前事务27可以看到历史版本的数据，也就是能查询到 point的值是150。
+此时“历史事务ID”变成了28，符合规则 min_trx_id <= db_trx_id < maxtrxid（27<=28<29），但是db_trx_id=28不在当前系统中活跃的事务m_ids集合，因此当前事务27可以看到历史版本的数据，也就是能查询到 point的值是150。
 
 因此整个过程中，同一个事务A内，相同的查询条件，查询到的数据不一致，也就是出现了不可重复读的情况。
 ##### RR
@@ -171,7 +172,7 @@ ReadView中有4个比较重要的变量：
 ”历史事务“变成了28
 可以看出”历史事务“还是符合规则 min_trx_id <= db_trx_id < max_trx_id（27<=28<29），
 
-但是db_trx_id=28还在当前系统中活跃的事务m_ids集合，db_trx_id=28还没提交，因此当前事务27是看不到“历史版本”的数据，也就是为什么事务B提交了，但是第二次查询出来的point的值还是100。
+但是db_trx_id=28还在当前系统中活跃的事务m_ids集合，相当于db_trx_id=28还没提交，因此当前事务27是看不到“历史版本”的数据，也就是为什么事务B提交了，但是第二次查询出来的point的值还是100。
 
 所以通过这样的方式就实现了，就是通过复用原有ReadView的方式解决了重复读问题。
 

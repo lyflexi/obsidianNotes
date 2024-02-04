@@ -290,7 +290,6 @@ slow_query_log_file = /var/lib/mysql/node-slow.log
 
 开启慢查询日志后，可以通过查看慢查询日志来分析哪些SQL语句超出了最大忍耐时间值，从而进行优化。但需要注意的是，开启慢查询日志会或多或少地带来一定的性能影响，因为它需要记录每个超时的SQL语句。因此，如果不是调优需要的话，一般不建议开启慢查询日志。
 
-
 制造慢查询并执行。如下。
 
 ```sql
@@ -313,7 +312,7 @@ SET timestamp=1529485986;
 select sleep(1);
 ```
 ## 定位慢查询SQL语句
-在生产环境中，如果要手工分析日志，查找、分析SQL，显然是个体力活。因此除了逐行分析慢查询日志之外，MySQL还自带了分析慢查询的工具mysqldumpslow，该工具是Perl脚本。
+在生产环境中，如果要手工分析日志，查找、分析SQL，显然是个体力活。==因此除了逐行分析慢查询日志之外，MySQL还自带了分析慢查询的工具mysqldumpslow，该工具是Perl脚本。==
 常用参数如下。
 ```shell
 -s：排序方式，值如下
@@ -371,15 +370,15 @@ EXPLAIN SELECT * FROM res_user ORDER BYmodifiedtime LIMIT 0,1000
 table | type | possible_keys | key |key_len | ref | rows | Extra EXPLAIN列的解释：
 重点关注：
 - key（显示走的索引名称）：显示索引名称，比如I_name_age表示联合索引名称叫I_name_age
-- key_len（查看索引使用是否充分）：这里有个内置的计算公式
+- key_len（数字，查看索引使用是否充分）：这里有个内置的计算公式
 - type（显示走的索引类型）：
-	- const：通过一次索引就能找到数据，一般用于主键或唯一索引作为条件的查询sql中
+	- const：通过一次索引就能找到数据，一般用于主键或唯一索引或者联合索引减少了回表操作作为条件的查询sql中
 	- eq_ref：常用于主键或唯一索引扫描。
 	- ref：常用于普通索引和唯一索引扫描。
 	- range：常用于范围查询，比如：between ... and 或 In ，like等操作
 	- index：全索引扫描。执行sql如下
-	- ALL：全表扫描。执行sql如下：
-- Extra查看附加信息：
+	- ALL：全表扫描，没走索引。执行sql如下：
+- Extra附加信息查看：
 	- Using where：表示使用了where条件过滤。
 	- Using temporary：表示是否使用了临时表，一般多见于order by 和 group by语句。
 	- Using filesort：表示按文件排序，一般是SQL指定的排序字段和联合索引字段的排序顺序不一致的情况才会出现。比如我建立的是code和name的联合索引，顺序是code在前，name在后，这里直接按name排序，跟之前联合索引的顺序不一样。执行explain select code  from test1 order by name desc;附加信息中就会出现Using filesort

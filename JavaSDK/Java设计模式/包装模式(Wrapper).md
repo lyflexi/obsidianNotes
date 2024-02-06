@@ -17,7 +17,7 @@
 - Adapter（适配器）：将源角色适配成目标要求接口
     
 
-在 JAVA的IO类库中有很多这样的需求。下面以`InputStreamReader`和`OutputStreamWriter` 类为例介绍适配器模式。`InputStreamReader` 和 `OutputStreamWriter` 分别继承`Reader`和`Writer`两个抽象类，但是要创建它们的对象必须在构造函数中传入一个 `InputStream`和 `OutputStream` 的实例。`InputStreamReader` 和 `OutputStreamWriter`也就是将 `InputStream`和 `OutputStream`适配到`Reader`和`Writer`。
+在 JAVA的老版阻塞式BIO类库中有很多这样的需求。下面以`InputStreamReader`和`OutputStreamWriter` 类为例介绍适配器模式。`InputStreamReader` 和 `OutputStreamWriter` 分别继承`Reader`和`Writer`两个抽象类，但是要创建它们的对象必须在构造函数中传入一个 `InputStream`和 `OutputStream` 的实例。`InputStreamReader` 和 `OutputStreamWriter`也就是将 `InputStream`和 `OutputStream`适配到`Reader`和`Writer`。
 
 ```Java
 //file 为已定义好的文件流 

@@ -1,7 +1,7 @@
 ![[Pasted image 20240101212508.png]]
 Bean 生命周期的整个执行过程描述如下：
 1. 实例化接口InstantiationAwareBeanPostProcessor 
-2. addSingletonFactory，会获取原始对象的AOP早期引用getEarlyBeanReference，并存入三级缓存`singletonFactories`中
+2. addSingletonFactory，会获取原始对象的AOP早期引用getEarlyBeanReference，并存入三级缓存`singletonFactories`中，此时还未进行属性填充
 3. populateBean设置对象属性
 4. 初始化接口BeanPostProcessor
 5. DisposableBean销毁接口

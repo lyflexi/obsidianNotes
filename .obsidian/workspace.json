@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "README.md"
+                "file": "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md"
               }
             },
             "group": "e65e8ecad3329a33"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
                 "mode": "source",
                 "source": false
               }
@@ -89,7 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 340.51103591918945
+    "width": 449.51103591918945
   },
   "right": {
     "id": "42bec07740fd88a4",
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "README.md",
+                "file": "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "README.md",
+                "file": "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,42 +159,42 @@
   },
   "active": "cb04191d574d8c8b",
   "lastOpenFiles": [
+    "SpringFrameWork/Aware使用场景和源码解读/Aware接口的生效时机.md",
+    "Attachments/pics/Pasted image 20240212192435.png",
+    "SpringFrameWork/BeanFactory创建Bean（对内部，缓存机制与Bean扩展点）/Bean生命周期四阶段分析.md",
+    "Attachments/pics/Pasted image 20240212190135.png",
+    "Attachments/pics/Pasted image 20240212184916.png",
+    "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
+    "JDK8~17/MultiThread和本地锁/synchronized关键字与对比.md",
+    "SpringFrameWork/Aware使用场景和源码解读",
+    "JDK8~17/MultiThread和本地锁/synchronized锁升级过程.md",
+    "JDK8~17/Java设计模式/单例模式Singleton.md",
+    "README.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/5.抽取HandlerMapping 与 HandlerAdapter.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/3.增加@Async注解，更像Spring了.md",
     "Netty网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
-    "JavaSDK/MultiThread和本地锁/异步任务(获取结果也是阻塞)CompletableFuture.md",
+    "JDK8~17/MultiThread和本地锁/异步任务(获取结果也是阻塞)CompletableFuture.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/1.完成零代码侵入的动态代理的框架封装.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/1.实现ThreadPoolTaskExecutor整合进IOC.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/4.添加配置化的AutoProxyCreator后置处理器，批量代理目标类.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/3.实现配置化的切入点表达式，批量增强目标方法.md",
-    "JavaSDK/MultiThread和本地锁/如何开启一个Thread（获取结果阻塞）.md",
+    "JDK8~17/MultiThread和本地锁/如何开启一个Thread（获取结果阻塞）.md",
     "Attachments/pics/Pasted image 20240206140336.png",
     "JavaSDK/MultiThread和本地锁/阻塞获取返回值任务FutureTask.md",
-    "JavaSDK/MultiThread和本地锁/Java线程池ThreadPoolExecutor.md",
-    "JavaSDK/Java设计模式/六种类间关系.md",
-    "JavaSDK/Java设计模式/六大设计原则.md",
+    "JDK8~17/MultiThread和本地锁/Java线程池ThreadPoolExecutor.md",
+    "JDK8~17/Java设计模式/六种类间关系.md",
+    "JDK8~17/Java设计模式/六大设计原则.md",
     "Netty网络编程与NIO/NIO/3.FileChannel用户程序零拷贝.md",
     "Attachments/pics/0027.png",
     "Attachments/pics/0026.png",
     "Attachments/pics/0025.png",
-    "JavaSDK/序列化场景Serializable.md",
-    "JavaSDK/深拷贝与浅拷贝.md",
-    "JavaSDK/Java设计模式/包装模式(Wrapper).md",
+    "JDK8~17/序列化场景Serializable.md",
+    "JDK8~17/深拷贝与浅拷贝.md",
+    "JDK8~17/Java设计模式/包装模式(Wrapper).md",
     "JavaSDK/JavaIO/文件与 IO 流.md",
     "Attachments/pics/0024.png",
-    "Netty网络编程与NIO/NIO/1.NIO三大组件.md",
-    "SpringCloud与分布式事务/openfeign源码.md",
     "Attachments/pics/0037.png",
     "Attachments/pics/0036 1.png",
-    "Attachments/pics/0038.png",
-    "Attachments/pics/0035.png",
-    "Attachments/pics/0036.png",
-    "JavaSDK/JavaIO/BIO NIO AIO模型.md",
-    "Netty网络编程与NIO/epoll.md",
-    "JavaSDK/MultiThread和本地锁/synchronized关键字与对比.md",
-    "JavaSDK/MultiThread和本地锁/synchronized锁升级过程.md",
-    "JavaSDK/流式编程 Stream.md",
-    "RocketMQ/rocketmq秒杀架构.md",
     "Netty网络编程与NIO/NIO",
     "Centos服务器/DevOps",
     "Centos服务器/K8s环境/分布式文件系统搭建",
@@ -203,7 +203,6 @@
     "Centos服务器/K8s环境/Deployment控制器细述",
     "Centos服务器/K8s环境/Pod细述",
     "Centos服务器/K8s环境/K8S环境部署",
-    "Centos服务器/K8s环境",
-    "MyBatis"
+    "Centos服务器/K8s环境"
   ]
 }

@@ -70,11 +70,8 @@ public class Singleton {
 另外，uniqueInstance 采用 volatile 关键字修饰也是很有必要的， 因为`synchronized (Singleton.class)`加锁语句并没有加在成员变量`uniqueInstance`上 
 
 `uniqueInstance = new Singleton(); `这段代码其实是分为三步执行：
-
 1. 为 uniqueInstance 分配内存空间（堆）
-    
 2. 调用构造器方法，初始化uniqueInstance（栈上引用变量）
-    
 3. 将 uniqueInstance 指向分配的内存地址
     
 

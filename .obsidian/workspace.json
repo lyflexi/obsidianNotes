@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md"
+                "file": "README.md"
               }
             },
             "group": "e65e8ecad3329a33"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,20 +159,30 @@
   },
   "active": "cb04191d574d8c8b",
   "lastOpenFiles": [
+    "Attachments/relativePath/readme_obsidian.png",
+    "Attachments/pics/readme_obsidian 1.png",
+    "README.md",
+    "JDK8~17/集合Collection/HashMap源码.md",
+    "JDK8~17/集合Collection/集合api.md",
+    "JDK8~17/集合Collection/LinkedHashMap队列实现.md",
+    "SpringBoot3/SpringBoot生命周期和九大事件与探针/2.启动过程九大事件与探针监听Listener.md",
+    "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.全生命周期六个过程介入RunListener.md",
+    "SpringBoot3/SpringBoot生命周期和九大事件与探针/4.SpringBoot与Spring整合大回环.md",
+    "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
+    "Netty网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
+    "JDK8~17/字符串/StringBuilder和StringBuffer.md",
+    "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
     "SpringFrameWork/Aware使用场景和源码解读/Aware接口的生效时机.md",
     "Attachments/pics/Pasted image 20240212192435.png",
     "SpringFrameWork/BeanFactory创建Bean（对内部，缓存机制与Bean扩展点）/Bean生命周期四阶段分析.md",
     "Attachments/pics/Pasted image 20240212190135.png",
     "Attachments/pics/Pasted image 20240212184916.png",
-    "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
     "JDK8~17/MultiThread和本地锁/synchronized关键字与对比.md",
     "SpringFrameWork/Aware使用场景和源码解读",
     "JDK8~17/MultiThread和本地锁/synchronized锁升级过程.md",
     "JDK8~17/Java设计模式/单例模式Singleton.md",
-    "README.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/5.抽取HandlerMapping 与 HandlerAdapter.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/3.增加@Async注解，更像Spring了.md",
-    "Netty网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
     "JDK8~17/MultiThread和本地锁/异步任务(获取结果也是阻塞)CompletableFuture.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/四、实现SpringAOP/1.完成零代码侵入的动态代理的框架封装.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/1.实现ThreadPoolTaskExecutor整合进IOC.md",
@@ -181,20 +191,10 @@
     "JDK8~17/MultiThread和本地锁/如何开启一个Thread（获取结果阻塞）.md",
     "Attachments/pics/Pasted image 20240206140336.png",
     "JavaSDK/MultiThread和本地锁/阻塞获取返回值任务FutureTask.md",
-    "JDK8~17/MultiThread和本地锁/Java线程池ThreadPoolExecutor.md",
-    "JDK8~17/Java设计模式/六种类间关系.md",
-    "JDK8~17/Java设计模式/六大设计原则.md",
-    "Netty网络编程与NIO/NIO/3.FileChannel用户程序零拷贝.md",
     "Attachments/pics/0027.png",
     "Attachments/pics/0026.png",
     "Attachments/pics/0025.png",
-    "JDK8~17/序列化场景Serializable.md",
-    "JDK8~17/深拷贝与浅拷贝.md",
-    "JDK8~17/Java设计模式/包装模式(Wrapper).md",
-    "JavaSDK/JavaIO/文件与 IO 流.md",
     "Attachments/pics/0024.png",
-    "Attachments/pics/0037.png",
-    "Attachments/pics/0036 1.png",
     "Netty网络编程与NIO/NIO",
     "Centos服务器/DevOps",
     "Centos服务器/K8s环境/分布式文件系统搭建",

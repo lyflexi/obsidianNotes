@@ -17,10 +17,7 @@ JDK1.8 之后 HashMap 的组成多了红黑树，在满足下面两个条件之�
 
 那么为什么要引入红黑树来替代链表呢？虽然链表的插入性能是O(1)，但查询性能确是O(n)，当哈希冲突元素非常多时，这种查询性能是难以接受的。因此，在JDK1.8中，如果冲突链上的元素数量大于8，并且哈希桶数组的长度大于64时，会使用红黑树代替链表来解决哈希冲突，使查询具备O(logn)的性能。此时的节点会被封装成TreeNode而不再是Node。
 
-声明：贯穿下文
-- Node就是Map数组节点，俗称桶
-- Node数组就是`Node<K,V>[] tab`，俗称桶数组，每个桶可能转换为链表Or红黑树
-- 下文我们根据JDK1.8源码去剖析HashMap，我们从扰动函数入手。
+下文我们根据JDK1.8源码去剖析HashMap，我们从扰动函数入手。
 
 # 全局变量
 
@@ -60,9 +57,9 @@ public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>, Cloneabl
 默认`DEFAULT_INITIAL_CAPACITY`和`DEFAULT_LOAD_FACTOR` ：
 给定的默认容量为 16，负载因子为 0.75。Map 在使用过程中不断的往里面存放数据，当数量达到了 16 * 0.75 = 12 就需要将当前 16 的容量进行扩容，而扩容这个过程涉及到 rehash、复制数据等操作，所以非常消耗性能。
 
-成员变量`threshold`是数组扩容阈值，`threshold = capacity * loadFactor`，当 Size>=threshold的时候，那么就要考虑对数组的扩增了。 但是，源码当中注释中强调了
+成员变量`threshold`默认是0，它就是数组扩容阈值，但是它会在第一次putVal的时候被赋值为`threshold = capacity * loadFactor`（下文解释为什么是这样子计算的）。
 ![[Pasted image 20231225103950.png]]
-
+当 Size>=threshold的时候，那么就要考虑对数组的扩增了， 但是，源码中的threshold注释中强调了
 翻译过来是：`threshold`在数组还没有被分配的情况下还可以充当初始数组容量，特别的`threshold=0`的时候代表 `DEFAULT_INITIAL_CAPACITY`（16）
 
 # 懒初始化

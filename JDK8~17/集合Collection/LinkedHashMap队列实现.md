@@ -1,4 +1,4 @@
-LinkedHashMap记录了元素插入顺序，除了保存当前对象的引用外，还保存了其上一个元素before和下一个元素after的引用，从而在HashMap的基础上又构成了双向链接列表。这样就能按照插入的顺序遍历原本无序的HashMap。LinkedHashMap的有序可以按两种顺序排列，一种是按照插入的顺序FIFO（先进先出），一种是按照读取的顺序LRU（Least Recently Used，优先淘汰最近最久未使用的元素）
+LinkedHashMap记录了元素插入顺序，除了保存当前对象的引用外，还保存了其上一个元素before和下一个元素after的引用，从而在HashMap的基础上构成了双向链接列表。这样就能按照插入的顺序遍历原本无序的HashMap。LinkedHashMap的有序可以按两种顺序排列，一种是按照插入的顺序FIFO（先进先出），一种是按照读取的顺序LRU（Least Recently Used，优先淘汰最近最少使用的元素）
 
 以下是LinkedHashMap的源码构造函数：
 

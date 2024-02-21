@@ -29,7 +29,7 @@ Obsidian 客户端下载（不限速）：https://forum-zh.obsidian.md/t/topic/1
 - 自动集成我的Obsidian插件
 
 Obsidian知识库渲染效果展示：
-![[./Attachments/relativePath/readme_obsidian.png]]
+![这是图片](./Attachments/relativePath/readme_obsidian.png " Custom name")
 
 >Reference：[Markdown 官方教程](https://markdown.com.cn/)
 

@@ -2,6 +2,28 @@ String字符串常量的值是不可变的，这就导致每次对String的操�
 - String：操作少量的数据，空间利用率差，不要使用String类的"+"来进行频繁的拼接，因为那样的性能极差
 - StringBuffer：单线程操作大量数据，效率低、线程安全
 - StringBuilder：多线程操作大量数据，效率高、线程不安全
+在内部，StringBuffer和StringBuilder对象均被当作char[]数组。
+```java
+//StringBuilder类：
+public StringBuilder() {  
+    super(16);  
+}
+//StringBuffer类：
+public StringBuffer() {  
+    super(16);  
+}
+
+
+//AbstractStringBuilder类：
+/**  
+ * The value is used for character storage. */
+char[] value;
+
+AbstractStringBuilder(int capacity) {  
+    value = new char[capacity];  
+}
+
+```
 
 # StringBuffer
 
@@ -15,7 +37,7 @@ StringBuffer 上的主要操作是 `append` 和 `insert` 方法，每个方法�
 
 # StringBuilder
 
-字符串变量（非线程安全）。在内部，StringBuilder对象被当作是一个包含字符序列的变长数组。其构造方法如下：
+字符串变量（非线程安全）。其构造方法如下：
 
 ```Java
 StringBuilder() //创建一个容量为16的StringBuilder对象（16个空元素）

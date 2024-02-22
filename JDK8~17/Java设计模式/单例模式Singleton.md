@@ -49,15 +49,17 @@ public class Singleton {
 
     private volatile static Singleton uniqueInstance;
 
+	//私有构造方法，防止外部用户通过new的方式创建Singleton
     private Singleton() {
     }
 
     public  static Singleton getUniqueInstance() {
        //先判断对象是否已经实例过，没有实例化过才进入加锁代码
         if (uniqueInstance == null) {//Single Checked
-            //类对象加锁
+            //类对象加锁,因为用户并不能new Singleton，也就拿不到this
             synchronized (Singleton.class) {
-                if (uniqueInstance == null) {//Double Checked
+	            //Double Checked
+                if (uniqueInstance == null) {
                     uniqueInstance = new Singleton();
                 }
             }
@@ -70,10 +72,9 @@ public class Singleton {
 另外，uniqueInstance 采用 volatile 关键字修饰也是很有必要的， 因为`synchronized (Singleton.class)`加锁语句并没有加在成员变量`uniqueInstance`上 
 
 `uniqueInstance = new Singleton(); `这段代码其实是分为三步执行：
-1. 为 uniqueInstance 分配内存空间（堆）
-2. 调用构造器方法，初始化uniqueInstance（栈上引用变量）
-3. 将 uniqueInstance 指向分配的内存地址
-    
+1. 分配内存空间：在堆内存中为 `Singleton` 对象分配空间。
+2. 初始化对象：调用 `Singleton` 的构造函数，初始化对象。（此时引用关系还未建立）。
+3. 将引用指向对象：将 `uniqueInstance` 引用指向分配的内存空间（此时对象才完全初始化）。
 
 >Java 语言规规定了线程执行程序时需要遵守intra-thread semantics（线程内语义）。保证重排序不会改变单线程内的程序执行结果。这个重排序在没有改变单线程程序的执行结果的前提下，可以提高程序的执行性能。虽然重排序并不影响单线程内的执行结果，但是在多线程的环境就带来一些问题。
 

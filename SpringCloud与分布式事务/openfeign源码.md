@@ -80,7 +80,7 @@ private void handleCartItems(List<CartVO> vos) {
 ```
 # feign服务间user信息传递
 gateway通过路由转发解决了前端请求入口的问题。  
-gateway还通过gateway过滤器解决了后端统一认证鉴权的问题。
+gateway还通过gateway在过滤器中调用exchange.mutate方法向传统的SpringMVC拦截器传递了用户登录信息，解决了后端统一认证鉴权的问题。
 但是还有个问题gateway是无法解决的，那就是微服务之间feign如何传递用户信息?虽然每个微服务都引入了hm-common（SpringMvc：UserInfoInterceptor+UserContext），但每个微服务都有各自的UserContext为自己所用，不同微服务之间用户信息无法传递。
 
 背景介绍：有些业务是比较复杂的，请求到达微服务后还需要调用其它多个微服务。比如下单业务trade的流程如下：

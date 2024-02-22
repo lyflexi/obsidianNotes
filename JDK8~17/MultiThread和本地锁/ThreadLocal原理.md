@@ -1,8 +1,7 @@
 ThreadLocal提供了线程变量的本地副本，对于线程共享变量如果使用ThreadLocal则无需加锁，同时也更省事省心。可以使用 `get` 和 `set` 方法来获取默认值或将其值更改为当前线程所存的副本的值，从而避免了线程安全问题。
 
-- ThreadLocalMap 的key是ThreadLocal ，多个线程Thread可以共用一个ThreadLocal 作为key，而不同的value才是最终的值。
-    
-- 相同的key并不会产生`ThreadLocalMap`当中Entry覆盖的问题，因为多个Thread并不会公用一个`ThreadLocalMap`，而是有几个Thread就会对应几个`ThreadLocalMap`
+- Thread中持有ThreadLocalMap引用，其key是ThreadLocal ，而不同的value才是最终的值。线程池会复用池中的线程，因此当前线程中的ThreadLocal可能会被复用，所以使用完ThreadLocal之后要及时手动remove，避免影响后续业务逻辑
+- 多个线程Thread也有可能共用一个ThreadLocal 作为key。但是相同的key并不会产生`ThreadLocalMap`当中Entry覆盖的问题，因为多个Thread并不会公用一个`ThreadLocalMap`，而是有几个Thread就会对应几个`ThreadLocalMap`
     
 ![[Pasted image 20231225163711.png]]
 
@@ -22,7 +21,7 @@ public class Thread implements Runnable {
 }
 ```
 
-从上面Thread类 源代码可以看出Thread 类中有一个 threadLocals 和 一个 inheritableThreadLocals 变量，它们都是 ThreadLocalMap 类型的变量，我们可以把 ThreadLocalMap 理解为ThreadLocal 类实现的定制化的 HashMap。
+从上面Thread类 源代码可以看出Thread 类中有一个 threadLocals 和 一个 inheritableThreadLocals 变量，它们都是 ThreadLocalMap 类型的变量，我们可以把 ThreadLocalMap 理解为ThreadLocal 类中定制化的 HashMap（内部类）。
 
 默认情况下这两个变量都是 null，只有当前线程调用 ThreadLocal 类的 set或get方法时才创建它们。
 
@@ -138,7 +137,7 @@ public class ThreadLocalDemo2
     }
 }
 
-//输出
+//忘记执行remove的控制台输出
 com.bilibili.juc.tl.ThreadLocalDemo2
 pool-1-thread-3        beforeInt:0         afterInt: 1
 pool-1-thread-2        beforeInt:0         afterInt: 1
@@ -152,6 +151,17 @@ pool-1-thread-3        beforeInt:2         afterInt: 3
 pool-1-thread-2        beforeInt:2         afterInt: 3
 
 Process finished with exit code 0
+//执行remove的控制台输出
+pool-1-thread-1	beforeInt:0	 afterInt: 1
+pool-1-thread-2	beforeInt:0	 afterInt: 1
+pool-1-thread-2	beforeInt:0	 afterInt: 1
+pool-1-thread-2	beforeInt:0	 afterInt: 1
+pool-1-thread-2	beforeInt:0	 afterInt: 1
+pool-1-thread-2	beforeInt:0	 afterInt: 1
+pool-1-thread-2	beforeInt:0	 afterInt: 1
+pool-1-thread-2	beforeInt:0	 afterInt: 1
+pool-1-thread-3	beforeInt:0	 afterInt: 1
+pool-1-thread-1	beforeInt:0	 afterInt: 1
 ```
 
 ### 避免造成内存泄露问题
@@ -159,13 +169,13 @@ Process finished with exit code 0
 每个Thread都有一个ThreadLocal.ThreadLocalMap类型的HashMap，该Map的key为ThreadLocal实例，他是一个弱引用，我们清楚弱引用有利于GC回收。当ThreadLocal作为Map的key为null的时候，GC就会回收这一部分空间。
 ![[Pasted image 20231225163736.png]]
 
-但是value却不一定能够被回收，ThreadLocalMap还与Current Thread存在一个强引用关系（依赖关系）
+但是value却不一定能够被回收，ThreadLocalMap还与Current Thread存在一个强引用关系（关联关系）
 ![[Pasted image 20231225163743.png]]
 
 因为对于线程池当中的线程会被复用，有可能会导致线程对象迟迟不会结束。假如我们不做任何措施的话，ThreadLocalMap 中就会出现很多 key 为 null 的 Entry，value 永远无法被 GC 回收，这个时候就可能会产生内存泄露。如下图所示：
 ![[Pasted image 20231225163748.png]]
 
-ThreadLocalMap 实现中已经考虑了这种情况，使用完 ThreadLocal方法后最好手动调用remove()方法会清理掉 key 为 null 的记录。
+ThreadLocalMap 实现中已经考虑了这种情况，使用完 ThreadLocal方法后最好手动调用remove()方法会清理掉 key 为 null 的整个Entry。
 
 # 强软弱虚四大引用扩展讲解
 ![[Pasted image 20231225163755.png]]

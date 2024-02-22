@@ -1,7 +1,52 @@
 # 数据结构
 
-JDK1.8 之前 HashMap 由 数组+链表 组成的，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突）。
-JDK1.8 之后 HashMap 的组成多了红黑树，在满足下面两个条件之后，会执行链表转红黑树操作，以此来加快搜索速度。
+JDK1.8 之前 HashMap 由 数组+链表Node<K,V>组成的，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突）。
+```java
+transient Node<K,V>[] table;
+
+static class Node<K,V> implements Map.Entry<K,V> {  
+    final int hash;  
+    final K key;  
+    V value;  
+    Node<K,V> next;  
+  
+    Node(int hash, K key, V value, Node<K,V> next) {  
+        this.hash = hash;  
+        this.key = key;  
+        this.value = value;  
+        this.next = next;  
+    }  
+  
+    public final K getKey()        { return key; }  
+    public final V getValue()      { return value; }  
+    public final String toString() { return key + "=" + value; }  
+  
+    public final int hashCode() {  
+        return Objects.hashCode(key) ^ Objects.hashCode(value);  
+    }  
+  
+    public final V setValue(V newValue) {  
+        V oldValue = value;  
+        value = newValue;  
+        return oldValue;  
+    }  
+  
+    public final boolean equals(Object o) {  
+        if (o == this)  
+            return true;  
+        if (o instanceof Map.Entry) {  
+            Map.Entry<?,?> e = (Map.Entry<?,?>)o;  
+            if (Objects.equals(key, e.getKey()) &&  
+                Objects.equals(value, e.getValue()))  
+                return true;  
+        }  
+        return false;  
+    }  
+}
+```
+
+JDK1.8 之后 HashMap 的组成多了红黑树TreeNode<K,V>，在满足下面两个条件之后，会执行链表转红黑树操作，以此来加快搜索速度。
+
 >这里简单地回顾一下红黑树，它是一种平衡的二叉树搜索树，类似地还有AVL树。两者核心的区别是AVL树追求“绝对平衡”，在插入、删除节点时，成本要高于红黑树，但也因此拥有了更好的查询性能，适用于读多写少的场景。然而，对于HashMap而言，读写操作其实难分伯仲，因此选择红黑树也算是在读写性能上的一种折中。
 >
 >红黑树的“平衡”的意思并不是说两个子树的叶子节点个数精确一样，而是说两个子树的高度不会差太多（对于AVL树，任何一个节点的两个子树高度差不会超过1；对于红黑树，则是不会相差两倍以上），从而在这样的树中进行搜索的话即便在最坏情况下也会很高效，这就足够了。
@@ -13,11 +58,9 @@ JDK1.8 之后 HashMap 的组成多了红黑树，在满足下面两个条件之�
 
 ![[Pasted image 20231225103853.png]]
 
-![[Pasted image 20231225103922.png]]
-
 那么为什么要引入红黑树来替代链表呢？虽然链表的插入性能是O(1)，但查询性能确是O(n)，当哈希冲突元素非常多时，这种查询性能是难以接受的。因此，在JDK1.8中，如果冲突链上的元素数量大于8，并且哈希桶数组的长度大于64时，会使用红黑树代替链表来解决哈希冲突，使查询具备O(logn)的性能。此时的节点会被封装成TreeNode而不再是Node。
 
-下文我们根据JDK1.8源码去剖析HashMap，我们从扰动函数入手。
+下文我们根据JDK1.8源码去剖析HashMap，我们从全局变量入手。
 
 # 全局变量
 
@@ -114,14 +157,17 @@ resize()中会设置默认的初始化容量DEFAULT_INITIAL_CAPACITY为16，扩�
 
 提示：==无符号右移`>>>`的优先级是最高的==
 
->`>>`表示右移，移出的部分将被抛弃。如果该数为正，则高位补0，若为负数，则高位补1。如0000 1111(15)右移2位的结果是0000 0011(3)，又或者0001 1010(18)右移3位的结果是0000 0011(3)。
->`>>>`表示无符号右移，也叫逻辑右移，即若该数为正，则高位补0，而若该数为负数，则右移后高位同样补0。
+>`>>`表示右移，移出的部分将被抛弃。如果该数为正，则高位补0，若为负数，则高位补1。
+	>1. 对于正数右移：假设我们有一个正数 `5`，其二进制表示为 `0000 0101`，如果我们对它进行右移一位，即 `5 >> 1`，则得到 `0000 0010`，即 `2`。
+	>2. 对于负数右移：假设我们有一个负数 `-5`，其二进制表示为 `1111 1011`（这里使用补码表示法：负数=绝对值的反码+1）。如果我们对其进行右移一位，即 `-5 >> 1`，同时高位补 `1`，因此得到 `1111 1101`，即 `-3`。
+>
+>`>>>`表示无符号右移，也叫忽略符号位右移，也叫逻辑右移，即若该数为正，则高位补0，而若该数为负数，则右移后高位同样补0
 
 tableSizeFor根据输入容量大小cap来计算最终哈希桶数组的容量大小，计算的意义找到“大于等于给定值cap的最小2的整数次幂”。整个过程是：
-
-1. 找到cap对应二进制中最高位的1，
-2. 然后每次以2倍的步长（依次移位1、2、4、8、16）复制最高位1到后面的所有低位，把最高位1后面的所有位全部置为1，
-3. 最后进行+1，即完成了进位
+1. cap-1，找到了小于cap的最大的2的整数次幂，==该值的特点是高位为1，低位全部是0  ==
+2. 计算【n】|【无符号右移1位后的n】
+3. 反复计算【n】|【无符号右移2/4/8/16后的n】,==最终实现的效果是最高位后面的所有位全部置为1（包括最高位）==
+4. 最后进行+1，即完成了进位，进位后的结果就是==“大于等于给定值cap的最小2的整数次幂”==
 ![[Pasted image 20231225104730.png]]
 
 当cap为3时，则n=2，计算过程如下：
@@ -186,35 +232,44 @@ static int hash(int h) {
 }
 ```
 
-# 插入过程
+# 插入过程（四大步骤）
 
-`putVal`方法，根据`(n - 1) & hash` 确定元素存放在哪个桶中，
-
+`putVal`方法，根据`(n - 1) & hash` 确定元素存放在哪个桶中，插入过程分为四大步：
+1. 如果通过HashMap的无参构造方法创建的table，则在此处扩容，即HashMap懒加载
+2. (n - 1) & hash 确定元素存放在哪个桶中，桶为空，新生成结点放入桶中(此时，这个结点是放在数组中)
+3. 桶中已经存在元素
+	1. 比较桶中第一个元素(数组中的结点)的hash值相等，key相等，将第一个元素赋值给e，用e来记录，代码末尾统一覆盖。若比较桶中第一个元素(数组中的结点)hash值不相等即key不相等，沿着链表向下找
+	2. 为红黑树结点吗，直接插入或者记录冲突节点
+	3. 为链表结点吗，直接插入（尾插）或者记录冲突节点
+4. 若e != null，最后执行统一的覆盖操作，表示在桶中找到key值、hash值与插入元素相等的结点
 ```Java
 final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                    boolean evict) {
     Node<K,V>[] tab; Node<K,V> p; int n, i;
     // table未初始化或者长度为0，进行扩容
-    if ((tab = table) == null || (n = tab.length) == 0)
+    if ((tab = table) == null || (n = tab.length) == 0)//将老数组table（可以看作所有哈希桶的根节点）复制给tab
+    //1. 如果通过HashMap的无参构造方法创建的table，则在此处扩容，即HashMap懒加载
         n = (tab = resize()).length;
-    // (n - 1) & hash 确定元素存放在哪个桶中，桶为空，新生成结点放入桶中(此时，这个结点是放在数组中)
+    //2. (n - 1) & hash 确定元素存放在哪个桶中，桶为空，新生成结点放入桶中(此时，这个结点是放在数组中)
     if ((p = tab[i = (n - 1) & hash]) == null)
         tab[i] = newNode(hash, key, value, null);
-    // 桶中已经存在元素
+    //3.桶中已经存在元素
     else {
         Node<K,V> e; K k;
-        // 比较桶中第一个元素(数组中的结点)的hash值相等，key相等
+        // 3.1比较桶中第一个元素(数组中的结点)的hash值相等，key相等
         if (p.hash == hash &&
             ((k = p.key) == key || (key != null && key.equals(k))))
-                // 将第一个元素赋值给e，用e来记录
+                // 将第一个元素赋值给e，用e来记录，代码末尾统一覆盖
                 e = p;
-        // hash值不相等，即key不相等；为红黑树结点
+        // 比较桶中第一个元素(数组中的结点)hash值不相等即key不相等，沿着链表向下找
+        // 3.2为红黑树结点吗
         else if (p instanceof TreeNode)
-            // 放入树中
+            // putTreeVal返回null表示直接插入, 或者返回冲突节点赋值给e由e来记录，代码末尾统一覆盖
+            // putTreeVal和put方法的注释如下：Returns:the previous value associated with key, or null if there was no mapping for key. (A null return can also indicate that the map previously associated null with key.)
             e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
-        // 为链表结点
+        // 3.3为链表结点吗
         else {
-            // 在链表最末插入结点
+            // 在链表最末插入结点，或者提前遍历到冲突节点赋值给e，用e来记录。代码末尾统一覆盖
             for (int binCount = 0; ; ++binCount) {
                 // 到达链表的尾部
                 if ((e = p.next) == null) {
@@ -235,11 +290,11 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                 p = e;
             }
         }
-        // 覆盖操作在此：表示在桶中找到key值、hash值与插入元素相等的结点
+        // 4. 覆盖操作在此e != null：表示在桶中找到key值、hash值与插入元素相等的结点
         if (e != null) {
             // 记录e的value
             V oldValue = e.value;
-            // onlyIfAbsent为false或者旧值为null
+            // onlyIfAbsent为false，或者旧值为null
             if (!onlyIfAbsent || oldValue == null)
                 //用新值替换旧值
                 e.value = value;
@@ -260,26 +315,26 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 }
 ```
 
-**对 putVal 方法添加元素的分析如下：**
+对 putVal 方法添加元素的分析如下，流程图来自于互联网并不是很准确，纠正如下：
+==可以直接插入，但是不可以直接覆盖而是由e记录冲突节点，最后若e不为null则统一执行覆盖==，另外红黑树少了个覆盖操作图上漏掉了
 ![[Pasted image 20231225104924.png]]
 
 关于HashMap链表插入问题，java7及之前之前是头插法，当时写这个代码的作者认为后来的值被查找的可能性更大一点，提升查找的效率。但是java7及之前HashMap的在并发扩容的时候会导致链表成环的问题。所以在执行get的时候，会触发死循环，引起CPU的100%问题，所以一定要避免在并发环境下使用HashMap。
 
 HashMap的死链问题：
 
-头插法在扩容时会改变链表中元素原本的顺序，线程T1执行之后，链表中的节点顺序发生了改变。但线程T2对于发生的一切还是不可知的，所以它指向的节点引用依然没变。如图所示，T2指向的是A节点，T2.next指向的是B节点。
+==头插法在扩容时会改变链表中元素原本的顺序==，并发环境下线程T1执行之后，链表中的节点顺序发生了改变。但线程T2对于发生的一切还是不可知的，所以它指向的节点引用依然没变。如图所示，T2指向的是A节点，T2.next指向的是B节点。
 ![[Pasted image 20231225104933.png]]
 
-==因此在jdk8及之后采用尾插入法并且引入了高低位链表==，扩容时会保持链表元素原本的顺序，因此在扩容时就不会出现链表成环的问题了。但Java8即便如此，HashMap也是不能在并发场景下使用的，因为还存在一个并发修改问题
-
-# 扩容细节
+==因此在jdk8及之后采用尾插入法并且引入了高低位链表==，扩容时会保持链表元素原本的顺序，因此在扩容时就不会出现链表成环的问题了。
+# 扩容细节（高低位链表）
 
 扩容是通过resize方法来实现的。扩容发生在putVal方法的最后，即写入元素之后才会判断是否需要扩容操作，当自增后的size大于之前所计算好的阈值threshold，即执行resize操作。resize的扩容会先创建一个更大容量的数组，
 1. 扩容后的数组应该为原数组的两倍，通过位运算<<1进行容量扩充，即扩容1倍，
-2. 并且这里的数组大小必须是2的幂，同时新的阈值newThr也扩容为老阈值的1倍。
+2. 同时新的阈值newThr也扩容为老阈值的1倍。
 
 然后遍历原table，重新计算所有的节点的hash值对应的下标，即rehash操作，最后将节点转移到新table中`Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];`。节点转移时总共存在三种情况：
-1. 不存在冲突：哈希桶数组中某个位置只有1个元素，即不存在哈希冲突时，则直接将该元素copy至新哈希桶数组的对应位置即可。
+1. 不存在冲突：哈希桶数组中只有第1个元素，即不存在哈希冲突时，则直接将该元素copy至新哈希桶数组的对应位置即可。
 2. 红黑树扩容：哈希桶数组中某个位置的节点为树节点时，则执行红黑树的扩容操作。
 3. ==链表扩容，引入高低位链表进行链表拆分。==
 ![[Pasted image 20231225105012.png]]
@@ -295,8 +350,8 @@ resize扩容最重要的操作就是第三种情况，在JDK1.8中，为了避�
     HashMap.Node<K,V> loHead = null, loTail = null;
     HashMap.Node<K,V> hiHead = null, hiTail = null;
     HashMap.Node<K,V> next;
-            //遍历该桶
-        do {
+	//遍历该桶
+	do {
         next = e.next;
         //找出拆分后仍处在同一个桶中的节点，将这些节点重新连接起来。
         if ((e.hash & oldCap) == 0) {
@@ -314,14 +369,14 @@ resize扩容最重要的操作就是第三种情况，在JDK1.8中，为了避�
             hiTail = e;
         }
     } while ((e = next) != null);
-        //最后这段代码是将拆分完的链表放进桶里的操作，比较简单，只需要将头节点放进桶里就ok了，
-        if (loTail != null) {
-        loTail.next = null;
-        newTab[j] = loHead;
+	//最后这段代码是将拆分完的链表放进桶里的操作，比较简单，只需要将头节点放进桶里就ok了，
+	if (loTail != null) {
+		loTail.next = null;
+		newTab[j] = loHead;
     }
-        if (hiTail != null) {
-        hiTail.next = null;
-        newTab[j + oldCap] = hiHead;
+	if (hiTail != null) {
+		hiTail.next = null;
+		newTab[j + oldCap] = hiHead;
     }
 ```
 
@@ -349,7 +404,7 @@ hash值对新容量计算索引时，可以看出新容量-1之后最后四位�
 - 如果=0，则代表h对应位上的值也是0，不移动位置
 - 如果=1，则代表h对应位上的值也是1，则需要移动到高位索引。
 
-高低位链表这种实现降低了对共享资源newTab的访问频次，先组织冲突节点，最后再放入newTab的指定位置。避免了JDK1.8之前每遍历一个元素就放入newTab中，从而导致并发扩容下的死链问题
+高低位链表这种实现降低了对共享资源newTab的访问频次，先组织冲突节点，最后再放入newTab的指定位置。避免了JDK1.8之前每遍历一个元素就放入newTab中，从而容易导致并发扩容下的死链问题
 
 # get 方法
 

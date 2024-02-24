@@ -3,11 +3,8 @@
 # CountDownLatch原理介绍
 
 CountDownLatch(闭锁) 做减法，主要涉及两个方法：
-
 - countDown()，当其它线程调用countDown方法会将计数器减1，但是不会阻塞
-    
 - await()，当前线程调用await方法时会被阻塞，等待计数器的值变为0时，当前线程才被唤醒继续执行
-    
 
 示例代码如下：
 
@@ -30,39 +27,151 @@ public class CountDownLatchDemo {
 ```
 
 CountDownLatch是基于AQS实现的，它的实现机制很简单：
-
+```java
+/*
+Constructs a CountDownLatch initialized with the given count.
+Params:
+count – the number of times countDown must be invoked before threads can pass through await
+Throws:
+IllegalArgumentException – if count is negative
+*/
+public CountDownLatch(int count) {  
+    if (count < 0) throw new IllegalArgumentException("count < 0");  
+    this.sync = new Sync(count);  
+}
+```
 - 当我们在构建CountDownLatch对象时，传入的值其实就会赋值给 AQS 的关键变量state
-    
 - 执行CountDownLatch的countDown方法时，其实就是利用CAS 将state 减一
-    
 - 执行await方法时，其实就是判断state是否为0
-    
     - 如果state不为0，则将调用await方法的当前线程加入到阻塞队列中，将该线程阻塞掉（除了头结点）
-        
-    - AQS头节点会一直自旋等待state为0，当state为0时，头节点把剩余的在队列中阻塞的节点也一并唤醒。
-        
+    - AQS头节点会一直自旋等待state为0，当state为0时，头节点把剩余的在锁阻塞队列中的节点==全部唤醒==
 
 # CyclicBarrier原理介绍
 
 回到CyclicBarrier上，代码也不难，只有await方法。从源码不难发现的是：它没有像CountDownLatch和ReentrantLock使用AQS的state变量，而是传入parties变量，同时也会赋值给CyclicBarrier内部维护count变量（这是可以复用的关键）
 ```Java
 //parties表示屏障拦截的线程数量，当屏障撤销时，先执行barrierAction，然后在释放所有线程
-public CyclicBarrier(int parties, Runnable barrierAction)
+public CyclicBarrier(int parties, Runnable barrierAction) {  
+    if (parties <= 0) throw new IllegalArgumentException();  
+    this.parties = parties;  
+    this.count = parties;  
+    this.barrierCommand = barrierAction;  
+}
 //barrierAction默认为null
 public CyclicBarrier(int parties)
 ```
-同时CyclicBarrier借助ReentrantLock加上Condition实现等待唤醒的功能。每次调用await时，会将count -1 ，操作count值是直接使用ReentrantLock来保证线程安全性。
-- 如果count不为0，则添加到condition队列中
-- 如果count等于0时，则把节点从condition队列添加至AQS的队列中并进行全部唤醒，并且将parties的值重新赋值为count的值（实现复用）
+==与闭锁不同，CyclicBarrier栅栏的等待唤醒操作均由一个api实现：await()==
+
+CyclicBarrier#await的==原理是ReentrantLock+Condition条件等待队列+AQS锁池阻塞队列==
+
+每次调用await时，会将count -1 ，操作count值是直接使用ReentrantLock来保证线程安全性。
+```java
+/**  
+ * Main barrier code, covering the various policies. */
+ private int dowait(boolean timed, long nanos)  
+    throws InterruptedException, BrokenBarrierException,  
+           TimeoutException {  
+    final ReentrantLock lock = this.lock;  
+    lock.lock();  
+    try {  
+        final Generation g = generation;  
+  
+        if (g.broken)  
+            throw new BrokenBarrierException();  
+  
+        if (Thread.interrupted()) {  
+            breakBarrier();  
+            throw new InterruptedException();  
+        }  
+  
+        int index = --count;  
+        if (index == 0) {  // tripped  
+            boolean ranAction = false;  
+            try {  
+                final Runnable command = barrierCommand;  
+                if (command != null)  
+                    command.run();  
+                ranAction = true;  
+                nextGeneration();  
+                return 0;  
+            } finally {  
+                if (!ranAction)  
+                    breakBarrier();  
+            }  
+        }  
+  
+        // loop until tripped, broken, interrupted, or timed out  
+		...
+	} finally {  
+	    lock.unlock();  
+    }  
+}
+```
+==如果count--之后等于0，则打开栅栏执行signalAll()，相当于把等待队列中的节点从condition队列添加至AQS的队列中并进行全部唤醒==，并且将parties的值重新赋值为count的值（实现复用）
+```java
+/**  
+ * Sets current barrier generation as broken and wakes up everyone. * Called only while holding lock. */
+private void breakBarrier() {  
+    generation.broken = true;  
+    count = parties;  
+    trip.signalAll();  
+}
+```
+如果count--之后不为0，则添加到condition队列中
+```java
+  
+/**  
+ * Main barrier code, covering the various policies. */
+private int dowait(boolean timed, long nanos)  
+    throws InterruptedException, BrokenBarrierException,  
+           TimeoutException {  
+    final ReentrantLock lock = this.lock;  
+    lock.lock();  
+	 ...
+        // loop until tripped, broken, interrupted, or timed out  
+        for (;;) {  
+            try {  
+                if (!timed)  
+                    trip.await();  //trip成员变量，private final Condition trip = lock.newCondition();
+                else if (nanos > 0L)  
+                    nanos = trip.awaitNanos(nanos);  
+            } catch (InterruptedException ie) {  
+                if (g == generation && ! g.broken) {  
+                    breakBarrier();  
+                    throw ie;  
+                } else {  
+                    // We're about to finish waiting even if we had not  
+                    // been interrupted, so this interrupt is deemed to                    
+                    // "belong" to subsequent execution.                    
+                    Thread.currentThread().interrupt();  
+                }  
+            }  
+  
+            if (g.broken)  
+                throw new BrokenBarrierException();  
+  
+            if (g != generation)  
+                return index;  
+  
+            if (timed && nanos <= 0L) {  
+                breakBarrier();  
+                throw new TimeoutException();  
+            }  
+        }  
+    } finally {  
+        lock.unlock();  
+    }  
+}
+```
+
+
 
 ## 阻塞任务线程而非主线程
 
 CountDownLatch和CyclicBarrier都是线程同步的工具类。可以发现这两者的等待主体是不一样的。
 
-- CountDownLatch调用await()通常是主线程
-    
-- CyclicBarrier调用await()是在任务线程调用的，所以，CyclicBarrier中的阻塞的是任务的线程，而主线程是不受影响的。
-    
+- CountDownLatch通常是在主线程中执行countDownLatch.await()
+- CyclicBarrier通常是在任务线程中执行cb.await()，所以，CyclicBarrier中的阻塞的是任务的线程，而主线程是不受影响的。
 
 ## 共同抵达时的执行操作
 

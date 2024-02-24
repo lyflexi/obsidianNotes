@@ -12,7 +12,7 @@
 - 写-写：有线程安全问题，可能会存在更新丢失问题，比如第一类更新丢失，第二类更新丢失
 下面挨个分析读-写，写-写会导致的问题：
 1. 脏读（`读-写`）: 当一个事务正在访问数据并且对数据进行了修改，虽然数据库已被修改，但是这个修改还没有commit，这时另外一个事务也访问了这个数据，然后使用了这个数据。因为这个数据是还没有提交的数据，那么另外一个事务读到的这个数据是“脏数据”，==未提交的事务后续有可能会进行回滚==，那么依据“脏数据”所做的操作可能是不正确的。
-2. 丢失修改（`写-写`）: 指在一个事务读取一个数据时，另外一个事务也访问了该数据，那么在第一个事务中修改了这个数据后，第二个事务也修改了这个数据。这样第一个事务内的修改结果就被丢失，因此称为丢失修改。 例如：事务1读取某表中的数据A=20，事务2也读取A=20，事务1修改A=A-1，事务2也修改A=A-1，最终结果A=19，事务1的修改被丢失（事务2并没有在事务1结束之后做修改）。
+2. 丢失修改（`写-写`）: 指在一个事务读取一个数据时，另外一个事务也访问了该数据，那么在第一个事务中修改了这个数据后，第二个事务也修改了这个数据。这样第一个事务内的修改结果就被丢失，因此称为丢失修改。 例如：事务1读取某表中的数据A=20，事务2也读取A=20，事务1修改A=A-10，事务2也修改A=A-10，最终结果A=10，事务1的修改被丢失（事务2并没有在事务1结束之后做修改）。
 3. 不可重复读（长事务）（`读-写`）: 指在长事务方法中多次读同一数据。由于第二个事务对数据进行了修改，导致长事务的多次读取数据不一样。
 4. 幻读（Phantom read）（`读-写`）: 幻读与不可重复读类似。它发生在一个事务（T1）读取了几行数据，接着另一个并发事务（T2）插入了一些数据时。在随后的查询中，第一个事务（T1）就会发现多了一些原本不存在的记录，就好像发生了幻觉一样，所以称为幻读。
 
@@ -58,7 +58,7 @@ select * from table_name where ... lock in share mode
 -- select加排它行锁（X)，对于delete、insert语句MySQL会自动给涉及数据集加排它锁X
 select * from table_name where ... for update
 -- 对于delete、insert语句MySQL会自动给涉及数据集加排它行锁X，
--- 对于update语句必须类似于update  goods set total_stocks = total_stocks - 1 才能触发行锁
+-- 对于update语句如update  goods set total_stocks = total_stocks - 1 能够自动触发行锁
 update  goods set total_stocks = total_stocks - 1 ,update_time = now() where goods_id = #{value} and total_stocks - 1 >= 0
 ```
 
@@ -100,6 +100,17 @@ SELECT * FROM emp WHERE empid > 100 FOR UPDATE
 | 5 | 32 | wangwu |
 | 7 | 45 | zhaoliu |
 假如在事务A中执行如下命令，那么age列潜在的临键锁有：(-∞, 10]、(10, 24]、(24, 32]、(24, 45]、(45, +∞]
+```sql
+-- 根据非唯一索引列 UPDATE 某条记录 
+UPDATE table SET name = Vladimir WHERE age = 24; 
+-- 或根据非唯一索引列 锁住某条记录 
+SELECT * FROM table WHERE age = 24 FOR UPDATE; 
+```
+不管执行了上述 SQL 中的哪一句，之后如果在事务 B 中执行以下命令，则该命令会被阻塞：
+```sql
+INSERT INTO table VALUES(100, 26, 'tianqi'); 
+```
+
 # 快照读，undo log实现MVCC多版本并发控制
 上面我们通过对行数据加锁Next-Key-Lock，已经解决了幻读问题。
 
@@ -112,7 +123,7 @@ SELECT * FROM emp WHERE empid > 100 FOR UPDATE
 
 MySQL中，在每一行记录中除了自定义的字段，还有一些隐藏字段：
 - 隐藏主键row_id：当数据库表没定义主键时，InnoDB会以row_id为主键生成一个聚集索引。
-- 历史事务==trx_id==：递增的事务id。只有在对表中的记录做改动时（执行INSERT、DELETE、UPDATE这些语句时）才会为事务分配事务id，只读事务中的事务id值都默认为0。
+- 历史事务ID==trx_id==：递增的事务id。只有在对表中的记录做改动时（执行INSERT、DELETE、UPDATE这些语句时）才会为事务分配事务id，只读事务中的事务id值都默认为0。
 - 回滚指针 roll_pointer：回滚指针指向当前记录的上一个版本（在 undo log 中），形成版本链。
 用一个简单的例子来画一下MVCC中用到的undo log版本链的逻辑图：
 ```sql

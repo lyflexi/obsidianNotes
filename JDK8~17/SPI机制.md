@@ -35,16 +35,17 @@ package spi;
 /**  
  * @Author: ly  
  * @Date: 2024/1/14 13:31  
- */import java.util.List;  
+ */
+import java.util.List;  
 // 查找服务接口  
 public interface Search {  
     // 按关键字查询内容方法  
     String searchDoc(String keyword);  
 }
 ```
-将它打包发布mvn clean install，确保maven仓库中有该jar包，之后提供者在项目中就可以引入这个 jar 包了。
+将它打包发布mvn clean install，确保maven仓库中有该jar包，之后服务方在项目中就可以引入调用方定义的规范了。
 ## 第三方服务厂商
-当服务的提供者，提供了服务接口的一种实现之后，只需要在自己的jar包的META-INF/services/目录里同时创建一个以服务接口命名的文件，该文件的内容就是实现该服务接口的具体实现类。而当外部程序引入厂商提供的依赖时，就能通过该jar包META-INF/services/里的配置文件找到具体的实现类名，并加载实现类，完成依赖的注入，这就是Java SPI的服务发现机制。
+当服务的提供者，提供了服务接口的一种实现之后，同时需要在自己的jar包的META-INF/services/目录里创建一个以服务接口命名的文件，该文件的内容就是实现该服务接口的具体实现类。而当外部程序引入厂商提供的依赖时，就能通过该jar包META-INF/services/里的配置文件找到具体的实现类名，并加载实现类，完成依赖的注入，这就是Java SPI的服务发现机制。
 ### ProviderA模块
 **（2）服务实现商File**
 ```java
@@ -105,9 +106,8 @@ public class DatabaseSearch implements Search {
 ![[Pasted image 20240114165340.png]]
 ## searchofServiceLoader模块
 **（4）服务发现**
-我们在Spring项目中使用API时，会使用Spring的依赖注入（DI）来实现“服务发现”，同样地，SPI的重点也是如何让调用方发现接口的具体实现，也就是SPI的服务发现机制。
-
-SPI的服务发现机制是由ServiceLoader提供，ServiceLoader是Java在JDK 6中引进的新特性，它主要是用来发现并加载一系列的service provider。==ServiceLoader会扫描服务厂商的jar包当中的META-INF/services/目录，该目录定义了厂商实现类的信息，ServiceLoader再通过反射实例化厂商的实现类==
+SPI的重点也是如何让调用方发现接口的具体实现，也就是SPI的服务发现机制。
+SPI的服务发现机制是由JDK6中的ServiceLoader提供，它主要是用来发现并加载一系列的service provider。==ServiceLoader会扫描服务厂商的jar包当中的META-INF/services/目录，该目录定义了厂商实现类的信息，ServiceLoader再通过反射实例化厂商的实现类==
 ```java
 package spi;  
   
@@ -146,7 +146,7 @@ Process finished with exit code 0
 
 # SPI原理
 
-ServiceLoader定义了如下成员变量，==并实现了Iterable接口==
+ServiceLoader定义了如下成员变量，==并实现了迭代器Iterable接口，注意Iterator接口和Iterable接口是两个不同的接口==
 - 实现iterator()方法
 ```java
 public final class ServiceLoader<S>  
@@ -312,9 +312,9 @@ public final class ServiceLoader<S>
 	                 x);  
 	        }  
 ```
-## spi打破了双亲委派机制
+## 逃脱了双亲委派模型的层次结构
 
-上述例子中，通过ServiceLoader.load(ISearch.class) 来加载ISearch接口的实现类，==我们知道Java加载类都离不开类加载器，查看ServiceLoader.load()方法的源码就会发现==，spi加载类是通过java.lang.Thread#setContextClassLoader方法设置了线程上下文加载器
+上述searchofServiceLoader模块的例子中，通过ServiceLoader.load(ISearch.class) 来加载ISearch接口的实现类，==我们知道Java加载类都离不开类加载器，查看ServiceLoader.load()方法的源码就会发现==，spi加载类是通过java.lang.Thread#setContextClassLoader方法设置了线程上下文加载器
 ```java
 public static <S> ServiceLoader<S> load(Class<S> service,  
                                         ClassLoader loader)  
@@ -330,17 +330,19 @@ public static <S> ServiceLoader<S> load(Class<S> service) {
 ```
 
 正常情况下，我们的Java类若未设置类加载器，则会从父线程中继承，在应用程序全局都未设置的情况下，默认是应用程序类加载器，即
-1. JDK 中的本地方法类一般由根加载器（Bootstrp loader）装载，Java核心类库位于<JAVA_HOME>\lib目录中
-2. JDK 中内部实现的扩展类一般由扩展加载器（ExtClassLoader ）实现装载，位于<JAVA_HOME>\lib\ext目录
-3. 而程序中的类文件则由系统加载器（AppClassLoader ）实现装载。
+1. JDK 中的本地Native方法类以及Java核心类由根加载器（Bootstrp loader）装载，Java核心类库位于`<JAVA_HOME>\lib`目录中
+2. JDK 中内部实现的扩展类一般由扩展加载器（ExtClassLoader ）实现装载，位于`<JAVA_HOME>\lib\ext`目录
+3. 而程序中的类文件则由系统加载器（AppClassLoader应用程序类加载器）实现装载。
+==而SPI使用了线程上下文加载器加载所需的SPI代码，逃脱了双亲委派模型的层次结构。==
 
-==而SPI使用了线程上下文加载器加载所需的SPI代码，实际上是父类加载器请求子类加载器来完成加载类的动作，打破了双亲委派模型的层次结构。==
+> 上下文类加载器（Context Class Loader）不属于引导类加载器（Bootstrap Class Loader）、扩展类加载器（ExtClassLoader）或应用程序类加载器（AppClassLoader）。它是Java中的一种特殊类加载器，通常由应用程序或框架在运行时动态设置，并且不属于标准的类加载器层次结构。
+> 上下文类加载器在Java中是通过`Thread`类中的`getContextClassLoader()`和`setContextClassLoader(ClassLoader cl)`方法来管理的。这个类加载器在很多情况下被用来解决类加载问题，比如在一些框架中，它可以用来加载一些框架所需要的类，而不受双亲委派模型的限制。
 
 # SPI业界的应用案例
 
-## 日志框架slf4j
+## 案例一、日志框架slf4j
 
-SPI的实际应用，最常见的应该是日志框架slf4j，它就是个日志门面，并不提供具体的实现，需要绑定其他具体实现。例如可使用log4j2作为具体的绑定器，只需要在 pom 中引入slf4j-log4j12，就可以使用具体功能。
+SPI的实际应用，最常见的应该是日志框架slf4j，它就是个日志门面，并不提供具体的实现，需要绑定其他具体实现。例如可使用log4j12作为具体的绑定器，需要在 pom 中同时引入slf4j和slf4j-log4j12，才可以使用具体功能。
 ```xml
 ```text
 <dependency>
@@ -402,10 +404,10 @@ public class Reload4jServiceProvider implements SLF4JServiceProvider {
     }  
 }
 ```
-
-## 数据库驱动mysql-connector-java
+//由于ServiceLoader的底层是用无参的反射方法newInstance()来创建服务实例，==因此Reload4jServiceProvider提供了一个无参的构造==
+## 案例二、数据库驱动mysql-connector-java
 MySQL驱动用来连接MySQL数据库，但是一个数据库可能会存在不同实现的数据库驱动，因此这也是SPI机制。 
-引入依赖：
+引入依赖：和slf4j的SPI机制不同的是，META-INF/services/java.sql.Driver的Driver是属于jdk自己的契约类
 ```xml
 <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->  
 <dependency>  
@@ -416,9 +418,8 @@ MySQL驱动用来连接MySQL数据库，但是一个数据库可能会存在不�
 ```
 查看mysql-connector-java的jar包，通过META-INF/services/java.sql.Driver加载了com.mysql.jdbc.Driver  
 ![[Pasted image 20240114200812.png]]
-
-查看com.mysql.jdbc.Driver  源码，发现源码当中使用DriverManager的静态方法加载了该厂商的实现类com.mysql.jdbc.Driver。
 ### java.sql.Driver（门面）定义spi
+查看com.mysql.jdbc.Driver  接口源码
 ```java
 
 package java.sql;  
@@ -452,8 +453,9 @@ import java.util.logging.Logger;
 }
 ```
 ### com.mysql.jdbc.Driver（厂商）实现spi
-com.mysql.jdbc.Driver
-Driver extends NonRegisteringDriver，实现了java.sql.Driver规定的的所有接口
+com.mysql.jdbc.Driver implements java.sql.Driver，实现了java.sql.Driver规定的的所有接口。
+
+实现当中使用jdk的DriverManager的静态方法加载了该厂商的实现类com.mysql.jdbc.Driver。
 ```java
 package com.mysql.jdbc;  
   
@@ -494,7 +496,7 @@ try {
 }
 ```
 
-#### 第一步：java.sql.DriverManager jdk使用ServiceLoader创建厂商驱动
+#### java.sql.DriverManager jdk使用ServiceLoader创建厂商驱动
 查看DriverManager源码，jvm在启动的时候，根加载器会加载java.sql.DriverManager，首先执行java.sql.DriverManager的静态代码块
 ```java
  static {  
@@ -527,7 +529,9 @@ private static void loadInitialDrivers() {
         drivers = null;  
     }  
     // If the driver is packaged as a Service Provider, load it.  
-    // Get all the drivers through the classloader    // exposed as a java.sql.Driver.class service.    // ServiceLoader.load() replaces the sun.misc.Providers()  
+    // Get all the drivers through the classloader    
+    // exposed as a java.sql.Driver.class service.   
+     // ServiceLoader.load() replaces the sun.misc.Providers()  
     AccessController.doPrivileged(new PrivilegedAction<Void>() {  
         public Void run() {  
   
@@ -535,7 +539,16 @@ private static void loadInitialDrivers() {
             Iterator<Driver> driversIterator = loadedDrivers.iterator();  
   
             /* Load these drivers, so that they can be instantiated.  
-             * It may be the case that the driver class may not be there             * i.e. there may be a packaged driver with the service class             * as implementation of java.sql.Driver but the actual class             * may be missing. In that case a java.util.ServiceConfigurationError             * will be thrown at runtime by the VM trying to locate             * and load the service.             *             * Adding a try catch block to catch those runtime errors             * if driver not available in classpath but it's             * packaged as service and that service is there in classpath.             */            
+             * It may be the case that the driver class may not be there             
+             * i.e. there may be a packaged driver with the service class             
+             * as implementation of java.sql.Driver but the actual class             
+             * may be missing. In that case a java.util.ServiceConfigurationError             
+             * will be thrown at runtime by the VM trying to locate             
+             * and load the service.             
+             *             
+             * Adding a try catch block to catch those runtime errors             
+             * if driver not available in classpath but it's             
+             * packaged as service and that service is there in classpath.             */            
             try{  
                 while(driversIterator.hasNext()) {  
                     driversIterator.next();  
@@ -552,7 +565,7 @@ private static void loadInitialDrivers() {
     if (drivers == null || drivers.equals("")) {  
         return;  
     }  
-    //jdk保障机制，jdk帮我们加载驱动，即使用户忘记Class.forName("com.mysql.jdbc.Driver");,依然保证驱动加载成功 
+
     String[] driversList = drivers.split(":");  
     println("number of Drivers:" + driversList.length);  
     for (String aDriver : driversList) {  
@@ -563,13 +576,45 @@ private static void loadInitialDrivers() {
         } catch (Exception ex) {  
             println("DriverManager.Initialize: load failed: " + ex);  
         }  
-    }  
+    } 
+
 }
 ```
+
+历史溯源：在早期的Java版本中，加载驱动程序的方式通常是使用`Class.forName("com.mysql.jdbc.Driver")`这种方式，因为在类加载的过程中会执行静态代码块，这样就能够触发驱动程序的注册。如下：
+```java
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class TempMain {
+	// 连接数据库URL格式为：jdbc协议:数据库子协议:主机:端口/连接的数据库名
+	// 和HTTP协议类似
+	private static String url = "jdbc:mysql://localhost:3306/mydb";
+	private static String user = "root";// 用户名
+	private static String password = "root";// 密码
+
+	// 第三种方法：使用驱动管理器类连接数据库
+	public static void main(String[] args) throws SQLException, ClassNotFoundException {
+		//1.在类加载的过程中，如果类加载器成功加载并初始化了`com.mysql.jdbc.Driver`类，它可能会触发静态代码块的执行，
+		//这些静态代码块可能会注册驱动程序到`DriverManager`中，以便后续通过JDBC连接到MySQL数据库时使用。
+		Class.forName("com.mysql.jdbc.Driver"); // 参数是字节码
+
+		// 2.使用java.sql.DriverManager连接到具体的数据库
+		//java.sql.DriverManager使用getConnection包装了驱动Driver本身的连接方法connect
+		Connection conn = DriverManager.getConnection(url, user, password);
+		System.out.println(conn);
+		//输出：com.mysql.jdbc.JDBC4Connection@50675690，表明连接成功
+	}
+}
+```
+
+然而，从JDBC 4.0及以后的版本开始，通常不再需要显式调用`Class.forName()`来加载驱动程序，因为JDBC规范要求驱动程序提供了一个`META-INF/services/java.sql.Driver`文件，其中记录了驱动程序类的名称，这样当应用程序启动时，`DriverManager`会自动加载并注册这些驱动程序类。这其实说的就是spi
+#### DriverManage打破双亲委派模型
 但是与此同时DriverManage内部创建的ServiceLoader打破了Java的双亲委派机制：
 因为DriverManager是java.sql包中的，所以DriverManager本身是被启动类根加载器加载的，只是在加载DriverManager类的时候会触发调用static方法，在static方法中使用的是SPI机制（创建了ServiceLoader打破了Java的双亲委派模型）来切换到上下文类加载器，然后使用上下文类加载器来加载classpath下的MySQL驱动（反射实现厂商类c.newInstance()）。
 ![[Pasted image 20240114204416.png]]
-#### 多了一步：java.sql.DriverManager 注册驱动给用户使用，因此用户最终使用的是java.sql.DriverManager的API#getConnection
+#### DriverManager#getConnection分析
 我们在使用特定的驱动实现时，通过一个简单的配置就而不用修改代码就可以达到效果。代码都是同一份
 ```java
 Connection conn = DriverManager.getConnection(url, user, password);
@@ -589,7 +634,8 @@ public class TempMain {
 
 	// 第三种方法：使用驱动管理器类连接数据库
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
-		// 1.通过得到字节码对象的方式加载静态代码块，从而给java.sql.DriverManager注册驱动程序
+		//1.在类加载的过程中，如果类加载器成功加载并初始化了`com.mysql.jdbc.Driver`类，它可能会触发静态代码块的执行，
+		//这些静态代码块可能会注册驱动程序到`DriverManager`中，以便后续通过JDBC连接到MySQL数据库时使用。
 		Class.forName("com.mysql.jdbc.Driver"); // 参数是字节码
 
 		// 2.使用java.sql.DriverManager连接到具体的数据库

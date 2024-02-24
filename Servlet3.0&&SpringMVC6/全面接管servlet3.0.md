@@ -13,14 +13,14 @@
   <scope>provided</scope>  
 </dependency>
 ```
-查看webjar包，发现springmvc为我们绑定好了Servlet的可插拔组件信息，
+查看spring-webjar包，发现springmvc为我们绑定好了Servlet的可插拔组件信息，
 ![[Pasted image 20240110105818.png]]
 打开jakarta.servlet.ServletContainerInitializer文件信息，绑定了一个SpringServletContainerInitializer
 ```java
 org.springframework.web.SpringServletContainerInitializer
 ```
 # springmvc绑定SpringServletContainerInitializer
-查看SpringServletContainerInitializer的onStart为我们做了什么事情：
+查看SpringServletContainerInitializer的onStartup为我们做了什么事情：
 1. 通过注解@HandlesTypes注入了感兴趣的类WebApplicationInitializer.class
 2. 遍历出所有的感兴趣类型waiClass，并以此反射出实例
 3. 感兴趣的类也属于Initializer，因此再遍历出所有实例的initializer，以次调用实例的onStartup方法
@@ -183,7 +183,8 @@ protected WebApplicationContext createRootApplicationContext() {
  * {@inheritDoc}  
  * <p>This implementation creates an {@link AnnotationConfigWebApplicationContext},  
  * providing it the annotated classes returned by {@link #getServletConfigClasses()}.  
- */@Override  
+ */
+@Override  
 protected WebApplicationContext createServletApplicationContext() {  
     AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();  
     Class<?>[] configClasses = getServletConfigClasses();  

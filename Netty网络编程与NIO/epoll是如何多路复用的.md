@@ -42,8 +42,7 @@ select方法本质其实就是维护了一个文件描述符（fd）数组，以
 cat /proc/sys/fs/file-max
 ```
 
-select方法被调用，首先需要将fd_set从用户空间拷贝到内核空间，然后内核用poll机制（此poll机制非IO多路复用的那个poll方法，可参加附录）直到有一个fd活跃，或者超时了，方法返回。
-
+select方法被调用，首先需要将fd_set从用户空间拷贝到内核空间，然后内核用poll机制（==此poll机制非IO多路复用的那个poll方法，内核驱动 poll 函数是支撑 poll，epoll和 select 内核函数的底层机制，它可以查询一个或多个文件描述符的读写状态==），直到有一个fd活跃，或者超时了，方法返回。
 ```Shell
 int select(int maxfdpl, fd_set readfds, fd_set writefds, fd_set exceptfds, struct timeval timeout);
 ```
@@ -52,18 +51,19 @@ int select(int maxfdpl, fd_set readfds, fd_set writefds, fd_set exceptfds, struc
 - 如果返回值为0，表明超时了
 - 如果返回值为正数，表明有n个fd准备就绪了
 
-
-select方法返回后，需要轮询fd_set，以检查出发生IO事件的fd。这样一套下来，select方法的缺点就很明显了：
+select方法返回后，会把整个fd_set返回给客户端（复制到用户空间）。这样一套下来，select方法的缺点就很明显了：
 
 - fd_set在用户空间和内核空间的频繁复制，效率低
 - 单个进程可监控的fd数量有限制，无论是1024还是2048，对于很多情景来说都是不够用的。
-- 基于轮询来实现，效率低
+- 基于轮询来实现，效率低，客户端需要轮询整个fd_set，找出发生了IO事件的fd
+
+一旦有其中一个fd对应的设备活跃了，那么就
 
 # poll
 
 poll本质上和select没有区别，依然需要进行数据结构的复制，依然是基于轮询来实现。
 
-但区别就是，select使用的是fd数组，==而poll则是维护了一个链表，所以从理论上，poll方法中，单个进程能监听的fd不再有数量限制==。但是select存在的轮询和复制问题，poll依然存在
+但区别就是，select使用的是fd数组，而poll则是维护了一个链表，所以从理论上，poll方法中，单个进程能监听的fd不再有数量限制。但是select存在的轮询和复制问题，poll依然存在
 
 ```Shell
 int poll(struct pollfd fdarray[],nfds_t nfds,int timeout);
@@ -74,26 +74,22 @@ int poll(struct pollfd fdarray[],nfds_t nfds,int timeout);
 `epoll` 是在Linux2.6内核正式提出，完善了select的一些缺点。
 
 - 首先`epoll` 不存在最大连接数的限制，远远比1024或者2048要大，江湖传言1G的内存上能监听10W个端口
-- 最重要的是它定义了就绪事件结构体`epoll_event`来处理，==基于事件驱动来实现的，使用了内核文件级别的回调机制，不会随着fd数量上升而效率下降==，当fd对应的设备发生IO事件时，就会由epoll_ctr执行这个回调函数将该fd放到一个就绪链表中，然后由客户端epoll_wait从该链表中取出一个个fd，以此达到O（1）的时间复杂度
+- 最重要的是它定义了就绪事件结构体`epoll_event`来处理，==基于事件驱动来实现的，使用了内核文件级别的回调机制，不会随着fd数量上升而效率下降：当fd对应的设备发生IO事件时，就会由epoll_ctr执行这个回调函数将该fd放到一个就绪链表中，然后由客户端epoll_wait从该链表中取出一个个fd，以此达到O（1）的时间复杂度==
 - 避免了整个fd_set在内核空间和用户空间之间进行来回复制的问题
 
 epoll操作实际上对应着有三个函数：epoll_create，epoll_ctr，epoll_wait
 
-## epoll_create
+## epoll_create（初始化红黑树）
 
-epoll_create相当于在内核中创建一个存放fd的数据结构。在select和poll方法中，内核都没有为fd准备存放其的数据结构，只是简单粗暴地把数组或者链表复制进来；而epoll则不一样，epoll_create会在内核建立一颗专门用来存放fd结点的红黑树
-## epoll_ctr
+epoll_create相当于在内核中创建一个存放fd的数据结构。在select和poll方法中，内核都没有为fd准备存放其的数据结构，只是简单粗暴地把数组或者链表复制进来；而epoll则不一样，epoll_create会在内核建立一颗专门用来存放fd结点的红黑树，便于高效的管理注册的fd节点
+## epoll_ctr(epoll_controll)
 
-与select和poll不一样的是，select和poll会一次性将监听的所有fd都复制到内核中，而epoll不一样，当需要添加一个新的fd时，会调用epoll_ctr给这个fd注册一个回调函数，然后将该fd结点注册到内核中的红黑树中。
+与select和poll不一样的是，select和poll会一次性将监听的所有fd都复制到内核中，而epoll不一样，当需要添加一个新的fd时，会调用epoll_ctr给这个fd节点注册一个回调函数，之后将该fd结点注册到内核中的红黑树中。
 
-当该fd对应的设备活跃时，会调用该fd上的回调函数，将该结点存放在一个就绪链表中。==这也解决了在内核空间和用户空间之间进行来回复制的问题。==
-
-总的来说，epoll通过红黑树来高效管理注册的事件，而就绪链表则负责快速提供已就绪的事件。这种设计使得epoll在处理大量并发连接时，相比传统的select和poll机制，能够提供更低的延迟和更高的性能。
+当该fd对应的设备活跃时，会调用该fd上的回调函数，将该结点存放在一个就绪链表中，就绪链表则负责快速提供已就绪的事件。==这也解决了在内核空间和用户空间之间进行来回复制fd_set的问题。==
 ## epoll_wait
 
-epoll_wait的做法也很简单，其实直接就是从就绪链表中取结点，==这也解决了轮询的问题==，大幅降低了时间复杂度
-
-
+epoll_wait的做法也很简单，其实直接就是从就绪链表中取结点，==这解决了客户端轮询的问题==，大幅降低了时间复杂度
 # 水平触发和边缘触发
 
 对于select和poll来说，其触发都是水平触发，只要条件满足，对应的事件就会一直被触发。

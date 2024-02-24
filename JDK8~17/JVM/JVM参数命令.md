@@ -16,9 +16,9 @@ Java 虚拟机所管理的内存中最大的一块，Java 堆是所有线程共�
 -Xms2G -Xmx5G
 ```
 
-## 指定新生代内存(Young Generation)
+## 指定新生代内存-Xmn
 
-根据[Oracle官方文档open in new window](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/sizing.html)，在堆总可用内存配置完成之后，第二大影响因素是为 Young Generation 在堆内存所占的比例。默认情况下，YG 的最小大小为 1310 _MB_，最大大小为_无限制_。
+根据[Oracle官方文档open in new window](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/sizing.html)，在堆总可用内存配置完成之后，第二大影响因素是为 Young Generation 在堆内存所占的比例。默认情况下，YoungGeneration 的最小大小为 1310 _MB_，最大大小为_无限制_。
 
 一共有两种指定 新生代内存(Young Ceneration)大小的方法：
 
@@ -48,7 +48,7 @@ GC 调优策略中很重要的一条经验总结是这样说的：
 
 另外，你还可以通过`-XX:NewRatio=<int>`来设置新生代和老年代内存的比值。
 
-比如下面的参数就是设置新生代（包括Eden和两个Survivor区）与老年代的比值为1。也就是说：新生代与老年代所占比值为1：1，新生代占整个堆栈的 1/2。
+比如下面的参数就是设置新生代（包括Eden和两个Survivor区）与老年代的比值为1:1。也就是说新生代占整个堆栈的 1/2。
 
 ```Java
 -XX:NewRatio=1 

@@ -38,7 +38,7 @@ public class Stock {
     private Integer stock = 5000;  
 }
 ```
-# 场景二：开启了事务
+# 场景二：事务方法加锁不当
 我们的解锁代码在事务commit之前生效，这导致了默认隔离级别RR下，会导致其他并发请求读取未提交的数据，又造成了超卖现象
 ```java
 @Service

@@ -151,7 +151,7 @@ lock.ReadWriteLockDemo
 Process finished with exit code 0
 ```
 
-## 锁降级策略
+## 写锁降级与双重检查锁DCL
 
 `ReentrantReadWriteLock`的经典应用场景是锁降级策略，将写入锁降级为读锁。当同一个线程持有了写锁，在没有释放写锁的情况下，它还可以继续获得读锁。降级的规则顺序如下：
 
@@ -221,9 +221,9 @@ public class CachedData {
 data = new Object();
 ```
 
-- 而且==后面我们对于 data 仅仅是读取。如果还一直使用写锁的话，就不能让多个线程同时来读取了，持有写锁是浪费资源的，降低了整体的效率，所以这个时候利用锁的降级是很好的办法，可以提高整体性能。==
+后面我们对于 data 仅仅是读取。如果还一直使用写锁的话，就不能让多个线程同时来读取了，持有写锁是浪费资源的，降低了整体的效率，所以这个时候利用锁的降级是很好的办法，可以提高整体性能。
 
->ReadWriteLock支持锁的降级，不支持升级
+>ReadWriteLock仅支持锁的降级，但不支持升级，原因很简单，因为读锁是共享锁不止一把
 >
 >假设有 A，B 和 C 三个线程，它们都已持有读锁。假设线程 A 尝试从读锁升级到写锁。那么它必须等待 B 和 C 释放掉已经获取到的读锁。如果随着时间推移，B 和 C 逐渐释放了它们的读锁，此时线程 A 确实是可以成功升级并获取写锁。
 >
@@ -353,8 +353,8 @@ public class ReentrantReadWriteLockDemo
 9        正在写入
 9        完成写入
 10        正在写入
-10        完成写入
-1        正在读取
+10        完成写入   备注：写的时候可以读
+1        正在读取    备注：读不完就不能写，写锁饥饿
 2        正在读取
 3        正在读取
 4        正在读取
@@ -402,7 +402,7 @@ StampedLock横空出世 ，StampedLock是JDK1.8中新增的一个读写锁, 也�
 StampedLock有三种访问模式：
 1. Reading（读模式悲观） : 功能和ReentrantReadWriteLock的读锁类似
 2. Writing（写模式悲观） : 功能和ReentrantReadWriteLock的写锁类似
-3. ==Optimistic reading(乐观读模式) : 无锁机制，获取读锁之后其他线程再尝试获取写锁时不会被阻塞，这其实是对读写锁的优化，很乐观认为读取时没人修改，假如被修改再实现升级为悲观读模式==
+3. ==Optimistic reading(乐观读模式) : 无锁机制，很乐观认为大部分情况下读取时没人修改。获取读锁之后，其他线程再尝试获取写锁时不会被阻塞允许修改，假如确实被修改了`stampedLock.validate(stamp)==false`再升级为悲观读模式，这其实是对读写锁的优化==
 
 ## 邮戳锁乐观读演示
 1. 获取stamp ：`long stamp = stampedLock.tryOptimisticRead();`

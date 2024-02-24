@@ -1,7 +1,6 @@
 使用AtomicInteger之后，不需要对方法加锁，也可以实现i++线程安全。
 
 `AtomicInteger`类部分源码：
-
 ```Java
 public final int get() //获取当前的值
 public final int getAndSet(int newValue)//获取当前的值，并设置新的值
@@ -28,7 +27,7 @@ class AtomicIntegerTest {
 }
 ```
 
-`Atomic`原子类的原理就是乐观锁的实现CAS，`Atomic`原子类主要利用和 `UnSafe` 类当中的两个native 方法`objectFieldOffset`和`compareAndSwapInt`和一个自旋操作`getAndAddInt`来保证原子操作，从而避免 synchronized 的高开销，执行效率大为提升。
+`Atomic`原子类的原理就是乐观锁的实现CAS，`Atomic`原子类主要利用和 `UnSafe` 类当中的两个native 方法`objectFieldOffset`和`compareAndSwapInt`来保证原子操作，从而避免 synchronized 的高开销，执行效率大为提升。
 
 ```Java
 //传入反射类型Filed，返回要更新的变量V的内存地valueOffset。
@@ -50,10 +49,6 @@ public final int getAndAddInt(Object var1, long var2, int var4) {
     return var5;
 }
 ```
-
-  
-
-  
 
 # 原子类源码分析
 
@@ -79,7 +74,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
 }
 ```
 
-## AtomicX调用Unsafe的compareAndSet
+## AtomicX调用Unsafe的compareAndSwapInt
 
 ```Java
     ...
@@ -90,22 +85,14 @@ public class AtomicInteger extends Number implements java.io.Serializable {
 ```
 
 CAS的全称是：比较并交换（Compare And Swap）。在CAS中，有这样四个值：
-
 - this：当前变量var
-    
 - valueOffset：变量V的内存地。
-    
 - expect：期望值（旧值）
-    
 - update：新值
-    
 
 比较并交换的过程如下：
-
 1. 判断`this`是否等于`expect`，如果等于，将`this`的值设置为`update`；
-    
 2. 如果不等，说明已经有其它线程更新了变量v，则当前线程放弃更新，什么都不做。
-    
 
 我们以一个简单的例子来解释这个过程：
 
@@ -121,19 +108,18 @@ cas失败：如果不等于5，说明i被其它线程改过了（比如现在i�
 
 当多个线程同时使用CAS操作一个变量时，只有一个会胜出，并成功更新，其余均会失败，但失败的线程并不会被挂起，仅是被告知失败，并且允许再次尝试，当然也允许失败的线程放弃操作。
 
-## AtomicX自旋执行compareAndSwapInt
+# 基于compareAndSwapInt的自旋锁实现
+CAS是实现自旋锁的基础，CAS利用CPU指令保证了操作的原子性，以达到加锁的效果，来看Atomic的另一段源码
 ```Java
     public final int getAndAddInt(Object var1, long var2, int var4) {
         int var5;
-        do {
+        do { //保证先执行do一次
             var5 = this.getIntVolatile(var1, var2);
         } while(!this.compareAndSwapInt(var1, var2, var5, var5 + var4));
 
         return var5;
     }
 ```
-
-CAS是实现自旋锁的基础，CAS利用CPU指令保证了操作的原子性，以达到加锁的效果。
 
 自旋看字面意思也很明白，自己旋转，是指尝试获取锁的线程不会立即阻塞而是采用循环的方式去尝试获取锁，当线程发现锁被占用时，会不断循环判断锁的状态，直到获取。但自旋成功的条件是CAS原语返回成功
 
@@ -142,7 +128,7 @@ CAS是实现自旋锁的基础，CAS利用CPU指令保证了操作的原子性�
 - 缺点是循环会消耗CPU。==解决思路是让JVM支持处理器提供的pause指令==。pause指令能让自旋失败时cpu睡眠一小段时间再继续自旋，从而使得读操作的频率低很多，为解决内存顺序冲突而导致的CPU流水线重排的代价也会小很多。
     
 
-# 手写自旋锁SpinLockDemo
+## 手写自旋锁SpinLockDemo
 
 ```Java
 package com.bilibili.juc.cas;
@@ -152,7 +138,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 题目：实现一个自旋锁,复习CAS思想
- * 自旋锁好处：循环比较获取没有类似wait的阻塞。
+ * 自旋锁好处：循环比较获取锁，避免传统意义上的阻塞。
  *
  * 通过CAS操作完成自旋锁，A线程先进来调用myLock方法自己持有锁5秒钟，B随后进来后发现
  * 当前有线程持有锁，所以只能通过自旋等待，直到A释放锁后B随后抢到。

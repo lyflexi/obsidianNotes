@@ -14,7 +14,7 @@ Java 泛型是JDK 5中引入的一个新特性，泛型提供了编译时类型�
 - 用于构建集合工具类。参考`Collections`中的`sort`、`binarySearch`方法
 - ......
 
-# 泛型的类型擦除
+# 泛型擦除
 
 Java 的泛型是伪泛型，这是因为在运行期间（反射期间），所有的泛型信息都会被擦掉，这也就是通常所说类型擦除
 
@@ -29,7 +29,7 @@ add.invoke(list, "kl");
 System.out.println(list);
 ```
 
-# 运行时解析泛型信息API
+# 泛型解析
 
 泛型擦除是有范围的，定义在类上的泛型信息是不会被擦除的。因为Java编译器在`class`类文件中以`Signature`属性的方式保留了类的泛型信息。
 
@@ -54,6 +54,7 @@ public abstract class BaseDao<T> {
 // 实现类
 public class UserDao extends BaseDao<User> {
     public static void main(String[] args) {
+    
         BaseDao<User> userDao = new UserDao();
 
     }
@@ -62,12 +63,9 @@ public class UserDao extends BaseDao<User> {
 class com.entity.User
 ```
 
-除了上述常见的泛型类之外，Java泛型还支持泛型接口与泛型方法
 
-# 泛型接口
-
+除了上述常见的泛型类之外，Java泛型还支持泛型接口，泛型方法以及泛型参数：如下示例
 泛型接口定义：
-
 ```Java
 public interface Generator<T> {
     public T method();
@@ -96,10 +94,7 @@ class GeneratorImpl implements Generator<String>{
 }
 ```
 
-# 泛型方法
-
-泛型方法定义：
-
+泛型方法定义：含泛型参数与泛型返回值
 ```Java
 public static <E> void printArray(E[] inputArray) {
     for (E element : inputArray) {

@@ -1,18 +1,13 @@
-`AbstractQueuedSynchronizer(AQS)`提供了一套可用于实现锁同步机制的框架，不夸张地说，`AQS`是`JUC`同步框架的基石。`AQS`通过一个`FIFO`双向队列维护线程同步状态，实现类只需要继承该类，并重写指定方法即可实现一套线程同步机制。我相信你应该看过源码了，共享资源指的是`state`状态位：
+`AbstractQueuedSynchronizer(AQS)`，翻译过来叫做抽象队列同步器，它提供了一套可用于实现锁同步机制的框架，不夸张地说，`AQS`是`JUC`同步框架的基石。`AQS`通过一个`FIFO`双向队列维护线程同步状态，实现类只需要继承该类，并重写指定方法即可实现一套线程同步机制。我相信你应该看过源码了，共享资源指的是`state`状态位：
 
 - `state=0`，没占用是0
-    
 - `state=1`，占用了是1
-    
 - `state>1`，大于1是可重入锁
-    
+
+# 同步队列AQS：CLH变体的虚拟双向队列
 ![[Pasted image 20231225160355.png]]
-
-# AQS原理
-
-## Node节点
-
-在`AQS`中如果线程获取资源失败，会包装成一个节点挂载到`CLH`队列上，`AQS`中定义了`Node`类用于包装线程。
+## 节点包装
+在`AQS`中如果线程获取资源失败，会包装成一个节点挂载到AQS队列上，`AQS`中定义了`Node`类用于包装线程。
 ![[Pasted image 20231225161340.png]]
 
 `Node`主要包含5个核心字段：
@@ -103,7 +98,42 @@ public class Mutex extends AbstractQueuedSynchronizer {
     }
 }
 ```
+# 内置条件队列ConditionObject
+但是需要注意，有了AQS队列之后，也不能少了等待队列，而AQS使用的是条件等待队列Condition，因此基于AQS的juc包，远远比基于ObjectMonitor的synchronized关键字更加强大，对比如下：
+- AQS：AQS锁阻塞队列+条件等待队列Condition，因为支持多个条件，所以支持多个等待队列Condition
+- ObjectMonitor：`_EntryList阻塞队列`+`_WaitSet等待队列`，只支持1个`_WaitSet`等待队列
 
+`AQS`中`Node`除了组成阻塞队列外，还在条件队列Condition中得到应用，`AQS`维护了内部类`ConditionObject`，`ConditionObject`的核心定义为：`ConditionObject`通过`Node`也构成了一个`FIFO`的队列，那么`ConditionObject`为`AQS`提供了怎样的功能呢？
+
+```Java
+public class ConditionObject implements Condition, java.io.Serializable {
+    ... 
+    private transient Node firstWaiter;
+    private transient Node lastWaiter;
+    ...
+}
+```
+
+查看`Condition`接口的定义，可以看到其定义的方法与`Object`类的`wait/notify/notifyAll`功能是一致的。
+```Java
+public interface Condition {
+    ...
+    void await() throws InterruptedException;
+    void signal();
+    void signalAll();
+    ...
+}
+```
+
+
+而`AQS`通过`ConditionObject`同样也提供了`wait/notify`机制的阻塞队列。
+
+1. 在条件队列`Condition`中，`Node`采用`nextWaiter`组成单向链表，
+    
+2. 当持有锁的线程发起`condition.await`调用后，会包装为`Node`挂载到Condition条件阻塞队列中；
+    
+3. 当对应`condition.signal`被触发后，==条件队列==中的节点将被唤醒并挂载到AQS锁阻塞队列中。由于`AQS`是`JUC`同步框架的基石，因此`ConditionObject`本质上依然是利用AQS的==锁阻塞（同步）队列==完成的线程同步，只不过`ConditionObject`本身提供一些条件唤醒的能力。略...
+![[Pasted image 20231225161215.png]]
 # 从ReentrantLock开始解读AQS
 
 本次讲解我们走最常用的ReentrantLock的`lock`/`unlock`方法作为案例突破口
@@ -360,38 +390,5 @@ for (;;) {
 > 
 > 3、独占锁释放仅唤醒一个阻塞节点，共享锁可以根据可用数量，一次唤醒多个阻塞节点
 
-# ConditionObject
 
-`AQS`中`Node`除了组成阻塞队列外，还在`ConditionObject`中得到应用，`ConditionObject`的核心定义为：
 
-```Java
-public class ConditionObject implements Condition, java.io.Serializable {
-    ... 
-    private transient Node firstWaiter;
-    private transient Node lastWaiter;
-    ...
-}
-```
-
-`ConditionObject`通过`Node`也构成了一个`FIFO`的队列，那么`ConditionObject`为`AQS`提供了怎样的功能呢？
-
-```Java
-public interface Condition {
-    ...
-    void await() throws InterruptedException;
-    void signal();
-    void signalAll();
-    ...
-}
-```
-
-查看`Condition`接口的定义，可以看到其定义的方法与`Object`类的`wait/notify/notifyAll`功能是一致的。
-
-而`AQS`通过`ConditionObject`同样也提供了`wait/notify`机制的阻塞队列。
-
-1. 在条件队列`Condition`中，`Node`采用`nextWaiter`组成单向链表，
-    
-2. 当持有锁的线程发起`condition.await`调用后，会包装为`Node`挂载到Condition条件阻塞队列中；
-    
-3. 当对应`condition.signal`被触发后，==条件阻塞队列==中的节点将被唤醒并挂载到锁阻塞队列中。由于`AQS`是`JUC`同步框架的基石，因此`ConditionObject`本质上依然是利用AQS的==锁阻塞队列==完成的线程同步，只不过`ConditionObject`本身提供一些条件唤醒的能力。略...
-![[Pasted image 20231225161215.png]]

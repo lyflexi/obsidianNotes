@@ -119,7 +119,6 @@ import java.util.concurrent.*;
         });  
   
         System.out.println(Thread.currentThread().getName() + "线程先去忙其它任务");  
-  
     }  
 }
 ```

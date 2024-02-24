@@ -273,7 +273,7 @@ drop table
 ## 开启慢查询日志
 慢查询日志是MySQL提供的一种日志记录，用于记录在MySQL中响应时间超过阀值的语句。具体来说，慢查询日志会记录那些运行时间超过long_query_time值的SQL语句，其中long_query_time的默认值为10秒。
 
-开启慢查询日志需要手动设置，因为默认情况下MySQL的慢查询日志是禁用的。要开启慢查询日志，可以通过设置slow_query_log的值来开启，例如使用以下命令：
+开启慢查询日志需要手动设置，因为默认情况下MySQL的慢查询日志是禁用的，因为开启慢查询日志会或多或少地带来一定的性能影响，它需要记录每个超时的SQL语句。要开启慢查询日志，可以通过设置slow_query_log的值来开启，例如使用以下命令：
 
 ```shell
 SET GLOBAL slow_query_log = 1;
@@ -288,7 +288,7 @@ slow_query_log_file = /var/lib/mysql/node-slow.log
 
 其中，slow_query_log_file指定了慢查询日志文件的存储路径。
 
-开启慢查询日志后，可以通过查看慢查询日志来分析哪些SQL语句超出了最大忍耐时间值，从而进行优化。但需要注意的是，开启慢查询日志会或多或少地带来一定的性能影响，因为它需要记录每个超时的SQL语句。因此，如果不是调优需要的话，一般不建议开启慢查询日志。
+开启慢查询日志后，可以通过查看慢查询日志来分析哪些SQL语句超出了最大忍耐时间值，从而进行针对性的优化。
 
 制造慢查询并执行。如下。
 
@@ -377,7 +377,7 @@ table | type | possible_keys | key |key_len | ref | rows | Extra EXPLAIN列的�
 	- ref：常用于普通索引和唯一索引扫描。
 	- range：常用于范围查询，比如：between ... and 或 In ，like等操作
 	- index：全索引扫描。执行sql如下
-	- ALL：全表扫描，没走索引。执行sql如下：
+	- ALL：全表扫描，没走索引。
 - Extra附加信息查看：
 	- Using where：表示使用了where条件过滤。
 	- Using temporary：表示是否使用了临时表，一般多见于order by 和 group by语句。

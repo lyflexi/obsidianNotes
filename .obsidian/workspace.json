@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 21.052631578947366,
+        "dimension": 24.940428911834786,
         "children": [
           {
             "id": "d079b05bbd2bd676",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JDK8~17/Java设计模式/动态代理模式.md"
+                "file": "JDK8~17/JVM/常量池与运行时常量池.md"
               }
             },
             "group": "e65e8ecad3329a33"
@@ -24,7 +24,7 @@
       {
         "id": "48e60c444ef36431",
         "type": "tabs",
-        "dimension": 78.94736842105263,
+        "dimension": 75.05957108816521,
         "children": [
           {
             "id": "cb04191d574d8c8b",
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JDK8~17/Java设计模式/动态代理模式.md",
+                "file": "JDK8~17/JVM/常量池与运行时常量池.md",
                 "mode": "source",
                 "source": false
               }
@@ -89,7 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 449.51103591918945
+    "width": 350.51103591918945
   },
   "right": {
     "id": "42bec07740fd88a4",
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JDK8~17/Java设计模式/动态代理模式.md",
+                "file": "JDK8~17/JVM/常量池与运行时常量池.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JDK8~17/Java设计模式/动态代理模式.md",
+                "file": "JDK8~17/JVM/常量池与运行时常量池.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,51 +159,50 @@
   },
   "active": "cb04191d574d8c8b",
   "lastOpenFiles": [
-    "JDK8~17/Java设计模式/包装模式(Wrapper).md",
-    "JDK8~17/Java设计模式/六种类间关系.md",
-    "JDK8~17/Java设计模式/六大设计原则.md",
-    "JDK8~17/Java设计模式/单例模式Singleton.md",
-    "JDK8~17/字符串String/StringBuilder和StringBuffer.md",
-    "JDK8~17/字符串String/String&&StringBuilder.md",
-    "JDK8~17/集合Collection/ConcurrentHashMap源码.md",
-    "JDK8~17/集合Collection/HashMap源码.md",
-    "JDK8~17/MultiThread和本地锁/ThreadLocal原理.md",
-    "SpringCloud与分布式事务/gateway源码.md",
-    "SpringCloud与分布式事务/openfeign源码.md",
-    "README.md",
-    "Attachments/relativePath/readme_obsidian.png",
-    "Attachments/pics/readme_obsidian 1.png",
-    "JDK8~17/集合Collection/集合api.md",
-    "JDK8~17/集合Collection/LinkedHashMap队列实现.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/2.启动过程九大事件与探针监听Listener.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.全生命周期六个过程介入RunListener.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/4.SpringBoot与Spring整合大回环.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
-    "Netty网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
-    "SpringFrameWork/Aware使用场景和源码解读/手写SpringUtil.md",
-    "SpringFrameWork/Aware使用场景和源码解读/Aware接口的生效时机.md",
-    "Attachments/pics/Pasted image 20240212192435.png",
-    "SpringFrameWork/BeanFactory创建Bean（对内部，缓存机制与Bean扩展点）/Bean生命周期四阶段分析.md",
-    "Attachments/pics/Pasted image 20240212190135.png",
-    "Attachments/pics/Pasted image 20240212184916.png",
-    "JDK8~17/MultiThread和本地锁/synchronized关键字与对比.md",
+    "JDK8~17/JVM/各种垃圾回收器/00.垃圾回收概论.md",
+    "JDK8~17/JVM/各种垃圾回收器/01.串行收集器SerialNEW、Old.md",
+    "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
+    "Attachments/pics/Pasted image 20240224202747.png",
+    "JDK8~17/JVM/JVM内存结构.md",
+    "JDK8~17/JVM/双亲委派机制.md",
+    "JDK8~17/SPI机制.md",
+    "JDK8~17/JVM/JVM参数命令.md",
+    "JDK8~17/JVM/源代码的执行过程（执行引擎）.md",
+    "JDK8~17/JVM/各种垃圾回收器/03.并发收集器CMS oldOnly.md",
+    "JDK8~17/JVM/各种垃圾回收器/02.并行收集器ParallelNEW、Old.md",
+    "JDK8~17/JVM/各种垃圾回收器",
+    "JDK8~17/多线程并发控制/synchronized锁升级过程.md",
+    "JDK8~17/多线程并发控制/Semaphore信号量.md",
+    "JDK8~17/多线程并发控制/唤醒方式的演进Monitor-Condition-LockSupport.md",
+    "JDK8~17/多线程并发控制/设置中断标志interrupt.md",
+    "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
+    "JDK8~17/多线程并发控制/对齐填充测试程序JOL.md",
+    "JDK8~17/多线程并发控制/synchronized关键字原理与对比.md",
+    "JDK8~17/多线程并发控制/CompareAndSwap原理.md",
+    "JDK8~17/多线程并发控制/CountDownLatch闭锁与CyclicBarrier栅栏.md",
+    "JDK8~17/多线程并发控制/(锁池-阻塞-Blocked)同步队列AQS.md",
+    "JDK8~17/多线程并发控制/(等待-Waitting)条件队列Condition.md",
+    "Attachments/pics/Pasted image 20240224182840.png",
+    "JDK8~17/多线程并发控制/jvm锁失效场景.md",
+    "JDK8~17/多线程并发控制/Atomic工具类.md",
+    "Attachments/pics/Pasted image 20240224131418.png",
+    "Attachments/pics/Pasted image 20240224131407.png",
+    "Attachments/pics/Pasted image 20240224131221.png",
+    "Attachments/pics/Pasted image 20240224131210.png",
+    "Attachments/pics/Pasted image 20240224130950.png",
+    "Attachments/pics/Pasted image 20240224130942.png",
+    "Attachments/pics/Pasted image 20240224130849.png",
+    "Attachments/pics/Pasted image 20240224130836.png",
+    "JDK8~17/多线程并发控制/解决并发问题的思路与总结.md",
+    "JDK8~17/线程与线程池",
+    "JDK8~17/线程与线程池/如何开启一个Thread（get阻塞）.md",
     "SpringFrameWork/Aware使用场景和源码解读",
-    "JDK8~17/MultiThread和本地锁/synchronized锁升级过程.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/二、实现SpringMvc/5.抽取HandlerMapping 与 HandlerAdapter.md",
-    "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/五、实现ThreadPoolTaskExecutor/3.增加@Async注解，更像Spring了.md",
-    "Attachments/pics/Pasted image 20240206140336.png",
-    "Attachments/pics/0027.png",
-    "Attachments/pics/0026.png",
-    "Attachments/pics/0025.png",
-    "Attachments/pics/0024.png",
     "Netty网络编程与NIO/NIO",
     "Centos服务器/DevOps",
     "Centos服务器/K8s环境/分布式文件系统搭建",
     "Centos服务器/K8s环境/PVPVC细述",
     "Centos服务器/K8s环境/服务暴露与负载均衡细述",
     "Centos服务器/K8s环境/Deployment控制器细述",
-    "Centos服务器/K8s环境/Pod细述",
-    "Centos服务器/K8s环境/K8S环境部署",
-    "Centos服务器/K8s环境"
+    "Centos服务器/K8s环境/Pod细述"
   ]
 }

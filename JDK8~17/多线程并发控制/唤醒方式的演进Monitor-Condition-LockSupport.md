@@ -1,20 +1,11 @@
 线程等待与唤醒的方式演进：
 ![[Pasted image 20231225160229.png]]
-
-LockSupport是用来创建锁和其他同步类的基本线程阻塞原语。LockSupport类使用了一种名为Permit(许可)的概念来做到阻塞和唤醒线程的功能，每个线程都有一个许可(permit)，permit只有两个值1和零，默认是零。可以把许可看成是一种(0,1)信号量(Semaphore)，但与Semaphore不同的是，许可的累加上限是1
-
-- 阻塞方法park：permit默认是0，所以一开始调用park()方法，当前线程就会阻塞,，直到别的线程将当前线程的permit设置为1时, park方法会被唤醒，然后会将permit再次设置为0并返回
-    
-- 唤醒方法unpark：调用unpark(thread)方法后，就会将thread线程的许可permit设置成1(注意多次调用unpark方法,不会累加，permit值上限是1)会自动唤醒thread线程，即之前阻塞中的LockSupport.park()方法失效
-    
-
 LockSupport它的解决的痛点：
-
-- LockSupport不用持有锁块，在代码书写方面不用加锁
-    
-- 唤醒与阻塞的先后顺序，即使先调用唤醒再调用阻塞也不会导致程序卡死报异常，因为unpark获得了一个凭证，之后再调用park方法，就可以名正言顺的依据凭证消费
-    
-
+- LockSupport在代码书写方面不用加锁，也即不用持有锁块
+- 唤醒与阻塞不存在先后顺序，即使先调用唤醒再调用阻塞也不会导致程序卡死报异常，因为unpark获得了一个凭证，之后再调用park方法，就可以名正言顺的依据凭证消费
+LockSupport是用来创建锁和其他同步类的基本线程阻塞原语。LockSupport类使用了一种名为Permit(许可)的概念来做到阻塞和唤醒线程的功能，每个线程都有一个许可(permit)，permit只有两个值1和零，默认是零。可以把许可看成是一种(0,1)信号量(Semaphore)，但与Semaphore不同的是，许可的累加上限是1
+- 阻塞方法park：permit默认是0，所以一开始调用park()方法，当前线程就会阻塞，直到别的线程将当前线程的permit设置为1时, park方法会被唤醒，然后会将permit再次设置为0并返回
+- 唤醒方法unpark：就会将thread线程的许可permit设置成1(注意多次调用unpark方法,不会累加，permit值上限是1)会自动唤醒thread线程，即之前阻塞中的LockSupport.park()方法失效
 # synchronized时期：必须持有同一把锁
 
 线程1：objectLock.wait();

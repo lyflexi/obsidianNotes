@@ -1,8 +1,9 @@
-ThreadLocal提供了线程变量的本地副本，对于线程共享变量如果使用ThreadLocal则无需加锁，同时也更省事省心。可以使用 `get` 和 `set` 方法来获取默认值或将其值更改为当前线程所存的副本的值，从而避免了线程安全问题。
+ThreadLocal提供了线程变量的本地副本，对于线程共享变量如果使用ThreadLocal则无需加锁，从而避免了线程安全问题。可以使用 `get` 和 `set` 方法来获取默认值或将其值更改为当前线程的副本值。
 
-- Thread中持有ThreadLocalMap引用，其key是ThreadLocal ，而不同的value才是最终的值。线程池会复用池中的线程，因此当前线程中的ThreadLocal可能会被复用，所以使用完ThreadLocal之后要及时手动remove，避免影响后续业务逻辑
-- 多个线程Thread也有可能共用一个ThreadLocal 作为key。但是相同的key并不会产生`ThreadLocalMap`当中Entry覆盖的问题，因为多个Thread并不会公用一个`ThreadLocalMap`，而是有几个Thread就会对应几个`ThreadLocalMap`
-    
+- Thread中持有ThreadLocalMap引用，其key是ThreadLocal ，而不同的value才是最终的值。必要的话，你可以同时申请多个ThreadLocal本地变量。
+- 线程池会复用池中的线程，因此当前线程中的ThreadLocal可能会被复用，所以使用完ThreadLocal之后要及时手动remove，避免影响后续业务逻辑
+- 多个线程Thread也有可能共用一个ThreadLocal 作为key。但是相同的key并不会覆盖`ThreadLocalMap`当中Entry，因为多个Thread并不会公用一个`ThreadLocalMap`，而是有几个Thread就会对应几个`ThreadLocalMap`
+
 ![[Pasted image 20231225163711.png]]
 
 # ThreadLocal 源码
@@ -21,14 +22,13 @@ public class Thread implements Runnable {
 }
 ```
 
-从上面Thread类 源代码可以看出Thread 类中有一个 threadLocals 和 一个 inheritableThreadLocals 变量，它们都是 ThreadLocalMap 类型的变量，我们可以把 ThreadLocalMap 理解为ThreadLocal 类中定制化的 HashMap（内部类）。
+从上面Thread类 源代码可以看出Thread 类中有一个 threadLocals 和 一个 inheritableThreadLocals 变量，它们都是 ThreadLocalMap 类型的变量，而ThreadLocalMap为ThreadLocal 类中定制化的 HashMap（内部类）。
 
 默认情况下这两个变量都是 null，只有当前线程调用 ThreadLocal 类的 set或get方法时才创建它们。
 
 ## ThreadLocal类源码#初始化HashMap
 
-ThreadLocal 在自己的getset方法内对ThreadLocalMap进行初始化 ，以及对value进行装填
-
+ThreadLocalMap懒加载：ThreadLocal 在自己的getset方法内对ThreadLocalMap进行初始化 ，以及对value进行装填
 ```Java
    public void set(T value) {
         Thread t = Thread.currentThread();
@@ -172,7 +172,7 @@ pool-1-thread-1	beforeInt:0	 afterInt: 1
 但是value却不一定能够被回收，ThreadLocalMap还与Current Thread存在一个强引用关系（关联关系）
 ![[Pasted image 20231225163743.png]]
 
-因为对于线程池当中的线程会被复用，有可能会导致线程对象迟迟不会结束。假如我们不做任何措施的话，ThreadLocalMap 中就会出现很多 key 为 null 的 Entry，value 永远无法被 GC 回收，这个时候就可能会产生内存泄露。如下图所示：
+因为对于线程池需要复用池中的线程，所以会导致线程对象迟迟不会结束。假如我们不做任何措施的话，ThreadLocalMap 中就会出现很多 key 为 null 的 Entry，value 永远无法被 GC 回收，这个时候就可能会产生内存泄露。如下图所示：
 ![[Pasted image 20231225163748.png]]
 
 ThreadLocalMap 实现中已经考虑了这种情况，使用完 ThreadLocal方法后最好手动调用remove()方法会清理掉 key 为 null 的整个Entry。
@@ -181,7 +181,7 @@ ThreadLocalMap 实现中已经考虑了这种情况，使用完 ThreadLocal方�
 ![[Pasted image 20231225163755.png]]
 ![[Pasted image 20231225163800.png]]
 
-注意，是在gc将对象从内存中清除出去**之前**做的操作
+==注意，finalize()是在gc将对象从内存中清除出去**之前**做的操作==
 
 ```Java
 
@@ -189,14 +189,11 @@ protected void finalize() throws Throwable { }
 ```
 
 ## 强引用：最常见
-
-当内存不足,JVM开始垃圾回收,对于强引用的对象,就算是出现了OOM也不会对该对象进行回收,机器死了都不收。
-
-**强引用是我们最常见的普通对象引用**,只要还有强引用指向一个对象,就能表明对象还“活着”,垃圾收集器不会碰这种对象。 在Java 中最常见的就是强引用,把一个对象赋给一个引用变量,这个引用变量就是一个强引用。 当一个对象被强引用变量引用时,它处于可达状态,它是不可能被垃圾回收机制回收的, 即使该对象以后永远都不会被用到,JVM也不会回收。
+强引用是我们最常见的普通对象引用，只要还有强引用指向一个对象,就能表明对象还“活着”，垃圾收集器不会碰这种对象。 在Java 中最常见的就是强引用是把一个对象赋给一个引用变量，那么这个引用变量就是一个强引用。 当一个对象被强引用变量引用时，它处于可达状态，它是不可能被垃圾回收机制回收的，即使该对象以后永远都不会被用到，JVM也不会回收。
 
 因此强引用是造成Java内存泄漏的主要原因之一。
 
-对于一个普通的对象,如果没有其他的引用关系,只要超过了引用的作用域或者显式地将相应(强)引用赋值为 null一般认为才是可以被垃圾收集的了(当然具体回收时机还是要看垃圾收集策略)。
+对于一个普通的对象，只能是超过了引用的作用域或者显式地将相应(强)引用赋值为 null才是可以被垃圾收集的了(当然具体回收时机还是要看垃圾收集策略)。
 
 ```Java
 package com.bilibili.juc.tl;
@@ -239,20 +236,26 @@ public class ReferenceDemo
     }
 }
 ```
+打印信息：
+```shell
+gc before: org.lyflexi.reference.MyObject@5cad8086
+-------invoke finalize method~!!!
+gc after: null
 
-## 软引用：看情况
+Process finished with exit code 0
+```
+
+## 软引用SoftReference：看剩余内存
 
 软引用是一种相对强引用弱化了一些的引用,需要用java.lang.ref.SoftReference类来实现,可以让对象豁免一些垃圾收集。
 
-对于只有软引用的对象来说：
+对于只有软引用的对象来说，当系统内存充足时它不会被回收，只有当系统内存不足时它 会被回收。
 
-- 当系统内存充足时它 不会 被回收
-    
-- 当系统内存不足时它 会被回收。
-    
-
-软引用通常用在对内存敏感的程序中,比如高速缓存就有用到软引用,内存够用的时候就保留,不够用就回收!
-![[Pasted image 20231225163817.png]]
+`-Xmx`、`-Xms` 和 `-Xmn` 是 Java 虚拟机（JVM）参数，用于调整 JVM 的堆内存大小和分配策略。它们的作用和区别如下：
+1. `-Xmx`: 这个参数设置了 Java 堆的最大内存大小。
+2. `-Xms`: 这个参数设置了 JVM 启动时分配给 Java 堆的初始内存大小。
+3. `-Xmn`: 这个参数设置了新生代（Young Generation）的大小。
+![[Pasted image 20240224103801.png]]
 
 ```Java
 package com.bilibili.juc.tl;
@@ -274,48 +277,37 @@ class MyObject
 }
 
 
-/**
- * @auther zzyy
- /
-public class ReferenceDemo
-{
-    public static void main(String[] args)
-        SoftReference<MyObject> softReference = new SoftReference<>(new MyObject());
-        //System.out.println("-----softReference:"+softReference.get());
-
-        System.gc();
-        try { TimeUnit.SECONDS.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
-        System.out.println("-----gc after内存够用: "+softReference.get());
-
-        try
-        {
-            byte[] bytes = new byte[20  1024 * 1024];//20MB对象
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            System.out.println("-----gc after内存不够: "+softReference.get());
-        }
-
-    }
-
-
+public class SoftReferenceTest {  
+  
+    public static void main(String[] args) {  
+        SoftReference<MyObject> softReference = new SoftReference<>(new MyObject());  
+        System.out.println("-----softReference:"+softReference.get());  
+  
+        System.gc();  
+        try { TimeUnit.SECONDS.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }  
+        System.out.println("-----gc after内存够用: "+softReference.get());  
+  
+        try  
+        {  
+            byte[] bytes = new byte[20 * 1024 * 1024];//20MB对象  
+        }catch (Exception e){  
+            e.printStackTrace();  
+        }finally {  
+            System.out.println("-----gc after内存不够: "+softReference.get());  
+        }  
+    }  
 }
 ```
-
-假如有一个应用需要读取大量的本地图片 :
-
-我 如果每次读取图片都从硬盘读取则会严重影响性能,
-
-- 如果一次性全部加载到内存中又可能造成内存溢出。
-    
-
-此时使用软引用可以解决这个问题。 设计思路是 : 用一个HashMap来保存图片的路径和相应图片对象关联的软引用之间的映射关系,在内存不足时, JVM会自动回收这些缓存图片对象所占用的空间,从而有效地避免了OOM的问题。
-
-```Java
-Map<StringSoftReference<Bitmap>> imageCache = new HashMap<String, SoftReference<Bitmap>>();
+打印信息：
+```shell
+-----softReference:org.lyflexi.reference.MyObject@5cad8086
+-----gc after内存够用: org.lyflexi.reference.MyObject@5cad8086
+-----gc after内存不够: null
+-------invoke finalize method~!!!
+Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+	at org.lyflexi.reference.SoftReferenceTest.main(SoftReferenceTest.java:22)
 ```
-
-## 弱引用：无法豁免
+## 弱引用WeakReference：无法豁免如ThreadLocal
 
 如果一个对象只具有弱引用，那就类似于**可有可无的生活用品**。弱引用与软引用的区别在于：弱引用比软引用的生存期更短。在垃圾回收器线程扫描它所管辖的内存区域的过程中，一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，都会回收它的内存。
 
@@ -341,89 +333,103 @@ class MyObject
 }
 
 
-/**
- * @auther zzyy
- */
-public class ReferenceDemo
-{
-    public static void main(String[] args)
-    {
-        WeakReference<MyObject> weakReference = new WeakReference<>(new MyObject());
-        System.out.println("-----gc before 内存够用： "+weakReference.get());
-
-        System.gc();
-        //暂停几秒钟线程
-        try { TimeUnit.SECONDS.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
-
-        System.out.println("-----gc after 内存够用： "+weakReference.get());
-    }
+/**  
+ * @Author: ly  
+ * @Date: 2024/2/24 10:41  
+ */public class WeakReferenceTest {  
+    public static void main(String[] args) {  
+        WeakReference<MyObject> weakReference = new WeakReference<>(new MyObject());  
+        System.out.println("-----gc before 内存够用： "+weakReference.get());  
+  
+        System.gc();  
+        //暂停几秒钟线程  
+        try { TimeUnit.SECONDS.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }  
+  
+        System.out.println("-----gc after 内存够用： "+weakReference.get());  
+    }  
 }
 ```
+打印信息：
+```shell
+-----gc before 内存够用： org.lyflexi.reference.MyObject@5cad8086
+-------invoke finalize method~!!!
+-----gc after 内存够用： null
 
-## 虚引用
+Process finished with exit code 0
+```
 
-- **引用队列：**虚引用PhantomReference不能单独使用，必须和引用队列 (ReferenceQueue)联合使用。与其他几种引用都不同，虚引用并不会决定对象的生命周期，也不能通过它访问对象。如果一个对象仅持有虚引用，那么它就和没有任何引用一样,在任何时候都可能被垃圾回收器回收。对象被回收之后，有东西将被装入引用队列 (ReferenceQueue)中。**gc之后！！！**
-    
-- **总是返回null：**PhantomReference的get方法总是返回null 虚引用的主要作用是跟踪对象被垃圾回收的状态。 PhantomReference的get方法总是返回null,因此无法访问对应的引用对象
-    
-- **通知机制：**虚引用仅仅是提供了一种确保对象被 finalize以后,做某些事情的通知机制。处理监控通知使用，换句话说,设置虚引用关联对象的唯一目的,就是在这个对象被收集器回收的时候收到一个系统通知或者后续添加进一步的处理,用 来实现比finalize机制更灵活的回收操作
-![[Pasted image 20231225163829.png]]
-
+## 虚引用PhantomReference：搭配引用队列
+虚引用PhantomReference不能单独使用，必须和引用队列 (ReferenceQueue)联合使用。与其他几种引用都不同，虚引用并不会决定对象的生命周期，也不能通过它访问对象。如果一个对象仅持有虚引用，那么它就和没有任何引用一样，在任何时候都可能被垃圾回收器回收。对象被回收之后，有东西将被装入引用队列 (ReferenceQueue)中。gc之后！！！
+- PhantomReference的get方法总是返回null：无法访问对应的引用对象，虚引用的主要作用是跟踪对象被垃圾回收的状态。
+- 通知机制：虚引用仅仅是在对象被gc以后，做某些事情的通知机制。对比finalize()，finalize()是gc之前生效
+同样配置jvm参数，-Xms10 -Xmx10m
+![[Pasted image 20240224113244.png]]
+测试用例：
 ```Java
-package com.bilibili.juc.tl;
-
-import java.lang.ref.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-class MyObject
-{
-    //这个方法一般不用复写，我们只是为了教学给大家演示案例做说明
-    @Override
-    protected void finalize() throws Throwable
-    {
-        // finalize的通常目的是在对象被不可撤销地丢弃之前执行清理操作。
-        System.out.println("-------invoke finalize method~!!!");
-    }
-}
-
-
-/**
- * @auther zzyy
- /
-public class ReferenceDemo
-{
-    public static void main(String[] args)
-    {
-        MyObject myObject = new MyObject();
-        ReferenceQueue<MyObject> referenceQueue = new ReferenceQueue<>();
-        PhantomReference<MyObject> phantomReference = new PhantomReference<>(myObject,referenceQueue);
-        //System.out.println(phantomReference.get());
-
-        List<byte[]> list = new ArrayList<>();
-
-        new Thread(() -> {
-            while (true){
-                list.add(new byte[1  1024 * 1024]);
-                try { TimeUnit.MILLISECONDS.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
-                System.out.println(phantomReference.get()+"\t"+"list add ok");
-            }
-        },"t1").start();
-
-        new Thread(() -> {
-            while (true){
-                Reference<? extends MyObject> reference = referenceQueue.poll();
-                if(reference != null){
-                    System.out.println("-----有虚对象回收加入了队列");
-                    break;
-                }
-            }
-        },"t2").start();
-
-    }
+public class PhantomReferenceTest {  
+    private static final List<Object> TEST_DATA = new LinkedList<>();  
+    private static final ReferenceQueue<MyObject> QUEUE = new ReferenceQueue<>();  
+  
+    public static void main(String[] args) {  
+        MyObject obj = new MyObject();  
+        PhantomReference<MyObject> phantomReference = new PhantomReference<>(obj, QUEUE);  
+  
+        // 该线程不断读取这个虚引用，并不断往列表里插入数据，以促使系统早点进行GC  
+        new Thread(() -> {  
+            while (true) {  
+                TEST_DATA.add(new byte[1024 * 1000]);//1m  
+                try {  
+                    Thread.sleep(1000);  
+                } catch (InterruptedException e) {  
+                    e.printStackTrace();  
+                    Thread.currentThread().interrupt();  
+                }  
+                System.out.println(phantomReference.get());  
+            }  
+        }).start();  
+  
+        // 这个线程不断读取引用队列，当弱引用指向的对象呗回收时，该引用就会被加入到引用队列中  
+        new Thread(() -> {  
+            while (true) {  
+                Reference<? extends MyObject> poll = QUEUE.poll();  
+                if (poll != null) {  
+                    System.out.println("--- 虚引用对象被jvm回收了 ---- " + poll);  
+                    System.out.println("--- 回收对象 ---- " + poll.get());  
+                }  
+            }  
+        }).start();  
+  
+        obj = null;  
+  
+        try {  
+            Thread.currentThread().join();  
+        } catch (InterruptedException e) {  
+            e.printStackTrace();  
+            System.exit(1);  
+        }  
+    }  
+  
+  
 }
 ```
+打印信息：
+```shell
+null
+null
+null
+null
+null
+-------invoke finalize method~!!!
+null
+null
+Exception in thread "Thread-0" java.lang.OutOfMemoryError: Java heap space
+	at org.lyflexi.reference.PhantomReferenceTest.lambda$main$0(PhantomReferenceTest.java:30)
+	at org.lyflexi.reference.PhantomReferenceTest$$Lambda$1/1452126962.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:750)
+--- 虚引用对象被jvm回收了 ---- java.lang.ref.PhantomReference@25f209f5
+--- 回收对象 ---- null
+```
+
 ![[Pasted image 20231225163839.png]]
 
 # ThreadLocal实践

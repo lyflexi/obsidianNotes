@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JDK8~17/JVM/常量池与运行时常量池.md"
+                "file": "RocketMQ/RocketMQ架构.md"
               }
             },
             "group": "e65e8ecad3329a33"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JDK8~17/JVM/常量池与运行时常量池.md",
+                "file": "RocketMQ/RocketMQ架构.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JDK8~17/JVM/常量池与运行时常量池.md",
+                "file": "RocketMQ/RocketMQ架构.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JDK8~17/JVM/常量池与运行时常量池.md",
+                "file": "RocketMQ/RocketMQ架构.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,17 +159,23 @@
   },
   "active": "cb04191d574d8c8b",
   "lastOpenFiles": [
-    "JDK8~17/JVM/各种垃圾回收器/00.垃圾回收概论.md",
-    "JDK8~17/JVM/各种垃圾回收器/01.串行收集器SerialNEW、Old.md",
+    "RocketMQ/rocketmq秒杀设计.md",
+    "RocketMQ/RocketMQ架构.md",
+    "RocketMQ/RocketMQ常见面试问题.md",
+    "Redis缓存/缓存一致性.md",
+    "MySQL/MySQL日志.md",
     "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
+    "JDK8~17/JVM/各种垃圾回收器/03.并发收集器CMS oldOnly.md",
+    "JDK8~17/JVM/各种垃圾回收器/00.垃圾回收概论.md",
+    "JDK8~17/JVM/各种垃圾回收器/02.并行收集器ParallelNEW、Old.md",
+    "JDK8~17/JVM/各种垃圾回收器/01.串行收集器SerialNEW、Old.md",
+    "JDK8~17/JVM/常量池与运行时常量池.md",
     "Attachments/pics/Pasted image 20240224202747.png",
     "JDK8~17/JVM/JVM内存结构.md",
     "JDK8~17/JVM/双亲委派机制.md",
     "JDK8~17/SPI机制.md",
     "JDK8~17/JVM/JVM参数命令.md",
     "JDK8~17/JVM/源代码的执行过程（执行引擎）.md",
-    "JDK8~17/JVM/各种垃圾回收器/03.并发收集器CMS oldOnly.md",
-    "JDK8~17/JVM/各种垃圾回收器/02.并行收集器ParallelNEW、Old.md",
     "JDK8~17/JVM/各种垃圾回收器",
     "JDK8~17/多线程并发控制/synchronized锁升级过程.md",
     "JDK8~17/多线程并发控制/Semaphore信号量.md",
@@ -181,10 +187,7 @@
     "JDK8~17/多线程并发控制/CompareAndSwap原理.md",
     "JDK8~17/多线程并发控制/CountDownLatch闭锁与CyclicBarrier栅栏.md",
     "JDK8~17/多线程并发控制/(锁池-阻塞-Blocked)同步队列AQS.md",
-    "JDK8~17/多线程并发控制/(等待-Waitting)条件队列Condition.md",
     "Attachments/pics/Pasted image 20240224182840.png",
-    "JDK8~17/多线程并发控制/jvm锁失效场景.md",
-    "JDK8~17/多线程并发控制/Atomic工具类.md",
     "Attachments/pics/Pasted image 20240224131418.png",
     "Attachments/pics/Pasted image 20240224131407.png",
     "Attachments/pics/Pasted image 20240224131221.png",
@@ -193,9 +196,7 @@
     "Attachments/pics/Pasted image 20240224130942.png",
     "Attachments/pics/Pasted image 20240224130849.png",
     "Attachments/pics/Pasted image 20240224130836.png",
-    "JDK8~17/多线程并发控制/解决并发问题的思路与总结.md",
     "JDK8~17/线程与线程池",
-    "JDK8~17/线程与线程池/如何开启一个Thread（get阻塞）.md",
     "SpringFrameWork/Aware使用场景和源码解读",
     "Netty网络编程与NIO/NIO",
     "Centos服务器/DevOps",

@@ -1,9 +1,7 @@
 # EventListenerMethodProcessor
 
 我们可以点进去@EventListener这个注解里面去看一看，如下图所示，可以看到这个注解上面有一大堆的描述，描述中有一个醒目的字眼，即参考EventListenerMethodProcessor。意思可能是说，如果你想搞清楚@EventListener注解的内部工作原理，那么可以参考EventListenerMethodProcessor这个类。
-
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=MTFiOWZhNzM0YjI1YThmNmE1OGM4YmI0N2M5ZTUzOTlfcWNVdzVOb2dNbFN6SEE3cWpZSUtiMFRVb0VLMVlVeWxfVG9rZW46STAxc2JtbTJVbzFpR3J4MXlpcmNEVHFpbm5jXzE3MDQ1NTIwMTk6MTcwNDU1NTYxOV9WNA)
-
+![[Pasted image 20240227091900.png]]
 EventListenerMethodProcessor是啥呢？它就是一个处理器，其作用是来解析方法上的@EventListener注解的。
 打开EventListenerMethodProcessor的diagram，虽然EventListenerMethodProcessor实现了三个接口：
 - SmartInitializingSingleton, 

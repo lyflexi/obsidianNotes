@@ -1,5 +1,5 @@
 天下所有语言的执行过程分为两种：
-- 编译型语言Compile：编译器，快，将源代码转换为机器码
+- 编译型语言Compile：编译器，快，将源代码转换为机器码，注：Java源代码编译为字节码的过程不属于此处的Compile范畴
 - 解释型语言Interpretor：解释器，慢，因为每行代码都需要被解释执行
 
 # Intercepter和Jit
@@ -8,10 +8,10 @@
 - 当jvm探测到热点代码时，就会触发JIT即时编辑器，将热点源代码（字节码）翻译成机器码并存入热点缓存CodeCache中
 Java代码默认解释执行，只有热点代码才会编译成机器码，见下图：
 ![[Pasted image 20240130132635.png]]
-# Client Compiler和Server Compiler
-JVM中集成了==两种JIT编译器，Client Compiler和Server Compiler==，它们的作用也不同。Client Compiler注重启动速度和局部的优化，Server Compiler则更加关注全局的优化，性能会更好，但由于会进行更多的全局分析，所以启动速度会变慢。两种编译器有着不同的应用场景，在虚拟机中同时发挥作用。
-- HotSpot VM带有一个Client Compiler C1编译器。这种编译器启动速度快，但是性能比较Server Compiler来说会差一些。
-- Hotspot虚拟机中使用的Server Compiler有两种：C2和Graal。
+# JIT之Client Compiler和Server Compiler
+JVM中集成了==两种JIT编译器，Client Compiler和Server Compiler==，它们的作用也不同。Client Compiler注重启动速度和局部的优化，Server Compiler则更加关注全局的优化，性能会更好，但由于会进行更多的全局分析，所以启动速度会变慢。两种编译器有着不同的应用场景，在HotSpot虚拟机中同时发挥作用。
+- Client Compiler C1编译器。这种编译器启动速度快，但是性能比较Server Compiler来说会差一些。
+- Server Compiler有两种：C2和Graal。
 # Tiered Compiler分层编译技术
 Java 7开始引入了分层编译(Tiered Compiler)的概念，它结合了C1和C2的优势，追求启动速度和峰值性能的一个平衡。执行java -version
 可以看到mixed mode模式，也就是jdk默认支持分层编译

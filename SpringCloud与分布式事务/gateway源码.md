@@ -4,7 +4,7 @@
 > 用户服务  
 > 商品服务  
 > 购物车服务  
-> 交易服务  
+> 交易服务（订单服务）
 > 支付服务  
 > 还有横向拆分的hm-api，统一存放所有的feign远程调用客户端  
 
@@ -94,8 +94,8 @@ public List<AddressDTO> findMyAddresses() {
 }
 ```
 我们会通过分布式网关技术解决上述问题，新建hm-gateway微服务模块
-1. 网关路由转发，解决前端请求入口的问题。  
-2. 网关鉴权，解决统一登录校验和用户信息获取的问题。  
+1. 网关路由转发，统一前端请求入口。  
+2. 网关过滤器统一鉴权并传递用户认证信息至SpringMVC的拦截器。  
 还有一点，对于每一个模块比如商品模块item-service，生产环境往往会对这个模块做集群部署，此时==网关还能够在后端进行负载均衡寻址==
 # uri+predicates解决请求转发问题
 网关调用nacos，实时更新服务列表  
@@ -127,7 +127,7 @@ public class GatewayProperties {
   
     /**  
      * List of filter definitions that are applied to every route.     */ 
-    //全局路由配置defaultFilters
+    //全局过滤器配置defaultFilters
     private List<FilterDefinition> defaultFilters = new ArrayList<>();  
   
     private List<MediaType> streamingMediaTypes = Arrays.asList(MediaType.TEXT_EVENT_STREAM,  

@@ -1,5 +1,81 @@
-注解注入的实现是依赖Bean生命周期的第一个扩展点InstantiationAwareBeanPostProcessor来实现的
-InstantiationAwareBeanPostProcessor接口有三个方法：
+来看Spring属性注入的源码片段：
+```java
+protected void populateBean(String beanName, RootBeanDefinition mbd, @Nullable BeanWrapper bw) {
+    if (bw == null) {...}
+
+	// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the  
+	// state of the bean before properties are set. This can be used, for example,  
+	// to support styles of field injection.  
+	// 属性填充之前，提供一个修改属性的机会
+	if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {  
+	    for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {  
+	       if (!bp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {  
+	          return;  
+	       }  
+	    }  
+	}
+	
+    //属性值
+    PropertyValues pvs = (mbd.hasPropertyValues() ? mbd.getPropertyValues() : null);  
+  
+	int resolvedAutowireMode = mbd.getResolvedAutowireMode();  
+	// 属性填充，根据@Autowired注入属性
+	if (resolvedAutowireMode == AUTOWIRE_BY_NAME || resolvedAutowireMode == AUTOWIRE_BY_TYPE) {  
+	    MutablePropertyValues newPvs = new MutablePropertyValues(pvs);  
+	    // Add property values based on autowire by name if applicable.  
+	    if (resolvedAutowireMode == AUTOWIRE_BY_NAME) {  
+	       autowireByName(beanName, mbd, bw, newPvs);  
+	    }  
+	    // Add property values based on autowire by type if applicable.  
+	    if (resolvedAutowireMode == AUTOWIRE_BY_TYPE) {  
+	       autowireByType(beanName, mbd, bw, newPvs);  
+	    }  
+	    pvs = newPvs;  
+	}  
+	// 扩展点：属性填充之后，根据AutowiredAnnotationBeanPostProcessor检查、修改或补充bean的属性信息，以满足特定的需求。
+	if (hasInstantiationAwareBeanPostProcessors()) {  
+	    if (pvs == null) {  
+	       pvs = mbd.getPropertyValues();  
+	    }  
+	    for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {  
+			//默认提供的实现里会调用AutowiredAnnotationBeanPostProcessor的postProcessProperties()方法直接给对象中的属性赋值
+			//	AutowiredAnnotationBeanPostProcessor会处理@Autowired、@Value、 @Inject 注解
+			//	CommonAnnotationBeanPostProcessor会处理@Resource注解
+	       PropertyValues pvsToUse = bp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);  
+	       if (pvsToUse == null) {  
+	          return;  
+	       }  
+	       pvs = pvsToUse;  
+	    }  
+	}
+
+
+    //依赖项检查，确保所有公开的属性都已设置
+    //依赖项检查可以是对象引用、“简单”属性或所有(两者都是)
+    if (needsDepCheck) {
+        if (filteredPds == null) {
+            filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
+        }
+        checkDependencies(beanName, mbd, filteredPds, pvs);
+    }
+
+    if (pvs != null) {
+        //3.属性赋值（把pvs里的属性值给bean进行赋值!!!!!）
+        //autowire自动注入，其实只是收集注入的值，放到pvs中，最终赋值的动作还是在这里！！
+        //PropertyValues中的值优先级最高，如果当前Bean中的BeanDefinition中设置了PropertyValues，那么最终将是PropertyValues中的值，覆盖@Autowired的
+        applyPropertyValues(beanName, mbd, bw, pvs);
+    }
+}
+```
+# autowireByType源码
+
+在Spring Framework中，`autowireByType` 和 `postProcessProperties` 是两种不同的机制，它们的作用和实现方式也不同。
+
+1. `autowireByType` 是一种自动装配（autowiring）的方式，它允许Spring根据类型自动装配bean之间的依赖关系。当一个bean被标记为需要自动装配时，Spring会尝试寻找与该bean类型匹配的其他bean，并将它们注入到该bean中。这种自动装配的方式基于bean的类型信息，而不是名称。通常，你可以使用`@Autowired`注解来启用`autowireByType`，或者在XML配置中使用`autowire="byType"`。
+    
+2. `postProcessProperties` 是一个Bean后处理器（InstantiationAwareBeanPostProcessor），它允许在Spring容器实例化bean并将其属性设置之后，对这些属性进行一些定制化的处理。当Spring实例化一个bean并设置其属性后，会调用所有注册的`postProcessProperties`方法，从而允许开发人员对bean的属性进行定制化处理。通常情况下，`postProcessProperties`方法可以用来检查、修改或补充bean的属性信息，以满足特定的需求。
+# postProcessProperties源码
+postProcessProperties(PropertyValues pvs, Object bean, String beanName) 是扩展点InstantiationAwareBeanPostProcessor的第三个方法：
 ```java
 
  public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {  
@@ -19,82 +95,16 @@ InstantiationAwareBeanPostProcessor接口有三个方法：
   
 }
 ```
-与@Autowired和@Resource依赖注入相关的是InstantiationAwareBeanPostProcessor接口的第三个方法：
-default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) 
-```java
-protected void populateBean(String beanName, RootBeanDefinition mbd, @Nullable BeanWrapper bw) {
-    if (bw == null) {...}
-
-    // Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
-    // state of the bean before properties are set. This can be used, for example,
-    // to support styles of field injection.
-    // 实例化之后，属性填充之前
-    if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {...}
-
-    //属性值，用来通过set方法注入的值
-    PropertyValues pvs = (mbd.hasPropertyValues() ? mbd.getPropertyValues() : null);
-
-	...
-
-    boolean hasInstAwareBpps = hasInstantiationAwareBeanPostProcessors();
-    boolean needsDepCheck = (mbd.getDependencyCheck() != AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
-	
-    PropertyDescriptor[] filteredPds = null;
-    if (hasInstAwareBpps) {
-        if (pvs == null) {
-            pvs = mbd.getPropertyValues();
-        }
-        //@Autowired和@Resource注解注入
-        for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
-            //默认提供的实现里会调用AutowiredAnnotationBeanPostProcessor的postProcessProperties()方法直接给对象中的属性赋值
-            //	AutowiredAnnotationBeanPostProcessor内部并不会处理pvs，直接返回了
-            //	AutowiredAnnotationBeanPostProcessor会处理@Autowired、@Value、 @Inject 注解
-            //	CommonAnnotationBeanPostProcessor会处理@Resource注解
-            PropertyValues pvsToUse = bp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
-            if (pvsToUse == null) {
-                if (filteredPds == null) {
-                    //获取筛选后的propertydescriptor，属性描述器集合(排除被忽略的依赖项类型 或 在被忽略的依赖项接口上 定义的属性)
-                    filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
-                }
-                //过时了，在工厂将给定的属性值应用到给定的bean之前，对它们进行后处理。
-                //允许检查是否满足了所有依赖项，例如基于bean属性设置器上的“Required”注解。
-                //	默认实现RequiredAnnotationBeanPostProcessor中，支持给"setXXX"方法加上@Required注解
-                //	标记为“必需的”，简单来说，就是要求pvs属性值中一定要存在 给@Required标记的set方法注入的值  
-                pvsToUse = bp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
-                if (pvsToUse == null) {
-                    return;
-                }
-            }
-            pvs = pvsToUse;
-        }
-    }
-
-    //依赖项检查，确保所有公开的属性都已设置
-    //依赖项检查可以是对象引用、“简单”属性(原语和String)或所有(两者都是)
-    if (needsDepCheck) {
-        if (filteredPds == null) {
-            filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
-        }
-        checkDependencies(beanName, mbd, filteredPds, pvs);
-    }
-
-    if (pvs != null) {
-        //3.属性赋值（把pvs里的属性值给bean进行赋值!!!!!）
-        //autowire自动注入，其实只是收集注入的值，放到pvs中，最终赋值的动作还是在这里！！
-        //PropertyValues中的值优先级最高
-        //	如果当前Bean中的BeanDefinition中设置了PropertyValues，那么最终将是PropertyValues中的值，覆盖@Autowired的
-        applyPropertyValues(beanName, mbd, bw, pvs);
-    }
-}
-
-```
-在populateBean设置对象属性的过程中，`InstantiationAwareBeanPostProcessor`接口的`postProcessProperties`方法用于填充属性，前提是要保证注入的实例已经存在于Spring容器当中。实现`postProcessProperties`的类比较多，这里重点讲两个：
+实现`postProcessProperties`的类比较多，这里重点讲两个：
  - AutowiredAnnotationBeanPostProcessor#postProcessProperties：主要注册 ==带有 @Autowired，@Value，@Lookup，@Inject 注解的属性。==
  - CommonAnnotationBeanPostProcessor#postProcessProperties ： ==主要注册带有 @Resource 注解的属性==，流程与AutowiredAnnotationBeanPostProcessor#postProcessProperties`类似
 
-# AutowiredAnnotationBeanPostProcessor#postProcessProperties
+## AutowiredAnnotationBeanPostProcessor#postProcessProperties
 
-@Autowired支持属性注入（最常用），构造器注入，setter注入。
+@Autowired支持三种注入方式：
+- 属性注入（最常用），
+- 构造器注入，
+- setter注入。
 
 ```Java
 public class ClassA {
@@ -120,22 +130,15 @@ public class ClassA {
   
 ```
 在`AutowiredAnnotationBeanPostProcessor`构造器中，初始化了对@Autowired，@Value，@Lookup，@Inject 注解的支持
-
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=MTJjZGM0MTk3ZThjMDgzYjM4MjRiZjc5NGQ2MTJhNWVfd3JwR0lyYVVVaEFqSVJaR1NsY0xoQnRQeFhkVEhrY2tfVG9rZW46RmUxT2JQYXR1bzMxQnd4MHVBSWNhejdtbjZnXzE3MDM3NDcxMzQ6MTcwMzc1MDczNF9WNA)
-
+![[Pasted image 20240226201445.png]]
 将依赖注入信息封装到InjectionMetadata中
+![[Pasted image 20240226201450.png]]
+而后从InjectionMetadata中遍历出所有的AutowiredElement进行反射注入！InjectionMetadata的两个实现类是AutowiredFieldElement和AutowiredMethodElement
+![[Pasted image 20240226201458.png]]
+AutowiredMethodElement：
+![[Pasted image 20240226201509.png]]
 
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=M2U5OTZmOTJiNTYzZTg2MDFjMDg4OTQwYjgwZDg2OTlfMmR3WnBFTzlUVFRueEVFb2liUFNHYzlyM29FTGZYUU1fVG9rZW46STVYRWJpSUhxb3NhWGF4UVFkOGNuYkpXbmlkXzE3MDM3NDcxMzQ6MTcwMzc1MDczNF9WNA)
-
-而后从InjectionMetadata中遍历出所有的AutowiredElement进行反射注入！
-
-AutowiredFieldElement和AutowiredMethodElement都属于AutowiredElement
-
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=MmFjNjUwYWE4YWFkMzZmMWJlNzQ2NTJiYTQ2NGRkNTFfT2dkNTlTV3F1bnZHMlRMUjZObTd6Vnk2UzhzSlJwTjNfVG9rZW46QVVWV2JzYzZub1ZrMTV4RE13YWMyQk5Nbm1oXzE3MDM3NDcxMzQ6MTcwMzc1MDczNF9WNA)
-
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=YzQwMzY3YTQ5ZDM4MzBhOWQwMjA3OWVjNzRlOWZmNWVfZW90dG5wZXRwdjUwVkZHZFpldHFKUHpVWjlRUHg4b0JfVG9rZW46SmNkVWJrTzBRb09td3B4Z0F0M2NrelFJbjZlXzE3MDM3NDcxMzQ6MTcwMzc1MDczNF9WNA)
-
-# CommonAnnotationBeanPostProcessor#postProcessProperties
+## CommonAnnotationBeanPostProcessor#postProcessProperties
 
 CommonAnnotationBeanPostProcessor#postProcessProperties主要注册带有 @Resource 注解的属性，流程与`AutowiredAnnotationBeanPostProcessor#postProcessProperties`类似
 

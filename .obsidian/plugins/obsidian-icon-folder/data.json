@@ -28,7 +28,6 @@
   "手写框架系列handson_miniFramework": "FabEmpire",
   "MySQL": "FabEmpire",
   "RocketMQ": "FabEmpire",
-  "Redis缓存": "FabEmpire",
   "分布式Session解决方案？还有待考证": "FabEmpire",
   "分布式锁解决方案": "FabEmpire",
   "SpringCloud与分布式事务": "FabEmpire",
@@ -42,5 +41,6 @@
   "MyBatis": "FabEmpire",
   "Nginx负载均衡": "FabEmpire",
   "Netty网络编程与NIO": "FabEmpire",
-  "JDK8~17": "FabEmpire"
+  "JDK8~17": "FabEmpire",
+  "Redis": "FabEmpire"
 }

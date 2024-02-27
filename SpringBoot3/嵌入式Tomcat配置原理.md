@@ -31,7 +31,7 @@ ServletWebServerFactoryConfiguration定义如下：
 ![[Pasted image 20240129103848.png]]
 默认 `Tomcat`配置生效。并且给容器中放 TomcatServletWebServerFactory
 ![[Pasted image 20240129103800.png]]
-# TomcatServletWebServerFactory
+### TomcatServletWebServerFactory
 TomcatServletWebServerFactory工厂通过getWebServer方法，来创建tomcatweb服务器
 ```java
 @Override  
@@ -60,11 +60,11 @@ public WebServer getWebServer(ServletContextInitializer... initializers) {
 }
 ```
 
+在getWebServer处打上断点，debug启动SpringBoot
+# WebServer的创建时机：
 
-# WebServer的创建时机
-
-跟踪TomcatServletWebServerFactory的getWebServer方法
-## ServletWebServerApplicationContext.java
+从TomcatServletWebServerFactory的getWebServer方法处回溯Debug栈
+## Spring子容器：ServletWebServerApplicationContext
 ```java
 private void createWebServer() {  
     WebServer webServer = this.webServer;  
@@ -93,16 +93,6 @@ private void createWebServer() {
 ```
 
 继续跟踪createWebServer，来到ServletWebServerApplicationContext的onRefresh方法：
-```java
-refresh(){
-......
-	//容器刷新 十二大步中的刷新子容器会调用 `onRefresh()`
-	// Initialize other special beans in specific context subclasses.
-	onRefresh() 
-......
-}
-```
-
 ServletWebServerApplicationContext是AbstractApplicationContext的子类，重写的onRefresh如下
 ```java
 @Override  
@@ -114,6 +104,15 @@ protected void onRefresh() {
     catch (Throwable ex) {  
        throw new ApplicationContextException("Unable to start web server", ex);  
     }  
+}
+```
+super.onRefresh()正式调用的父类AbstractApplicationContext的onRefresh() 
+```java
+refresh(){
+......
+	//容器刷新 十二大步中的第九步，刷新子容器会调用 `onRefresh()`// Initialize other special beans in specific context subclasses.
+	onRefresh() 
+......
 }
 ```
 

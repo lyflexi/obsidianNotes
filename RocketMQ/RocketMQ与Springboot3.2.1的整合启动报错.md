@@ -4,7 +4,7 @@
     <groupId>org.springframework.boot</groupId>  
     <artifactId>spring-boot-starter-parent</artifactId>  
     <version>3.2.1</version>  
-    <relativePath/> <!-- lookup parent from repository -->  
+    <relativePath/> <!-- spring-boot 3.2.1 -->  
 </parent>
 
 
@@ -35,7 +35,7 @@ Consider defining a bean of type 'org.apache.rocketmq.spring.core.RocketMQTempla
 ```
 导致这个问题的原因是：
 
-Springboot-3.0已经放弃了spring.plants自动装配，它被/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports所取代，但是rocketmq-spring-boot-starter还停留在过时的装配方式，打开rocketmq-spring-boot的jar一看便知
+Springboot-3.0自动装配已经放弃了spring.plants（spring.factories），它被/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports所取代，但是rocketmq-spring-boot-starter还停留在过时的装配方式，打开rocketmq-spring-boot的jar一看便知
 ![[Pasted image 20240120144412.png]]
 
 解决方案，或者说是临时性的兼容方案是，用户手动添加文件/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports，内容跟spring.factories的内容一样

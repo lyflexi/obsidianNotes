@@ -1,7 +1,7 @@
 Feign是Spring Cloud组件中一个轻量级RESTful的HTTP服务客户端，Feign内置了Ribbon，用来做客户端负载均衡，去调用服务注册中心的服务。Feign的使用方式是：使用Feign的注解定义接口，调用接口，就可以调用服务注册中心的服务。
 
 2019年feign停更，springcloud F 及F版本以上 ，springboot 2.0 以上基本上使用openfeign，目前大多数新项目都用openfeign：
-- ==自SpringCloud2020版本开始，已经弃用内置的Ribbon，改用Spring自己开源的Spring Cloud LoadBalancer了，我们使用的OpenFeign的也已经与其整合。==
+- ==自SpringCloud2020版本开始，已经弃用内置的Ribbon，改用Spring自己开源的Spring Cloud LoadBalancer了（响应式负载均衡器），我们使用的OpenFeign的也已经与其整合。==
 -  ==OpenFeign在Feign的基础上支持了SpringMVC的注解，因此OpenFeign可以在FeignClient定义的远程调用接口上声明@RequestMapping等SpringMVC注解==
 - 作为消费者，OpenFeign通过动态代理的方式进行远程调用。
 - 作为生产者，OpenFeign通过反射的方式生成服务实例。
@@ -24,7 +24,7 @@ Feign是Spring Cloud组件中一个轻量级RESTful的HTTP服务客户端，Feig
 - cart-service，购物车模块，端口为8082
 购物车数据库表存储的只是用户加入商品到购物车那一时刻的快照，商品的价格在此后是存在浮动的，有可能涨价也有可能降价
 因此，用户进入购物车的时候，需要额外调用商品模块查询该商品的最新价格，两价格之差需要展示到用户购物车中，以刺激用户消费，因此购物车模块需要如下设计：
-# feign远程调用
+# feign远程调用（不含用户信息）
 购物车模块要声明ItemClient，用来远程调用item-service
 ```java
 @FeignClient("item-service")  
@@ -368,7 +368,7 @@ feign:
 ## 验证连接池
 `cart-service`再次向远程item-service服务发起请求
 ![[Pasted image 20240125195357.png]]
-# 回过头进入loadBalancerClient.choose
+# OpenFeign负载均衡原理loadBalancerClient.choose
 所以feign负载均衡的关键就是FeignBlockingLoadBalancerClient#execute方法里调用了loadBalancerClient来通过lb的方式选择服务实例
 ```java
 ServiceInstance instance = loadBalancerClient.choose(serviceId, lbRequest);

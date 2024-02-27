@@ -80,15 +80,15 @@ redis 127.0.0.1:6379 smembers runoob
 
 以上实例中 rabbitmq 添加了两次，但根据集合内元素的唯一性，第二次插入的元素将被忽略。
 
-## zset(sorted set：有序集合)
+## zset(sorted set：有序集合+score)
 
 Redis zset 和 set 一样也是string类型元素的集合,且不允许重复的成员。
 
 不同的是每个元素都会关联一个double类型的分数。redis正是通过分数来为集合中的成员进行从小到大的排序。
 
-zset的成员是唯一的,但分数(score)却可以重复。
+zset的成员是唯一的，但分数(score)却可以重复。
 
-**zadd 命令：**添加元素到集合，元素在集合中存在则更新对应score，`zadd key score member`
+zadd 命令：添加元素到集合，元素在集合中存在则更新对应score，`zadd key score member`
 
 ```Shell
 redis 127.0.0.1:6379 DEL runoob
@@ -117,7 +117,7 @@ redis 127.0.0.1:6379 ZRANGEBYSCORE runoob 0 1000
 
 ==其中的指针`ptr`指针指向的才是真实数据存储的内存地址。==
 
-属性中的`encoding`就是当前对象底层采用的**数据结构**或**编码方式**，可选的有11种之多：
+属性中的`encoding`就是当前对象底层采用的编码方式，不同的编码方式意味着不同的数据结构，可选的有11种之多：
 
 | **编号** | **编码方式** | **说明** |
 |---|---|---|
@@ -146,7 +146,7 @@ Redis中的5种不同的数据类型采用的底层数据结构和编码方式�
 ## SkipList升序排列
 
 SkipList（跳表）首先是链表，但与传统链表相比有几点差异：
-- ==跳表中的元素按照升序排列存储==
+- ==跳表中的元素按照升序有序存储==
 - 节点可能包含多个指针，指针跨度不同。
 
 传统链表只有指向前后元素的指针，因此只能顺序依次访问。如果查找的元素在链表中间，查询的效率会比较低。而SkipList则不同，它内部包含跨度不同的多级指针，可以让我们跳跃查找链表中间的元素，效率非常高。
@@ -194,10 +194,10 @@ typedef struct zskiplistNode {
 
 **答**：SortedSet是有序集合，底层的存储的每个数据都包含element和score两个值。score是得分，element则是字符串值。SortedSet会根据每个element的score值排序，形成有序集合。
 
-它支持的操作很多，比如：
+根据score的排序原理如下：
 - 根据element查询score值，要实现根据element查询对应的score值，就必须实现element与score之间的键值映射，SortedSet底层是基于==HashTable==来实现的。
-- 按照score值升序或降序查询element，要实现对score值排序，并且查询效率还高，就需要有一种高效的有序数据结构，SortedSet是基于==跳表Skiplist==实现的。
+- 要按照score值升序或降序查询element，并且查询效率还高，就需要有一种高效的有序数据结构，SortedSet是基于==跳表Skiplist==实现的。
 
-加分项：因为SortedSet底层需要用到两种数据结构，对内存占用比较高。因此Redis底层会对SortedSet中的元素大小做判断。如果元素大小小于128**且**每个元素都小于64字节，SortedSet底层会采用ZipList，也就是压缩列表来代替HashTable**和**SkipList
+加分项：因为SortedSet底层需要用到两种数据结构，对内存占用比较高。因此Redis底层会对SortedSet中的元素大小做判断。如果元素大小小于128且每个元素都小于64字节，SortedSet底层会采用ZipList，也就是压缩列表来代替HashTable**和**SkipList
 
 不过，`ZipList`存在连锁更新问题，因此而在Redis7.0版本以后，`ZipList`又被替换为Listpack（紧凑列表）。

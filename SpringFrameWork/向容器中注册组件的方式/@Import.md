@@ -1,6 +1,6 @@
 @Import的value 有三种类型的Class.
 1. ImportBeanDefinitionRegistrar.class 导入类定义注册者.
-2. 1. ImportSelector.class 导入选择器。
+2. ImportSelector.class 导入选择器用于批量注册。
 3. 如果不是上面两种类型 就会被当作普通的configuration 类 注册到容器。 例如
 	1. @EnableScheduling通过@Import将SchedulingConfiguration.class注册到容器中
 	2. @EnableSpringConfigured通过@Import将SpringConfiguredConfiguration.class注册到容器中

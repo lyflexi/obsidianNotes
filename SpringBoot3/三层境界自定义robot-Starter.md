@@ -8,12 +8,11 @@
 官方starter命名规范：`spring-boot-starter-xxx
 民间starter命名规范：`xxx-spring-boot-starter`
 
-自定义starter要实现的效果：任何项目导入此`starter`都可以使用，并且允许用户在application.properties中修改配置参数
-
+自定义starter要实现的效果：任何项目导入此`starter`都可以使用其中的Service，并且允许用户在application.properties中修改配置参数
+# 1.基本抽取-firstlevel
 1. 创建自定义starter项目debug_springboot_robotstarter，引入spring-boot-starter基础依赖，新版IDEA新建项目会自动帮我们引入
-2. 编写业务组件功能
-3. ==其他项目的springboot默认扫描规则扫不到自定义starter中的组件（默认的扫描包路径不同），因此我们要编写RobotAutoConfiguration手动向spring容器导入自己的业务组件==
-4. 自定义starter的主程序类可以删除。
+2. 编写业务组件功能，但是==其他项目的springboot默认扫描规则扫不到自定义starter中的业务组件（默认的扫描包路径不同），因此我们要在robotstarter中编写RobotAutoConfiguration手动向spring容器导入自己的业务组件RobotService==
+3. 自定义starter的主程序类可以删除。
 业务代码如下：
 RobotProperties
 ```java
@@ -113,20 +112,10 @@ public class RobotAutoConfiguration {
     public RobotController robotController(){  
         return new RobotController();  
     }  
-  
-  
 }
 ```
 
-- 3. 编写`xxxAutoConfiguration`自动配置类，帮其他项目导入这个模块需要的所有组件
-- 4. 编写配置文件`META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`指定启动需要加载的自动配置
-- 5. 其他项目引入即可使用
 
-  
-
-
-
-# 1.基本抽取-firstlevel
 其他项目引用这个`starter`，直接导入这个 `RobotAutoConfiguration`，就能把这个场景的组件导入进来
 ```java
 package org.lyflexi.debug_springboot;  

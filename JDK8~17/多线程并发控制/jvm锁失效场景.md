@@ -39,7 +39,7 @@ public class Stock {
 }
 ```
 # 场景二：事务方法加锁不当
-我们的解锁代码在事务commit之前生效，这导致了默认隔离级别RR下，会导致其他并发请求读取未提交的数据，又造成了超卖现象
+我们的解锁代码在事务commit之前生效，这导致了默认隔离级别RR下，会导致其他并发请求读取未提交的数据，造成最终库存结果不符合预期
 ```java
 @Service
 public class StockService {  

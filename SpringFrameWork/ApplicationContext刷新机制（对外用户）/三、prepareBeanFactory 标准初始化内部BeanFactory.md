@@ -62,4 +62,4 @@ protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 	3. beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
 	4. beanFactory.registerResolvableDependency(ApplicationContext.class, this);
 6. 添加BeanPostProcessor(ApplicationListenerDetector),用于收集实现了ApplicationListener接口的Bean
-7. 注入一些其它信息的bean，比如environment、systemProperties等
+7. 通过registerSingleton注入默认的环境组件，比如environment、systemProperties等

@@ -10,25 +10,30 @@ server:
 # 秒杀架构设计
 技术选型:springBoot + Redis + Mysql + RocketMq + Security ...  
   
-设计: (秒杀抢优惠券..)  
-- 设计seckill-web接收处理秒杀请求  ，对用户进行去重，并预扣减库存
-- 设计seckill-service处理秒杀真实业务的  ，redis分布式锁
+设计要点: (秒杀抢优惠券..)  
+- 设计seckill-web接收用户请求，并预扣减库存及时返回用户HTTP响应用于提升性能
+- 设计seckill-service处理秒杀真实业务的，消费seckill-web传递过来的消息并使用redis分布式锁扣减库存
   
 TOC项目部署细节:  
-假设用户量: 50w，服务器带宽100M拉满，8核16G服务器6台，seckill-web : 4台    seckill-service 2台  
-- 日活量: 5千-2.5万   1%-5%  ，这个统计数据库用户表的登录时间
-- QPS约等于日活量: 2w左右   这个统计方式是自己打日志或者统计nginx的访问日志(access.log) ，对相同的时间log 2023-4-24 16:58:11 进行分组统计
-技术要点：  
-1.通过redis的setnx对用户和商品做去重判断，防止用户刷接口的行为  
-2.每天晚上8点通过定时任务 把mysql中参与秒杀的库存商品，同步到redis中去，做库存的预扣减，提升接口性能  
-3.通过RocketMq消息中间件的异步消息，来将秒杀的业务异步化，进一步提升性能  
-4.seckill-service使用MQ的并发消费模式将消息并发的取到Java程序，并且设置合理的线程数量，快速处理队列中堆积的消息  
-5.使用redis的分布式锁+自旋锁，对商品的库存进行并发控制，真正的减少db压力  
-6.使用声明式事务注解Transactional，并且设置异常回滚类型，控制数据库的原子性操作  
-7.使用jmeter压测工具，对秒杀接口进行压力测试，在8C16G的服务器上，qps2k+，达到压测预期  
-8.使用sentinel的热点参数限流规则，针对爆款商品和普通商品的区别，区分限制
+假设用户量: 10w，服务器带宽100M拉满，8核16G服务器4台，seckill-web : 2台    seckill-service 2台  
+- 日活量: 1000-5000   1%-5%  ，根据数据库用户表的登录时间来统计
+- QPS约等于日活量: 2500左右   这个统计方式是自己打日志或者统计nginx的访问日志(access.log) ，对同一时刻的请求log 2023-4-24 16:58:11 进行分组统计
+
+技术实现细节：  
+
+1.每天晚上8点通过定时任务 把mysql中参与秒杀的库存商品，同步到redis中去，
+2.通过redis的setnx对用户和商品做去重判断，防止用户刷接口的行为
+3.做库存的预扣减，只是对redis中的库存做扣减，目的是提升接口性能  
+4.通过RocketMq消息中间件的异步消息，来将秒杀的业务异步化，进一步提升性能  
+5.seckill-service使用MQ的并发消费模式快速处理队列中堆积的消息，将消息并发的取到Java程序  
+6.使用redis自旋锁来实现分布式锁，对商品的库存进行并发控制，真正的减少db压力  
+7.使用声明式事务注解Transactional，并且设置异常回滚类型，控制数据库的原子性操作  
+8.使用jmeter压测工具，对秒杀接口进行压力测试，在8C16G的服务器上，qps2k+，达到压测预期  
+9.（可选）使用sentinel的热点参数限流规则，针对爆款商品和普通商品的区别，区分限制
 ![[秒杀架构.png]]
+库存表
 ![[Pasted image 20240123094757.png]]
+订单表
 ![[Pasted image 20240123094811.png]]
 # seckill-web模块
 yml配置
@@ -53,8 +58,9 @@ rocketmq:
 ```
 
 SeckillController设计：
-1. 根据从MySQL同步过来的库存，进行预扣减
-2. 发送消息至seckill-service模块执行真正的扣减
+1. 自定义uk = userId + "-" + goodsId，通过setIfAbsent("uk:" + uk, "");返回boolean对用户请求去重，防止用户爆刷接口
+2. 根据从MySQL同步过来的库存，进行预扣减
+3. 发送消息至seckill-service模块执行真正的扣减
 ```java
 package org.lyflexi.seckill_web.controller;  
 
@@ -82,7 +88,7 @@ public class SeckillController {
      * 都是大项目的某一个小的功能模块  
      *  
      * @param goodsId  
-     * @param userId  真实的项目中 要做登录的 不要穿这个参数  
+     * @param userId  真实的项目中 要做登录的 不要传这个参数  
      * @return  
      */  
     @GetMapping("seckill")  
@@ -91,7 +97,7 @@ public class SeckillController {
         // log 2023-4-24 16:58:11        int userId = userIdAt.incrementAndGet();  
         // uk uniqueKey = [yyyyMMdd] +  userId + goodsId  
         String uk = userId + "-" + goodsId;  
-        // 这一步使用setIfAbsent只是用来给秒杀用户去重，分布式锁在另外的seckill_service模块做的  
+        // 这一步使用setIfAbsent，只是用来防止用户的重复请求。分布式锁在另外的seckill_service模块做的  
         Boolean flag = redisTemplate.opsForValue().setIfAbsent("uk:" + uk, "");  
         if (!flag) {  
             return "您已经参与过该商品的抢购，请参与其他商品O(∩_∩)O~";  
@@ -182,7 +188,7 @@ public class DataSync {
 ```
 ## 消费监听MQ
 ### 方案一：jvm锁
-MySQL默认隔离级别是RR，所以一定要在事务块外面加锁：保证第一个并发先提交事务，第二个再获取锁，这样才可以实现并发安全，要不然锁不住  
+MySQL默认隔离级别是RR，所以一定要在事务块外面加锁，只有保证第一个并发先提交事务，第二个再获取锁，这样才可以实现并发安全，要不然可重读旧数据，造成最后的库存结果不符合预期，少卖了
 ```java
 @Override  
 public void onMessage(MessageExt message) {  
@@ -229,7 +235,7 @@ public void realSeckill(Integer userId, Integer goodsId) {
 ```
 另外jvm锁没法集群  ，当前服务的锁对象EntrySet/WaitSet的作用域是当前服务内部，无法适用于分布式的情况
 ### 方案二：MySQL分布式锁
-mysql(行锁)   可以做分布式锁，对于update操作，必须是类似于update goods set total_stocks = total_stocks - 1 这种情况才能触发行锁
+mysql(行锁)   可以做分布式锁，对于update中使用类似于如下的复合操作update goods set total_stocks = total_stocks - 1 可以自动触发行锁
 ```java
 @Override  
 public void onMessage(MessageExt message) {  
@@ -248,7 +254,7 @@ public void realSeckill(Integer userId, Integer goodsId) {
     // update goods set total_stocks = total_stocks - 1 where goods_id = goodsId and total_stocks - 1 >= 0;  
     // 通过mysql来控制锁  
     int i = goodsMapper.updateStock(goodsId);  
-    if (i > 0) {  
+    if (i > 0) { //同时创建当前订单
         Order order = new Order();  
         order.setGoodsid(goodsId);  
         order.setUserid(userId);  
@@ -350,7 +356,7 @@ public class SeckillListener implements RocketMQListener<MessageExt> {
                     redisTemplate.delete("lock:" + goodsId);  
                 }  
             } else {  
-                //自选次数+1  
+                //自旋次数+1  
                 currentThreadTime += 200;  
                 try {  
                     //这次没拿到锁，我们认定紧接着下次拿到锁的概率还是很小，所以我们让该线程睡一会  
@@ -379,7 +385,7 @@ public class SeckillListener implements RocketMQListener<MessageExt> {
 ## seckill-service验证
 3000条消息已经完全被消费
 ![[Pasted image 20240123095529.png]]
-数据库新增3000条订单
+数据库订单表新增3000条订单
 ![[Pasted image 20240123095827.png]]
 最重要的是库存表商品余量为0，没有超卖现象发生
 ![[Pasted image 20240123095931.png]]

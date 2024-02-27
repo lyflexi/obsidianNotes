@@ -11,11 +11,11 @@ Eureka结构如下图：
 - 服务生产者集成在Eureka客户端，启动时，生产者发送注册请求到Eureka Server。==同时生产者有心跳机制==
     - 生产者每30秒发送一次续约请求到Eureka Server。心跳间隔默认30s：`eureka.instance.lease-renewal-interval-in-seconds=5`
     - 若Eureka Server超过90秒未收到生产者的续约请求，则Eureka服务端会将其从服务列表中踢除；心跳超时时间默认90s：`eureka.instance.lease-expiration-duration-in-seconds=10`
-- 服务消费者也是集成在Eureka客户端，启动时，消费者同样会发送注册请求到Eureka Server。==同时消费者会周期性的从服务中心获取对端的服务清单信息缓存到本地==
+- 服务消费者也是集成在Eureka客户端，==启动时消费者会周期性的从服务中心获取对端的服务清单信息缓存到本地==
     - 是否从Eureka Server获取服务实例清单：`fetch-registry: true`
         - 服务消费者中，消费者每隔30秒，会从Eureka Server获取服务实例列表，其中，首次是全量查询，后续为增量查询；获取到服务实例列表后，消费者会将服务实例写入到本地缓存中；从Eureka Server获得服务清单的间隔时间是：`registry-fetch-interval-seconds: 15`
     - 服务消费者调用服务提供者时，Eureka会从本地缓存获取对应的实例信息，并进行远程接口调用restTemplate。
-    - 向Eureka Server更新自己实例信息的间隔时间：`instance-info-replication-interval-seconds: 15`（因为消费者有一天也可能作为生产者，所以要也及时更新自己的信息）
+    - 别忘了消费者也要向Eureka Server更新自己实例信息，更新间隔时间为：`instance-info-replication-interval-seconds: 15`（因为消费者有一天也可能作为生产者，所以要也及时更新自己的信息）
 
 # Eureka的自我保护机制
 通常情况下，如果 Eureka Server 在一定的 90s 内没有接收到某个微服务实例的心跳，会注销该实例。

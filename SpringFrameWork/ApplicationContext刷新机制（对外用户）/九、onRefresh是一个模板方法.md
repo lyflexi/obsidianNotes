@@ -16,4 +16,7 @@
 
 同理，以上onRefresh方法就是留给子类来重写的，这样是为了给我们留下一定的弹性，当子类ApplicationContext（也可以说是子容器）重写该方法后，在容器刷新的时候就可以再自定义一些逻辑了，比如给容器中多注册一些组件之类的。
 
-剧透一下，这里在未来的springboot篇，就是在这个时机，由子容器创建了tomcat环境
+
+
+// Initialize other special beans in specific context subclasses.
+剧透一下，这里在未来的springboot篇，就是在这个时机，由AbstractApplicationContext的子容器ServletWebServerApplicationContext创建了tomcat环境

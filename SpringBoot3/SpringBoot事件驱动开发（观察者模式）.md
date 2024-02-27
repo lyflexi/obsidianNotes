@@ -6,7 +6,7 @@
 每次新增业务，都要在Controller中修改业务代码
 # 事件驱动开发
 可以通过事件驱动开发来优化上述逻辑，将各个Service视为事件监听者，我们只需配置一个发布者Publisher即可
-- **事件发布**：通过ApplicationEventPublisherAware给我们提供，或者注入ApplicationEventMulticaster
+- **事件发布**：通过ApplicationEventPublisherAware给我们提供发布ApplicationEventPublisher能力，或者注入ApplicationEventMulticaster直接使用
 - **事件监听**：@Component+实现ApplicationListener接口，或者@Component + @EventListener
 ![[Pasted image 20240129153450.png]]
 # EventPublisher
@@ -54,10 +54,7 @@ public class EventPublisher implements ApplicationEventPublisherAware {
 ```
 # LoginSuccessEvent
 ```JAVA
-package org.lyflexi.debug_springboot.eventdriver;  
-  
-import org.springframework.context.ApplicationEvent;  
-  
+
 /**  
  * @author lfy  
  * @Description  登录成功事件。所有事件都推荐继承 ApplicationEvent  
@@ -72,12 +69,8 @@ import org.springframework.context.ApplicationEvent;
     }  
 }
 
-package org.lyflexi.debug_springboot.eventdriver;  
-  
-import lombok.AllArgsConstructor;  
-import lombok.Data;  
-import lombok.NoArgsConstructor;  
-  
+
+
 /**  
  * @author lfy  
  * @Description  

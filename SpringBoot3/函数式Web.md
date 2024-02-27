@@ -1,7 +1,7 @@
 传统的Web请求处理的方式是@Controller + @RequestMapping：耦合式 （路由与@Autowired业务耦合）  
 
 
-SpringMVC 5.2 以后 允许我们对Restfull风格的请求使用函数式Web的方式，定义Web的请求处理流程：分离式（路由、业务分离）  
+SpringMVC 5.2 以后 允许我们对Restfull风格的请求使用函数式Web的方式来定义Web的请求处理流程，这意味着我们可以集中式管理web-api，将路由与业务代码完全分离
 # 核心API
 
 - **RouterFunction**

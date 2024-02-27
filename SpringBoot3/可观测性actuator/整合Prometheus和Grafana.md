@@ -1,4 +1,4 @@
- 监控案例落地：基于 Prometheus + Grafana
+ 监控案例落地：基于 Prometheus + Grafana，使用时序数据库Prometheus拉取SpringBoot-App数据，并通过Grafana面板展示
 ```shell
 #安装prometheus:时序数据库
 docker run -p 9090:9090 -d \

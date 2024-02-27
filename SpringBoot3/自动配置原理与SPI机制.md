@@ -81,89 +81,89 @@ public @interface AutoConfigurationPackage {}
 
 下面开始梳理流程，点进AutoConfigurationImportSelector去看源码selectImports方法
 ```Java
-        @Override
-        public String[] selectImports(AnnotationMetadata annotationMetadata) {
-                if (!isEnabled(annotationMetadata)) {
-                        return NO_IMPORTS;
-                }
-                AutoConfigurationEntry autoConfigurationEntry = getAutoConfigurationEntry(annotationMetadata);
-                return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
-        }
+@Override
+public String[] selectImports(AnnotationMetadata annotationMetadata) {
+	if (!isEnabled(annotationMetadata)) {
+			return NO_IMPORTS;
+	}
+	AutoConfigurationEntry autoConfigurationEntry = getAutoConfigurationEntry(annotationMetadata);
+	return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
+}
 ```
 
 getAutoConfigurationEntry方法
 
 ```Java
-        protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
-                if (!isEnabled(annotationMetadata)) {
-                        return EMPTY_ENTRY;
-                }
-                AnnotationAttributes attributes = getAttributes(annotationMetadata);
-                List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
-                configurations = removeDuplicates(configurations);
-                Set<String> exclusions = getExclusions(annotationMetadata, attributes);
-                checkExcludedClasses(configurations, exclusions);
-                configurations.removeAll(exclusions);
-                configurations = getConfigurationClassFilter().filter(configurations);
-                fireAutoConfigurationImportEvents(configurations, exclusions);
-                return new AutoConfigurationEntry(configurations, exclusions);
-        }
+protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
+	if (!isEnabled(annotationMetadata)) {
+			return EMPTY_ENTRY;
+	}
+	AnnotationAttributes attributes = getAttributes(annotationMetadata);
+	List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+	configurations = removeDuplicates(configurations);
+	Set<String> exclusions = getExclusions(annotationMetadata, attributes);
+	checkExcludedClasses(configurations, exclusions);
+	configurations.removeAll(exclusions);
+	configurations = getConfigurationClassFilter().filter(configurations);
+	fireAutoConfigurationImportEvents(configurations, exclusions);
+	return new AutoConfigurationEntry(configurations, exclusions);
+}
 ```
 
 getCandidateConfigurations方法
 
 ```Java
-        protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
-                List<String> configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),
-                                getBeanClassLoader());
-                Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories. If you "
-                                + "are using a custom packaging, make sure that file is correct.");
-                return configurations;
-        }
+protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+	List<String> configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),
+					getBeanClassLoader());
+	Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories. If you "
+					+ "are using a custom packaging, make sure that file is correct.");
+	return configurations;
+}
 ```
 
 loadFactoryNames方法
 
 ```Java
-    public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
-        String factoryTypeName = factoryType.getName();
-        return (List)loadSpringFactories(classLoader).getOrDefault(factoryTypeName, Collections.emptyList());
-    }
+public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
+	String factoryTypeName = factoryType.getName();
+	return (List)loadSpringFactories(classLoader).getOrDefault(factoryTypeName, Collections.emptyList());
+}
 ```
 
 loadSpringFactories方法
 
 ```Java
-        private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
-                MultiValueMap<String, String> result = cache.get(classLoader);
-                if (result != null) {
-                        return result;
-                }
+private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
+	MultiValueMap<String, String> result = cache.get(classLoader);
+	if (result != null) {
+			return result;
+	}
 
-                try {
-                        Enumeration<URL> urls = (classLoader != null ?
-                                        classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
-                                        ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
-                        result = new LinkedMultiValueMap<>();
-                        while (urls.hasMoreElements()) {
-                                URL url = urls.nextElement();
-                                UrlResource resource = new UrlResource(url);
-                                Properties properties = PropertiesLoaderUtils.loadProperties(resource);
-                                for (Map.Entry<?, ?> entry : properties.entrySet()) {
-                                        String factoryTypeName = ((String) entry.getKey()).trim();
-                                        for (String factoryImplementationName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
-                                                result.add(factoryTypeName, factoryImplementationName.trim());
-                                        }
-                                }
-                        }
-                        cache.put(classLoader, result);
-                        return result;
-                }
-                catch (IOException ex) {
-                        throw new IllegalArgumentException("Unable to load factories from location [" +
-                                        FACTORIES_RESOURCE_LOCATION + "]", ex);
-                }
-        }
+	try {
+		Enumeration<URL> urls = (classLoader != null ?
+						classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
+						ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
+		result = new LinkedMultiValueMap<>();
+		while (urls.hasMoreElements()) {
+			URL url = urls.nextElement();
+			UrlResource resource = new UrlResource(url);
+			Properties properties = PropertiesLoaderUtils.loadProperties(resource);
+			for (Map.Entry<?, ?> entry : properties.entrySet()) {
+				String factoryTypeName = ((String) entry.getKey()).trim();
+				for (String factoryImplementationName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
+					result.add(factoryTypeName, factoryImplementationName.trim());
+				}
+			}
+		}
+		cache.put(classLoader, result);
+		return result;
+	}
+	catch (IOException ex) {
+		throw new IllegalArgumentException("Unable to load factories from location [" +
+						FACTORIES_RESOURCE_LOCATION + "]", ex);
+	}
+}
 ```
 
 加载了一个配置文件叫"META-INF/spring.factories"
@@ -173,7 +173,7 @@ loadSpringFactories方法
 ![[Pasted image 20240129100649.png]]
 
 默认扫描我们当前系统里面所有spring.factories位置的文件，spring.factories位于spring-boot-autoconfigure-2.3.4.RELEASE.jar包当中META-INF/spring.factories，spring.factories文件里面写死了spring-boot一启动就要给容器中加载的所有配置类。这其实是SPI机制：
-- 主人定义一个接口或抽象类，
+- 主人定义一系列的接口或抽象类，
 - 然后各大厂商（starter）通过在classpath（META-INF/spring.factories）中声明该实现类
 - 最后主人引入各大厂商（starter），来实现对组件的动态发现和加载。
 ![[Pasted image 20240129100749.png]]==需要注意的是，全场景的自动配置都在 `spring-boot-autoconfigure`这个包，在这个包的org目录中已经把所有的场景的自动配置类都写好了，但是这些实现的自动配置类都是条件生效的，因此默认不是全都开启的，只有导入哪个场景就开启哪个场景相关的自动配置==，比如我们没有引入batch批处理场景spring-boot-starter-batch，batch相关不会生效

@@ -20,7 +20,7 @@ SpringMVC是对Servlet的封装，屏蔽掉Servlet很多的细节，举几个例
 但是HttpServletBean自己本身并没有实现`initServletBean`方法，而是把`initServletBean`方法留给了子类`FrameworkServlet`去实现，以及由子类`FrameworkServlet`调用`initServletBean`方法
 ![[Pasted image 20240108160900.png]]
 
-#### FrameworkServlet初始化IOC容器refresh
+#### FrameworkServlet初始化父子容器WAC
 ![[Pasted image 20240108160933.png]]
 
 核心方法initWebApplicationContext方法如下：
@@ -66,29 +66,39 @@ SpringMVC是对Servlet的封装，屏蔽掉Servlet很多的细节，举几个例
 
 1. 首先有个统一处理请求的入口`DispatcherServlet`（前端控制器）：通过DispatcherServlet.properties文件配置，会把映射器、适配器、视图解析器、异常处理器、文件处理器等等给初始化掉
 
-2. 随后根据请求路径找到对应的`HanlderMapping`（处理映射器）：处理映射器其实是个HandlerExecutionChain(映射器+拦截器List)
-    
+2. 随后根据请求路径找到对应的`HanlderMapping`映射器，映射器`HanlderMapping`同时也是个HandlerExecutionChain拦截器List
 3. 对处理映射器`HanlderMapping`进行包装，得到`HandlerAdapter`（适配器）
-    
 4. 拦截器前置处理
-    
 5. 真实处理请求调用真正的代码->利用第3步的适配器，调用包装后的`Handler`中的方法，处理业务
-    
     1. 注解请求参数绑定方法参数
-        
     2. 返回结果通过Converter转换为JSON
-        
     3. 处理结束，返回ModelAndView（Model模型数据+View视图名称（不是真正的视图））
-        
     4. `DispatcherServlet`将视图名称交给ViewResolver（视图解析器），==ViewResolver返回真正的视图对象==给`DispatcherServlet`，`DispatcherServlet`把`Model`（数据模型）交给视图对象进行渲染，将渲染后的视图返回用户，产生响应。
-        
 6. 拦截器后置处理
     
 ![[Pasted image 20240108161407.png]]
 
 统一的处理入口对应SpringMVC下的源码是在DispatcherServlet下实现的
+## doService->doDispatch
+所有的请求其实都会被doService方法处理，翻译过来如下：
+子类必须实现doService方法来完成请求处理的工作，接收GET、POST、PUT和DELETE的集中回调。该契约本质上与HttpServlet中通常被覆盖的doGet或doPost方法的契约相同。这个类拦截调用，以确保异常处理和事件发布发生。参数:request-当前HTTP请求response -当前HTTP响应抛出:Exception-在任何类型的处理失败的情况下参见:jakarta.servlet.http.HttpServlet。doGet, jakarta.servlet.http.HttpServlet.doPost
+```java
+/**  
+ * Subclasses must implement this method to do the work of request handling, * receiving a centralized callback for GET, POST, PUT and DELETE. * <p>The contract is essentially the same as that for the commonly overridden  
+ * {@code doGet} or {@code doPost} methods of HttpServlet.  
+ * <p>This class intercepts calls to ensure that exception handling and  
+ * event publication takes place. * @param request current HTTP request  
+ * @param response current HTTP response  
+ * @throws Exception in case of any kind of processing failure  
+ * @see jakarta.servlet.http.HttpServlet#doGet  
+ * @see jakarta.servlet.http.HttpServlet#doPost  
+ */
 
-所有的请求其实都会被doService方法处理，doService里边最主要就是调用doDispatch方法，通过doDispatch方法我们就可以看到整个SpringMVC处理的流程
+ protected abstract void doService(HttpServletRequest request, HttpServletResponse response)  
+       throws Exception;
+```
+
+doService里边最主要就是调用doDispatch方法，通过doDispatch方法我们就可以看到整个SpringMVC处理的流程
 
 ```Java
 protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -199,8 +209,12 @@ protected void doDispatch(HttpServletRequest request, HttpServletResponse respon
 
 ## 真实请求处理（利用适配器RequestMappingHandlerAdapter）
 
-拦截器前置处理执行完后，就会调用适配器对象实例的invokeAndHandle方法执行真正的代码逻辑处理，
-
+拦截器前置处理执行完后，就会调用适配器对象实例的handle
+```java
+// Actually invoke the handler.
+//实际处理，返回视图对象ModelAndView 
+mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+```
 跟踪代码到`RequestMappingHandlerAdapter`的`handleInternal`方法：
 ![[Pasted image 20240108161636.png]]
 

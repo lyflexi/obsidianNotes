@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringBoot3/可观测性actuator/整合Prometheus和Grafana.md"
+                "file": "Servlet3.0&&SpringMVC6/SpringMVC原理DispatcherServlet.md"
               }
             },
             "group": "e65e8ecad3329a33"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringBoot3/可观测性actuator/整合Prometheus和Grafana.md",
+                "file": "Servlet3.0&&SpringMVC6/SpringMVC原理DispatcherServlet.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringBoot3/可观测性actuator/整合Prometheus和Grafana.md",
+                "file": "Servlet3.0&&SpringMVC6/SpringMVC原理DispatcherServlet.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringBoot3/可观测性actuator/整合Prometheus和Grafana.md",
+                "file": "Servlet3.0&&SpringMVC6/SpringMVC原理DispatcherServlet.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -159,8 +159,8 @@
   },
   "active": "cb04191d574d8c8b",
   "lastOpenFiles": [
-    "SpringBoot3/可观测性actuator/快速入门.md",
     "SpringBoot3/可观测性actuator/整合Prometheus和Grafana.md",
+    "SpringBoot3/可观测性actuator/快速入门.md",
     "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
     "SpringBoot3/AOT提前编译/JIT即时编译与分层编译优化.md",
     "SpringBoot3/SpringBoot生命周期和九大事件与探针/4.SpringBoot与Spring整合大回环.md",

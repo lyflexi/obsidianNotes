@@ -488,20 +488,33 @@ ls /root/data/pv2/out.txt
 
 ![[Pasted image 20240201100028.png]]
 
-## 生命周期
+## PV生命周期
 ![[Pasted image 20240201100056.png]]
   
 
 PVC和PV是一一对应的，PV和PVC之间的相互作用遵循如下的生命周期。
 - 资源供应：管理员手动创建底层存储和PV。
-- 资源绑定：用户创建PVC，kubernetes负责根据PVC声明去寻找PV，并绑定在用户定义好PVC之后，系统将根据PVC对存储资源的请求在以存在的PV中选择一个满足条件的。
+- 资源绑定：用户创建PVC，kubernetes负责根据PVC声明去寻找PV，系统将根据PVC对存储资源的请求在以存在的PV中选择一个满足条件的。
 	- 一旦找到，就将该PV和用户定义的PVC进行绑定，用户的应用就可以使用这个PVC了。
 	- 如果找不到，PVC就会无限期的处于Pending状态，直到系统管理员创建一个符合其要求的PV。
 	- PV一旦绑定到某个PVC上，就会被这个PVC独占，不能再和其他的PVC进行绑定了。
 - 资源使用：用户可以在Pod中像volume一样使用PVC，Pod使用Volume的定义，将PVC挂载到容器内的某个路径进行使用。
-- 资源释放：当存储资源使用完毕后，用户可以删除PVC，和该PVC绑定的PV将会标记为“已释放”，但是还不能立刻和其他的PVC进行绑定。**通过之前PVC写入的数据可能还留在存储设备上，只有在清除之后该PV才能再次使用。**
-- 资源回收：管理员根据PV设置的回收策略进行资源的回收，用于设置与之绑定的PVC释放资源之后如何处理遗留数据的问题。只有PV的存储空间完成回收，才能供新的PVC绑定和使用。
-## PV 和 PVC 的绑定规则细述
+- 资源释放：当存储资源使用完毕后，用户可以删除PVC，和该PVC绑定的PV将会标记为“已释放”，但是还不能立刻和其他的PVC进行绑定。==通常之前PVC写入的数据可能还留在存储设备上，只有在清除之后该PV才能再次使用。==
+- 资源回收：管理员根据PV设置的回收策略进行资源的回收，只有PV的存储空间完成回收，才能供新的PVC绑定和使用。
+
+在 Kubernetes 中，PV（Persistent Volume）的回收策略有三种：Delete、Recycle 和 Retain。然而，从 Kubernetes 1.18 版本开始，`Recycle` 已经被标记为弃用，而建议使用 `Delete` 或 `Retain` 替代。但是，为了回答你的问题，我会解释 `Delete` 和 `Recycle` 之间的区别。
+1. **Delete**：
+    - 当 PV 的回收策略设置为 `Delete` 时，当 PV 的对应 PVC 被删除时，Kubernetes 将会删除 PV 上的数据，然后释放持久卷的存储资源。这意味着，一旦 PVC 被删除，PV 上存储的数据将被永久删除，而 PV 自身也会被 Kubernetes 系统回收。
+2. **Recycle**（已弃用）：
+    - 在以前的版本中，可以将 PV 的回收策略设置为 `Recycle`。当 PV 的回收策略设置为 `Recycle` 时，当 PVC 被删除时，Kubernetes 会尝试删除 PV 上的数据，然后将 PV 返回到空闲状态，以供后续使用。然而，`Recycle` 策略存在一些问题，比如它可能无法很好地处理数据的清理，也不能适用于所有类型的存储。
+3. Retain：该策略表示保留PV中的数据，不进行回收，必须手动处理。
+
+
+PV 也存在三种状态分别是，Avaliable 、Bound 、Released。当一个回收策略为 Retain 的 PV其绑定的 PVC 被删除时，该 PV 会由 Bound 状态转变为 Released 状态。  Released 状态的 PV 需要手动删除 YAML 配置文件中的 claimRef 字段才能再次与 PVC 成功绑定。
+claimRef 字段详情查看：
+![[Pasted image 20240201100359.png]]
+
+## PVC动态绑定
   
 创建PVC后一直绑定不了PV的可能原因
 
@@ -510,23 +523,12 @@ PVC和PV是一一对应的，PV和PVC之间的相互作用遵循如下的生命�
 - **③PVC的accessModes和PV的accessModes不一致。**
 - **④VolumeMode：主要定义 volume 是文件系统（FileSystem）类型还是块（Block）类型，PV 与 PVC 的 VolumeMode 标签必须相匹配。**
 
-**PV 状态介绍**
-
-|   |   |
-|---|---|
-|PV 状态|描述|
-|Avaliable|创建好的 PV 在没有和 PVC 绑定的时候处于 Available 状态。|
-|Bound|当一个 PVC 与 PV 绑定之后，PVC 就会进入 Bound 的状态。|
-|Released|一个回收策略为 Retain 的 PV，当其绑定的 PVC 被删除，该 PV 会由 Bound 状态转变为 Released 状态。  <br>**注意：**Released 状态的 PV 需要手动删除 YAML 配置文件中的 claimRef 字段才能与 PVC 成功绑定。|
-![[Pasted image 20240201100359.png]]
-
 **PVC 状态介绍**：
 
-|   |   |
-|---|---|
-|PVC 状态|描述|
-|Pending|没有满足条件的 PV 能与 PVC 绑定时，PVC 将处于 Pending 状态。|
-|Bound|当一个 PV 与 PVC 绑定之后，PVC 会进入 Bound 的状态。|
+| PVC 状态  | 描述                                        |
+| ------- | ----------------------------------------- |
+| Pending | 没有满足条件的 PV 能与 PVC 绑定时，PVC 将处于 Pending 状态。 |
+| Bound   | 当一个 PV 与 PVC 绑定之后，PVC 会进入 Bound 的状态。      |
 
 **绑定规则**
 
@@ -539,13 +541,19 @@ PVC和PV是一一对应的，PV和PVC之间的相互作用遵循如下的生命�
 |Storageclass|PV 与 PVC 的 storageclass 类名必须相同（或同时为空）。|
 |AccessMode|主要定义 volume 的访问模式，PV 与 PVC 的 AccessMode 必须相同。|
 |Size|主要定义 volume 的存储容量，PVC 中声明的容量必须小于等于 PV，如果存在多个满足条件的 PV，则选择最小的 PV 与 PVC 绑定。|
+前面的例子中，我们提前创建了 PV，然后通过 PVC 申请 PV 并在 Pod 中使用，系统会根据上述参数筛选满足条件的 PV 进行绑定，这种方式叫做静态供给（Static Provision）。
 
-说明：
 
-PVC 创建后，系统会根据上述参数筛选满足条件的 PV 进行绑定。如果当前集群内的 PV 资源不足，系统会动态创建一个满足绑定条件的 PV 与 PVC 进行绑定。
+相比于静态供给，动态绑定是基于StorageClass来实现的，当没有满足 PVC 条件的 PV，会动态创建 PV。相比静态供给，动态供给有明显的优势：不需要提前创建 PV，减少了管理员的工作量，效率高。StorageClass 定义了如何创建 PV，下面是两个例子。
+`StorageClass standard`
+![[Pasted image 20240229102023.png]]
+`StorageClass slow`：
+![[Pasted image 20240229102035.png]]
+这两个 StorageClass 都会动态创建 AWS EBS，不同在于 standard 创建的是 gp2 类型的 EBS，而 slow 创建的是 io1 类型的 EBS。不同类型的 EBS 支持的参数可参考 AWS 官方文档。
+StorageClass 支持 Delete 和 Retain 两种 reclaimPolicy，默认是 Delete。
 
-**StorageClass 的选择和 PV/PVC 的绑定关系**
+PVC 在申请 PV 时，需要额外指定 StorageClass 和容量以及访问模式，比如：
+![[Pasted image 20240229102102.png]]
+看到了吗，动态供应模式我们平时就在使用这种方式来创建的PVC，只不过一直没在意罢了
 
-容器服务 TKE 的平台操作中，StorageClass 的选择与 PV/PVC 之间的绑定关系见下图：
-![[Pasted image 20240201100511.png]]
   

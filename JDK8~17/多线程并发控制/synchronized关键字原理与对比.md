@@ -340,16 +340,11 @@ public class SynchronizedDemo {
 下面通过 JDK 自带的 命令查看字节码信息来验证synchronized原理
 1. 首先切换到类的对应目录执行 javac SynchronizedDemo.java 命令生成编译后的 .class 文件
 2. 然后执行javap -c -s -v -l SynchronizedDemo.class命令查看 SynchronizedDemo 类的相关字节码信息。
-
 从下面我们可以看出：
-**synchronized 同步语句块的实现使用的是 monitorenter 和 monitorexit 指令，其中：**
-- **monitorenter 指令指向同步代码块的开始位置**
-- **monitorexit 指令则指明同步代码块的结束位置。**
-    
-
-synchronized用的是监视器锁（monitor），是依赖于底层的操作系统的 Mutex Lock 来实现的。当执行 monitorenter 指令时，线程试图获取 **对象监视器 monitor** 的持有权。
 ![[Pasted image 20231225135440.png]]
-
+synchronized 同步语句块的实现使用的是 monitorenter 和 monitorexit 指令，其中：
+- monitorenter 指令指向同步代码块的开始位置，当执行 monitorenter 指令时，线程试图获取 对象监视器 monitor 的持有权。
+- monitorexit 指令则指明同步代码块的结束位置。
 ## synchronized 修饰方法的的情况
 测试程序
 ```Java

@@ -394,7 +394,7 @@ table | type | possible_keys | key |key_len | ref | rows | Extra EXPLAIN列的�
 MySQL可以为多个字段创建索引。一个索引最多可以包括16个字段。对于多列索引，只有查询条件使用了这些字段中的第一个字段时，索引才会被使用。
 
 ...还有很多种索引失效情况，这里不再赘述
-### 2.优化数据库结构
+### 2.优化表结构
 
 合理的数据库结构不仅可以使数据库占用更小的磁盘空间，而且能够使查询速度更快。数据库结构的设计，需要考虑数据冗余、查询和更新的速度、字段的数据类型是否合理等多方面的内容。
 
@@ -402,11 +402,7 @@ MySQL可以为多个字段创建索引。一个索引最多可以包括16个字�
 
 对于字段比较多的表，如果有些字段的使用频率很低，可以将这些字段分离出来形成新表。因为当一个表的数据量很大时，会由于使用频率低的字段的存在而变慢。
 
-2. 增加中间表（冗余表），避免频繁join操作，减少关联查询次数
-
-对于需要经常联合查询的表，可以建立中间表以提高查询效率。通过建立中间表，把需要经常联合查询的数据插入到中间表中，然后将原来的联合查询改为对中间表的查询，以此来提高查询效率。这是一种空间换时间的策略
-
-### 3.分解关联查询
+2. 避免频繁join操作，减少关联查询次数
 
 将一个大的查询分解为多个小查询是很有必要的。
 
@@ -423,27 +419,124 @@ SELECT * FROM tag
      SELECT * FROM post WHERE post.id in (123,456,567);
 ```
 
-### 4.优化LIMIT分页
+### 3.优化深分页问题
 先说一下limit分页语法
 ```sql
 select * from user_address limit M,N
 ```
-limit后跟两个参数，第一个参数M为从第几个数据开始，第二个参数N为取多少个数据。
-第一个参数也叫偏移量，初始值是0
-如果数据量很小，这么写分页当然没问题，但是当数据量大起来的时候，查询速度就会慢很多。
+我们一起来看一个实战案例哈。假设现在有表结构如下，并且有200万数据.
 ```sql
--- 查询用时0.011S
-select field1,field2,field3 from user_address limit 100,10 
--- 查询用时0.618S
-select field1,field2,field3 from user_address limit 90000,10 
+CREATE TABLE account (  
+id varchar(32) COLLATE utf8_bin NOT NULL COMMENT '主键',  
+account_no varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT '账号'  
+amount decimal(20,2) DEFAULT NULL COMMENT '金额'  
+type varchar(10) COLLATE utf8_bin DEFAULT NULL COMMENT '类型A，B'  
+create_time datetime DEFAULT NULL COMMENT '创建时间',  
+update_time datetime DEFAULT NULL COMMENT '更新时间',  
+PRIMARY KEY (id),  
+KEY `idx_account_no` (account_no),  
+KEY `idx_create_time` (create_time)  
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='账户表'
 ```
+业务需求是这样：获取最2021年的A类型账户数据，上报到大数据平台。
+```java
+    //查询上报总数量  
+    Integer total = accountDAO.countAccount();  
+  
+//查询上报总数量对应的SQL  
+<select id ='countAccount' resultType="java.lang.Integer">  
+    seelct count(1)  
+    from account  
+    where create_time >='2021-01-01 00:00:00'  
+    and  type ='A'  
+</select>  
+  
+    //计算页数  
+    int pageNo = total % pageSize == 0 ? total / pageSize : (total / pageSize + 1);  
+  
+//分页查询，上报  
+for(int i = 0; i < pageNo; i++){  
+        List<AcctountPO> list = accountDAO.listAccountByPage(startRow,pageSize);  
+        startRow = (pageNo-1)*pageSize;  
+        //上报大数据  
+        postBigData(list);  
+    }  
+  
+//分页查询SQL（可能存在limit深分页问题，因为account表数据量几百万）  
+<select id ='listAccountByPage' >  
+    seelct *  
+    from account  
+    where create_time >='2021-01-01 00:00:00'  
+    and  type ='A'  
+    limit #{startRow},#{pageSize}  
+</select>
+```
+以上的实现方案，会存在limit深分页问题，limit语句会先扫描offset+n行，然后再丢弃掉前offset行，只返回后n行数据。
+那怎么优化呢？
+#### 标签记录法
+试想，如果limit的下一次的查询能从前一次查询结束后标记的位置开始查找
+```sql
+do{
+	lastId = list.get(list,size()-1).getId();  
+	lastList = select id,name,balance FROM account where id > #{lastId} order by id limit 10; 
+	list.add(lastList);
+}while(lastList==null)
+```
+#### 使用between and
+很多时候，可以将`limit`查询转换为已知位置的查询，这样MySQL通过范围扫描`between...and`，就能获得到对应的结果。
+如果知道边界值为100000，100010后，就可以这样优化：
+```sql
+select  id,name,balance FROM account where id between 100000 and 100010 order by id;
+```
+这种方式也有个天然的缺点，很多时候我们并不知道精确的扫描范围
+#### 如有二级索引避免回表
+先看下表结构哈：
 
-不考虑加索引，试想，如果limit的下一次的查询能从前一次查询结束后标记的位置开始查找，同时我们让第一次查询只查id（因为只查id会比同时查field1,field2,field3要快），那不就好上了吗？
+```sql
+CREATE TABLE account (
+  id int(11) NOT NULL AUTO_INCREMENT COMMENT '主键Id',
+  name varchar(255) DEFAULT NULL COMMENT '账户名',
+  balance int(11) DEFAULT NULL COMMENT '余额',
+  create_time datetime NOT NULL COMMENT '创建时间',
+  update_time datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (id),
+  KEY idx_name (name),
+  KEY idx_update_time (update_time) //索引
+) ENGINE=InnoDB AUTO_INCREMENT=1570068 DEFAULT CHARSET=utf8 ROW_FORMAT=REDUNDANT COMMENT='账户表';
+```
+假设深分页的执行SQL如下：
+```sql
+select id,name,balance from account where update_time> '2020-09-19' limit 100000,10;
+```
+这个SQL的执行时间如下：
+![[Pasted image 20240229163128.png]]
+SQL的执行分析流程：
+1. 通过普通二级索引树idx_update_time，==通过update_time条件，找到满足条件的记录ID（二级索引中叶子节点存放的是主键的值）==。
+2. 通过ID，回到主键索引树，找到满足记录的行，然后取出展示的列（回表）
+3. 扫描满足条件的100010行，然后扔掉前100000行，返回。
+执行计划如下，扫描更多的行数，也意味着回表更多的次数。
+![[Pasted image 20240229163643.png]]
+##### 子查询select id
+
+以上的SQL，回表了100010次，实际上我们能不能不去回表呢？
+```sql
+select id,name,balance FROM account where id >= (select a.id from account a where a.update_time >= '2020-09-19' limit 100000, 1) LIMIT 10;
+```
+查询效果一样的，执行时间只需要0.038秒！
+![[Pasted image 20240229164057.png]]
+##### 连接查询INNER JOIN
+通过INNER JOIN可以实现延迟关联，SQL如下：
+```sql
+SELECT  acct1.id,acct1.name,acct1.balance FROM account acct1 INNER JOIN (SELECT a.id FROM account a WHERE a.update_time >= '2020-09-19' ORDER BY a.update_time LIMIT 100000, 10) AS  acct2 on acct1.id= acct2.id;
+```
+查询效果也是杠杆的，只需要0.034秒
+![[Pasted image 20240229164336.png]]
+
 因此我们可以做出如下的优化方案：
 ```sql
 -- 查询用时0.068S
 select field1,field2,field3 from user_address where id >= (select id from user_address order by id limit 100000,1) limit 10  
--- 或者
+-- 或者INNER JOIN 延迟关联
 Select news.id, news.description from news inner join (select id from news order by title limit 50000,5) as myNew using(id);
 ```
 

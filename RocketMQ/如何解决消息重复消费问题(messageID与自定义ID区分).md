@@ -158,7 +158,7 @@ class ARocketmqDemoApplicationTests {
   
 }
 ```
-### 解决方案2,MQ+Redis存储唯一key
+### 解决方案2,MQ+Redis存储唯一key（秒杀用户去重案例）
 
 consumer面对两个重复的消息key，第一次拿到key之后先保存到redis中，接下来正常执行业务逻辑，执行结束删除redis
 如果很快第二次再次拿到相同的消息key，则先去redis中比较，如果redis中存在这个key(说明已经在消费中了)，则本次不做重复消费

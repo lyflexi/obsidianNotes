@@ -17,6 +17,6 @@ Redis一般我们会把它用作于缓存，当然啦，日常有的应用场景
 在发送入口处会对所有需要下发的消息打上模板ID：UMPID，然后根据不同维度进行处理。比如说：
 
 - Set结构`[key日期--Set<value>]`：我要看某一天下发的所有模板有哪些，就以key为日期，将对应UMPID扔到Set就好了
-- List结构`[key用户--LinkList<value>]`：我要看某个用户当天下发的消息有哪些，以及这些消息的整体链路是如何。用的是List结构，Key是userId，Value则是UMPID+state(关键点位)+processTime（处理时间)
+- List结构`[key用户--LinkList<value>]`：我要看某个用户当天下发的消息整体链路是如何。用的是List结构，Key是userId，Value则是UMPID+state(关键点位)+processTime（处理时间)
 - Hash结构`[key模板--Hash<key状态--value>]`：我要看某一个模板的消息下发的整体链路情况，那我以UMPID为Key，Value是Hash结构，Key是state，Value则是人数，这里的state我们在下发的过程中打的关键点位，比如接收到消息打个51，消息被去重了打个61，消息成功下发了打个81…
 

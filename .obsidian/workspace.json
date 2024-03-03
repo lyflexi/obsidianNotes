@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JDK8~17/多线程并发控制/唤醒方式的演进Monitor-Condition-LockSupport.md"
+                "file": "JDK8~17/JVM/JVM调优实战.md"
               }
             },
             "group": "e65e8ecad3329a33"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JDK8~17/多线程并发控制/唤醒方式的演进Monitor-Condition-LockSupport.md",
+                "file": "JDK8~17/JVM/JVM调优实战.md",
                 "mode": "source",
                 "source": false
               }
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JDK8~17/多线程并发控制/唤醒方式的演进Monitor-Condition-LockSupport.md",
+                "file": "JDK8~17/JVM/JVM调优实战.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JDK8~17/多线程并发控制/唤醒方式的演进Monitor-Condition-LockSupport.md",
+                "file": "JDK8~17/JVM/JVM调优实战.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,18 +157,28 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "cb04191d574d8c8b",
+  "active": "d079b05bbd2bd676",
   "lastOpenFiles": [
+    "Attachments/pics/Pasted image 20240303112720.png",
+    "Attachments/pics/Pasted image 20240303112655.png",
+    "Attachments/pics/Pasted image 20240303112641.png",
+    "Attachments/pics/Pasted image 20240303112547.png",
+    "Attachments/pics/Pasted image 20240303112319.png",
+    "Attachments/pics/Pasted image 20240303111504.png",
+    "JDK8~17/JVM/各种垃圾回收器/02.并行收集器ParallelNEW、Old.md",
+    "JDK8~17/JVM/JVM调优实战.md",
+    "Attachments/pics/Pasted image 20240303110726.png",
+    "Attachments/pics/Pasted image 20240303105959.png",
+    "JDK8~17/JVM/各种垃圾回收器/03.并发收集器CMS oldOnly.md",
+    "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
+    "JDK8~17/多线程并发控制/唤醒方式的演进Monitor-Condition-LockSupport.md",
     "JDK8~17/多线程并发控制/synchronized关键字原理与对比.md",
     "JDK8~17/多线程并发控制/synchronized锁升级过程.md",
-    "JDK8~17/JVM/各种垃圾回收器/02.并行收集器ParallelNEW、Old.md",
     "JDK8~17/多线程并发控制/jvm锁失效场景.md",
-    "JDK8~17/JVM/各种垃圾回收器/03.并发收集器CMS oldOnly.md",
     "MySQL/SQL与优化.md",
     "Attachments/pics/Pasted image 20240229164336.png",
     "Attachments/pics/Pasted image 20240229164057.png",
     "Attachments/pics/Pasted image 20240229163643.png",
-    "Attachments/pics/Pasted image 20240229163128.png",
     "MySQL/索引与优化.md",
     "SpringFrameWork/向容器中注册组件的方式/BeanDefinitionRegistryPostProcessor(invokeBeanFactoryPostProcessors的调用时机).md",
     "RocketMQ/如何保证消息的顺序.md",
@@ -183,18 +193,8 @@
     "Redis/Redis业务打点.md",
     "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
     "Centos服务器/K8s环境/PVPVC细述/PVPVC.md",
-    "Attachments/pics/Pasted image 20240229102102.png",
-    "Attachments/pics/Pasted image 20240229102035.png",
-    "Attachments/pics/Pasted image 20240229102023.png",
     "Centos服务器/K8s环境/PVPVC细述/配置存储ConfigMap.md",
     "Redis/缓存有哪些失效场景.md",
-    "Servlet3.0&&SpringMVC6/SpringMVC原理DispatcherServlet.md",
-    "SpringBoot3/可观测性actuator/整合Prometheus和Grafana.md",
-    "SpringBoot3/可观测性actuator/快速入门.md",
-    "SpringBoot3/AOT提前编译/GraalVM与AOT预先编译.md",
-    "Attachments/pics/Pasted image 20240227091900.png",
-    "Attachments/pics/Pasted image 20240226224201.png",
-    "Attachments/pics/Pasted image 20240226223711.png",
     "JDK8~17/JVM/各种垃圾回收器",
     "JDK8~17/线程与线程池",
     "SpringFrameWork/Aware使用场景和源码解读",

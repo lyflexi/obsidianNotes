@@ -48,7 +48,7 @@ mysql> SELECT @@transaction_isolation;
 
 在讲Next-Key Locks之前，我们需要先了解下MySQL下的各种锁。==声明：本文只讨论排他锁==
 ![[Pasted image 20240118162132.png]]
-InnoDB 实现了标准的行锁，对行数据进行锁定，行锁包括共享锁lock in share mode和排它锁X
+InnoDB 实现了标准的行锁，对行数据进行锁定，行锁包括共享锁lock in share mode和排它锁for update
 - 对于共享锁而言，对当前行加共享锁，不会阻塞其他事务对同一行的读请求，但会阻塞对同一行的写请求。只有当读锁释放后，才会执行其它写操作。共享锁的脚本是lock in share mode
 - 对于排它锁而言，会阻塞其他事务对同一行的读和写操作，只有当写锁释放后，才会执行其它事务的读写操作。排他锁的脚本是for update
 ```sql
@@ -103,7 +103,7 @@ SELECT * FROM emp WHERE empid > 100 FOR UPDATE
 ```sql
 -- 根据非唯一索引列 UPDATE 某条记录 
 UPDATE table SET name = Vladimir WHERE age = 24; 
--- 或根据非唯一索引列 锁住某条记录 
+-- 或根据非唯一索引列 FOR UPDATE 某条记录 
 SELECT * FROM table WHERE age = 24 FOR UPDATE; 
 ```
 不管执行了上述 SQL 中的哪一句，之后如果在事务 B 中执行以下命令，则该命令会被阻塞：
@@ -114,37 +114,32 @@ INSERT INTO table VALUES(100, 26, 'tianqi');
 # 快照读，undo log实现MVCC多版本并发控制
 上面我们通过对行数据加锁Next-Key-Lock，已经解决了幻读问题。
 
-==但是精益求精MySQL的InnoDB实现了MVCC来更好地处理读写冲突，原理是快照视图ReadView，保证 “读” 数据时无需加锁也可以读取到数据的某一个版本的快照，实现"非阻塞并发读"。==每一次修改数据，都会在 undo log 中存有快照记录，这里的快照，就是读取undo log中的某一版本的快照。这种方式的优点是可以不用加锁就可以读取到数据，缺点是读取到的数据可能不是最新的版本。在进一步了解MySQL中实现MVCC的细节之前，先回顾一下redo log 和 undo log：
+==但是精益求精MySQL的InnoDB实现了MVCC来更好地处理读写冲突，每一次修改数据，都会在 undo log 中存有快照记录，而ReadView就是undo log中的某一版本， “读” 数据时无需加锁也可以读取到数据的某一个版本的快照，从而实现"非阻塞并发读"==。这种方式的优点是可以不用加锁就可以读取到数据，缺点是读取到的数据可能不是最新的版本。在进一步了解MySQL中实现MVCC的细节之前，先回顾一下redo log 和 undo log：
 - 在修改数据的时候，会向 redo log 中记录修改的页内容（为了在数据库宕机重启后恢复对数据库的操作），
 - 也会向 undo log 记录数据原来的快照（用于回滚事务）。==undo log有两个作用，除了用于回滚事务，还用于实现MVCC。==
 
-## 通过ReadView寻找版本链
-#### 行历史记录的三个参数
-
+### 数据行记录存储事务ID形成版本链
 MySQL中，在每一行记录中除了自定义的字段，还有一些隐藏字段：
-- 隐藏主键row_id：当数据库表没定义主键时，InnoDB会以row_id为主键生成一个聚集索引。
-- 历史事务ID==trx_id==：递增的事务id。只有在对表中的记录做改动时（执行INSERT、DELETE、UPDATE这些语句时）才会为事务分配事务id，只读事务中的事务id值都默认为0。
+- 主键row_id这是我们的老熟人：当数据库表没定义主键时，InnoDB会以row_id为主键生成一个聚集索引作为隐藏。
+- 历史事务==trx_id==：只有在对表中的记录做改动时（执行INSERT、DELETE、UPDATE这些语句时）才会为事务分配事务id，只读事务中的事务id值都默认为0。
 - 回滚指针 roll_pointer：回滚指针指向当前记录的上一个版本（在 undo log 中），形成版本链。
 用一个简单的例子来画一下MVCC中用到的undo log版本链的逻辑图：
 ```sql
-当事务100（trx_id=100）执行了 insert into t_user values(1,'张三',20); 之后：
+当事务100（trx_id=100）执行了 insert into t_user values(1,'张三',21); 之后：
 当事务102（trx_id=102）执行了 update t_user set name='李四' where id=1; 之后：
 当事务103（trx_id=103）执行了 update t_user set name='王五' where id=1; 之后：
 ```
 ![[Pasted image 20240118185321.png]]
 
 在上面的例子中，多个事务对 id=1 的数据修改后，这行记录除了最新的数据，在 undo log 中还有多个版本的快照。那其他事务查询时能查到最新版本的数据吗？如果不能，能读到哪个版本的快照呢？
-#### ReadViewd的四个参数与四个规则
-ReadView中有4个比较重要的变量：
-![[Pasted image 20240118171340.png]]
-- m_ids：活跃事务id列表，当前系统中所有活跃的（也就是没提交的写事务）事务id列表。
+### ReadView活跃事务ID寻找版本链
+ReadView保存了活跃事务ID列表m_ids，活跃事务指的是没提交的写事务，除了m_ids之外，ReadView中还保存了其他三种ID
 - min_trx_id：m_ids 中最小的事务id。
 - max_trx_id：生成 ReadView 时，系统应该分配给下一个事务的id，公式为max(m_ids)+1
 - creator_trx_id：生成该 ReadView 的事务的事务id。
 
-由Read View来决定当前事务能读到Undo Log中哪个版本的数据，而判断依据就是通过Read View和【行记录的隐藏字段trx_id】做对比的，规则如下
+由Read View来决定当前事务能读到Undo Log中哪个版本的数据，而判断依据就是通过Read View和行记录的事务trx_id做对比的，规则如下
 ![[Pasted image 20240118191847.png]]
-
 （1）当trx_id < min_trx_id，说明==历史事务trx_id==已经提交了，提交了就结束了，所以其版本记录对当前事务可见。
 （2）trx_id > max_trx_id时，说明==历史事务trx_id==还未开始，其版本记录对当前事务不可见。
 （3）当min_trx_id<= trx_id < max_trx_id时，判断==历史事务trx_id==是不是在当前事务ID集合（m_ids）里面
@@ -152,38 +147,36 @@ ReadView中有4个比较重要的变量：
 - 如果==历史事务trx_id== not in (m_ids)则说明这个历史事务trx_id已经Commit了，其版本记录对当前事务可见
 （4）特别的，当trx_id = creator_trx_id，说明版本链中的这个版本是==历史事务trx_id==修改的，所以其版本记录对当前事务可见。
 
-#### RC和RR两种场景区分
+### RC和RR两种场景区分
 另外，MVCC只在`READ-COMMITTED`（解决脏读）和`REPEATABLE-READ`（保证可重读）隔离级别下生效。区别是ReadView 在 RC 和 RR 两种隔离级别下生成的时机不同
 - 在RC隔离级别下，每次select都会生成一个最新的ReadView；==这就是RC解决不了RR的真正原因==
 - 在RR隔离级别下，事务第一次select时创建ReadView，之后一直使用。==这就是RR解决了RR的真正原因==
 
-##### RC
-来看示例流程，事务A，B几乎同时查询一条记录，因为是read committed (读已提交) 隔离级别，所以每次select都会生成不同的ReadView
+#### RC
+来看示例流程，事务A，B几乎同时查询trx_id 为 26记录，因为是read committed (读已提交) 隔离级别，所以每次select都会生成不同的ReadView
 ![[Pasted image 20240118191903.png]]
 
-事务A、B查询流程图如下：
+我们来看事务ID分别为27和28的A、B读取trx_id 为 26 的记录，事务A进行了两次查询，而第二次是在事务B提交之后，
 ![[Pasted image 20240118191919.png]]
 
-我们在来看事务ID分别为27和28的A、B读取trx_id 为 26 的记录，事务A进行了两次查询，而第二次是在事务B提交之后，我们来两次次查询生成的ReadView的区别：
+我们来两次次查询生成的ReadView的区别：
 ![[Pasted image 20240118191926.png]]
-此时事务A能查询到point值为100， 符合db_trx_id < min_trx_id规则，说明历史事务26已经提交，所以当前事务27能查询到历史事务26的版本记录（100）， 但是第二次读之前事务B对数据进行了修改，并提交了事务，此时可见的版本链数据如下图：
-![[Pasted image 20240118191933.png]]
-此时“历史事务ID”变成了28，符合规则 min_trx_id <= db_trx_id < maxtrxid（27<=28<29），但是db_trx_id=28不在当前系统中活跃的事务m_ids集合，因此当前事务27可以看到历史版本的数据，也就是能查询到 point的值是150。
-
+- 第一次事务A能查询到point值为100， 符合db_trx_id < min_trx_id规则，说明历史事务26已经提交，所以当前事务27能查询到历史事务26的版本记录（100）
+- 但是第二次读之前事务B对数据进行了修改，并提交了事务。此时这一行数据的“历史事务ID”变成了28，符合规则 min_trx_id <= db_trx_id < maxtrxid（27<=28<29），但是db_trx_id=28不在当前系统中活跃的事务m_ids集合，因此当前事务27可以看到历史版本的数据，也就是能查询到 point的值是150。
 因此整个过程中，同一个事务A内，相同的查询条件，查询到的数据不一致，也就是出现了不可重复读的情况。
-##### RR
+#### RR
 可重复读在事务第一次select时创建ReadView，后面都是复用这个ReadView，这个和读已提交的区别所在。
 
 事务A、B的执行情况和读已提交的流程一样，都是针对同一条记录修改前后事务提交的两次查询，但是两次查询出来的都是一样的，值都是100。
 ![[Pasted image 20240118191939.png]]
 但是两次查询的ReadView共用一个，结果如下：
 ![[Pasted image 20240118191950.png]]
-事务B还是修改成150
+事务B还是修改成150，”历史事务“变成了28
 ![[Pasted image 20240118191553.png]]
-”历史事务“变成了28
+
 可以看出”历史事务“还是符合规则 min_trx_id <= db_trx_id < max_trx_id（27<=28<29），
 
-但是db_trx_id=28还在当前系统中活跃的事务m_ids集合，相当于db_trx_id=28还没提交，因此当前事务27是看不到“历史版本”的数据，也就是为什么事务B提交了，但是第二次查询出来的point的值还是100。
+但是db_trx_id=28还在当前系统中活跃的事务m_ids集合，相当于db_trx_id=28还没提交，因此当前事务27是看不到“历史版本db_trx_id=28”的数据，只能看到“历史版本db_trx_id=26”的数据，也就是为什么事务B提交了，但是第二次查询出来的point的值还是100。
 
 所以通过这样的方式就实现了，就是通过复用原有ReadView的方式解决了重复读问题。
 

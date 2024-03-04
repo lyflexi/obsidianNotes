@@ -93,7 +93,7 @@ h. DISTINCT, ALL 选项
 
 ```
 
-# 子查询
+# 子查询-重要！
 子查询需用括号包裹。
 ## from型
 ```sql
@@ -116,13 +116,13 @@ h. DISTINCT, ALL 选项
 ```
 ## in和exist对比
 
-==exist需要在子查询中额外的判断一次where，因此exist不够直观==
+==exist需要在子查询中额外的判断一次where，因此exist不够直观，但有的时候使用exist可以优化sql查询==
 - "IN" 子句用于在 WHERE 条件中指定多个可能的值。它允许你指定一个值列表，并检查列中的值是否匹配列表中的任何一个值。
 语法示例：
 ```sql
 SELECT column1, column2, ...  FROM table_name  WHERE column_name IN (value1, value2, ...);
 ```
-类似于：
+==类似于以下Java代码：复杂度为N^2==
 ```java
 ```csharp
 List resultSet={};
@@ -141,7 +141,7 @@ for(int i=0;i<A.length;i++) {
 return resultSet;
 ```
 在这个例子中，`column_name` 是要检查的列名，`value1`, `value2`, ... 是可能的值列表。如果列中的值匹配列表中的任何一个值，则该行将被包含在结果集中。
-- "EXISTS" 子句用于测试子查询是否返回任何结果。它用于确定是否存在至少一行与外部查询匹配的行，==有的时候使用exist可以优化sql查询==
+- "EXISTS" 子句用于测试子查询是否返回任何结果。它用于确定是否存在至少一行与外部查询匹配的行
 语法示例：
 ```sql
 SELECT column1, column2, ...  FROM table_name1  WHERE EXISTS (SELECT column_name FROM table_name2 WHERE condition);
@@ -151,7 +151,7 @@ SELECT column1, column2, ...  FROM table_name1  WHERE EXISTS (SELECT column_name
 ```sql
 SELECT column1, column2, ...  FROM table_name1  WHERE EXISTS (SELECT 1 FROM table_name2 WHERE condition);
 ```
-只需要确认子查询返回至少一行结果，而不需要子查询获取实际所有结果，这有助于减少不必要的数据处理和传输。类似于：
+只需要确认子查询返回至少一行结果，而不需要子查询获取实际所有结果，这有助于减少不必要的数据处理和传输。类似于以下Java代码：复杂度为N
 ```java
 ```csharp
 List resultSet={};
@@ -270,7 +270,7 @@ drop table
 
 # SQL优化（慢查询优化）
 
-## 开启慢查询日志
+## 开启慢查询日志slow_query_log
 慢查询日志是MySQL提供的一种日志记录，用于记录在MySQL中响应时间超过阀值的语句。具体来说，慢查询日志会记录那些运行时间超过long_query_time值的SQL语句，其中long_query_time的默认值为10秒。
 
 开启慢查询日志需要手动设置，因为默认情况下MySQL的慢查询日志是禁用的，因为开启慢查询日志会或多或少地带来一定的性能影响，它需要记录每个超时的SQL语句。要开启慢查询日志，可以通过设置slow_query_log的值来开启，例如使用以下命令：
@@ -302,7 +302,7 @@ mysql> select sleep(1);
 1 row in set (1.00 sec)
 ```
 
-打开慢查询日志文件。可以看到上述慢查询的SQL语句被记录到日志中。慢查询SQL都会被放在这个特殊的日志当中后
+打开慢查询日志文件。可以看到上述慢查询的SQL语句被记录到这个特殊的日志中。
 
 ```sql
 # Time: 180620 17:13:06
@@ -313,7 +313,7 @@ select sleep(1);
 ```
 ## 定位慢查询SQL语句
 在生产环境中，如果要手工分析日志，查找、分析SQL，显然是个体力活。==因此除了逐行分析慢查询日志之外，MySQL还自带了分析慢查询的工具mysqldumpslow，该工具是Perl脚本。==
-常用参数如下。
+[常用参数]如下。
 ```shell
 -s：排序方式，值如下
     c：查询次数
@@ -357,10 +357,7 @@ Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), apsara[apsara]@dc14878
 通过命令mysqldumpslow -s t -t 5 /var/lib/mysql/slow-query.log按照时间排的top 5个SQL语句
 通过命令mysqldumpslow -s t -t 3 -g "like" /var/lib/mysql/slow-query.log按照时间排序且含有'like'的top 5个SQL语句
 ## 解释慢查询SQL执行过程
-利用explain关键字可以分析SQL查询语句的执行过程
-
-例如：执行
-
+利用explain关键字可以分析SQL查询语句的执行过程，例如：执行
 ```sql
 EXPLAIN SELECT * FROM res_user ORDER BYmodifiedtime LIMIT 0,1000
 ```
@@ -372,7 +369,7 @@ table | type | possible_keys | key |key_len | ref | rows | Extra EXPLAIN列的�
 - key（显示走的索引名称）：显示索引名称，比如I_name_age表示联合索引名称叫I_name_age
 - key_len（数字，查看索引使用是否充分）：这里有个内置的计算公式
 - type（显示走的索引类型）：
-	- const：通过一次索引就能找到数据，一般用于主键或唯一索引或者联合索引减少了回表操作作为条件的查询sql中
+	- const：通过一次索引就能找到数据，一般用于主键索引或者联合索引减少了回表操作作为条件的查询sql中
 	- eq_ref：常用于主键或唯一索引扫描。
 	- ref：常用于普通索引和唯一索引扫描。
 	- range：常用于范围查询，比如：between ... and 或 In ，like等操作
@@ -390,7 +387,7 @@ table | type | possible_keys | key |key_len | ref | rows | Extra EXPLAIN列的�
 1. 使用LIKE关键字的查询语句
 在使用LIKE关键字进行查询的查询语句中，如果匹配字符串的第一个字符为“%”，索引不会起作用。只有“%”不在第一个位置索引才会起作用。
 
-2. 使用多列索引的查询语句
+2. 联合索引失效
 MySQL可以为多个字段创建索引。一个索引最多可以包括16个字段。对于多列索引，只有查询条件使用了这些字段中的第一个字段时，索引才会被使用。
 
 ...还有很多种索引失效情况，这里不再赘述
@@ -489,7 +486,7 @@ do{
 select  id,name,balance FROM account where id between 100000 and 100010 order by id;
 ```
 这种方式也有个天然的缺点，很多时候我们并不知道精确的扫描范围
-#### 如有二级索引避免回表
+#### 避免二级索引回表
 先看下表结构哈：
 
 ```sql
@@ -518,14 +515,14 @@ SQL的执行分析流程：
 ![[Pasted image 20240229163643.png]]
 ##### 子查询select id
 
-以上的SQL，回表了100010次，实际上我们能不能不去回表呢？
+以上的SQL，回表了100010次，实际上我们能不能不去回表呢？可以将查询压力直接转移到主键索引上
 ```sql
 select id,name,balance FROM account where id >= (select a.id from account a where a.update_time >= '2020-09-19' limit 100000, 1) LIMIT 10;
 ```
 查询效果一样的，执行时间只需要0.038秒！
 ![[Pasted image 20240229164057.png]]
 ##### 连接查询INNER JOIN
-通过INNER JOIN可以实现延迟关联，SQL如下：
+通过INNER JOIN可以实现延迟关联，SQL如下：也是将查询压力直接转移到主键索引上
 ```sql
 SELECT  acct1.id,acct1.name,acct1.balance FROM account acct1 INNER JOIN (SELECT a.id FROM account a WHERE a.update_time >= '2020-09-19' ORDER BY a.update_time LIMIT 100000, 10) AS  acct2 on acct1.id= acct2.id;
 ```

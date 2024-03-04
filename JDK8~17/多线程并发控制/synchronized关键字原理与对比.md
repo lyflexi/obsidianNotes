@@ -218,7 +218,7 @@ public class WaitAndNotify {
     }  
 }
 ```
-## ObjectMonitor数据结构与可重入原理
+## ObjectMonitor数据结构与可重入原理：五大字段
 下面简单介绍下ObjectMonitor.hpp数据结构
 ```C++
 ObjectMonitor() {
@@ -304,7 +304,7 @@ public enum State {
 线程状态区分为阻塞和等待两种，对比如下：
 - 阻塞状态（Blocked）通常发生在线程试图获取对象的同步锁，但该锁被其他线程占用时。在这种情况下，线程会进入锁池，等待锁被释放。阻塞状态是线程主动放弃CPU使用权，暂时停止运行的状态。
 - 等待状态（Waiting）则通常发生在线程执行了某些方法，如wait()、join()或sleep()，这些方法会使线程进入等待状态。例如，当线程执行wait()方法时，它会被放入等待池中。==与阻塞状态不同的是，等待状态下的线程通常需要其他线程调用了该对象的notify()或notifyAll()方法来唤醒它，或者等待的时间超时，线程才可以继续执行。==
-### 获取Monitor和释放Monitor的整体流程
+### 获取Monitor和释放Monitor的整体流程：`_owner`
 
 依据`_recursions`，所以synchronized是可重入锁，synchronized获取Monitor和释放Monitor的流程如下：
 ![[Pasted image 20231225134517.png]]
@@ -313,7 +313,8 @@ public enum State {
 获取 Monitor 流程：
 1. 当一个线程尝试获取某个对象的 Monitor 时，首先检查该 Monitor 是否已被其他线程持有。
 2. 如果 Monitor 未被其他线程持有，则当前线程获取该 Monitor，`_EntryList`入队，设置 `_owner` 为当前线程，并将 `_count` 设置为 1，表示当前线程持有该锁，并将 `_recursions` 设置为 0，表示尚未进行重入。
-3. 如果 Monitor 已被其他线程持有，则当前线程会被放入该 Monitor 的 `_WaitSet` 中，进入等待状态，直到 Monitor 被释放。
+3. 如果`_owner` 为当前线程，则执行可重入， `_recursions+1` 
+4. 如果 Monitor 已被其他线程持有，则当前线程会被放入该 Monitor 的 `_WaitSet` 中，进入等待状态，直到 Monitor 被释放。
 
 释放 Monitor 流程：
 1. 当持有 Monitor 的线程希望释放 Monitor 时，首先会检查是否有其他线程在等待获取该 Monitor。
@@ -515,6 +516,73 @@ public void m2(){
 - synchronized关键字使用`wait()`和`notify()`/`notifyAll()`方法相结合可以实现等待/通知机制。但是ObjectMonitor不支持选择性通知
 - ReentrantLock可实现选择性通知：借助于Condition接口与newCondition()方法，其他线程对象可以注册在指定的Condition中，Condition实例的signalAll()方法只会唤醒注册在该Condition实例中的所有等待线程。
 
+## 锁拥有者线程对象
+Synchronized获取锁的时候，先判断共享资源`_count`:
+- 如果`_count`为0，则当前线程获取锁，并设置 `_owner` 为当前线程
+- 如果`_count`不为0，且`_owner` 为当前线程，则执行可重入， `_recursions+1` 
+
+ReentrantLock获取锁的时候，先判断共享资源state:
+- 如果state是0，则调用setExclusiveOwnerThread(current); 设置锁的拥有者为当前线程current = Thread.currentThread();
+- 如果state不是0，会调用到getExclusiveOwnerThread()判断当前锁是否已拥有，如果是则`int nextc = c + acquires`，acquire是1
+```java
+/**  
+ * Performs non-fair tryLock.  tryAcquire is implemented in 
+ * subclasses, but both need nonfair try for trylock method. */
+final boolean nonfairTryAcquire(int acquires) {  
+    final Thread current = Thread.currentThread();  
+    int c = getState();  
+    if (c == 0) {  
+        if (compareAndSetState(0, acquires)) {  
+            setExclusiveOwnerThread(current);  
+            return true;  
+        }  
+    }  
+    else if (current == getExclusiveOwnerThread()) {  
+        int nextc = c + acquires;  
+        if (nextc < 0) // overflow  
+            throw new Error("Maximum lock count exceeded");  
+        setState(nextc);  
+        return true;  
+    }  
+    return false;  
+}
+```
+其中setExclusiveOwnerThread和getExclusiveOwnerThread方法是抽象类AbstractOwnableSynchronizer的方法，这两个方法操作的对象都是成员变量`private transient Thread exclusiveOwnerThread; `
+```java
+public abstract class AbstractOwnableSynchronizer  
+    implements java.io.Serializable {  
+  
+    /** Use serial ID even though all fields transient. */  
+    private static final long serialVersionUID = 3737899427754241961L;  
+  
+    /**  
+     * Empty constructor for use by subclasses.     */    
+    protected AbstractOwnableSynchronizer() { }  
+  
+    /**  
+     * The current owner of exclusive mode synchronization.     */    
+    private transient Thread exclusiveOwnerThread;  
+  
+    /**  
+     * Sets the thread that currently owns exclusive access.     * A {@code null} argument indicates that no thread owns access.  
+     * This method does not otherwise impose any synchronization or     * {@code volatile} field accesses.  
+     * @param thread the owner thread  
+     */    
+    protected final void setExclusiveOwnerThread(Thread thread) {  
+        exclusiveOwnerThread = thread;  
+    }  
+  
+    /**  
+     * Returns the thread last set by {@code setExclusiveOwnerThread},  
+     * or {@code null} if never set.  This method does not otherwise  
+     * impose any synchronization or {@code volatile} field accesses.  
+     * @return the owner thread  
+     */    
+    protected final Thread getExclusiveOwnerThread() {  
+        return exclusiveOwnerThread;  
+    }  
+}
+```
 # synchronized与volatile
 
 synchronized 关键字和 volatile 关键字区别如下：

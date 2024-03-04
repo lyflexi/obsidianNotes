@@ -189,15 +189,13 @@ typedef struct zskiplistNode {
     } level[]; // 多级索引数组
 } zskiplistNode;
 ```
-## SortedSet数据结构分析
-**面试题**：Redis的`SortedSet`底层的数据结构是怎样的？Redis源码中`zset`，也就是`SortedSet`的结构体如下：
-
-**答**：SortedSet是有序集合，底层的存储的每个数据都包含element和score两个值。score是得分，element则是字符串值。SortedSet会根据每个element的score值排序，形成有序集合。
+## SortedSet底层数据结构分析
+SortedSet是有序集合，底层的存储的每个数据都包含element和score两个值。score是得分，element则是字符串值。SortedSet会根据每个element的score值排序，形成有序集合。
 
 根据score的排序原理如下：
 - 根据element查询score值，要实现根据element查询对应的score值，就必须实现element与score之间的键值映射，SortedSet底层是基于==HashTable==来实现的。
 - 要按照score值升序或降序查询element，并且查询效率还高，就需要有一种高效的有序数据结构，SortedSet是基于==跳表Skiplist==实现的。
 
-加分项：因为SortedSet底层需要用到两种数据结构，对内存占用比较高。因此Redis底层会对SortedSet中的元素大小做判断。如果元素大小小于128且每个元素都小于64字节，SortedSet底层会采用ZipList，也就是压缩列表来代替HashTable**和**SkipList
+加分项：因为SortedSet底层需要用到两种数据结构，对内存占用比较高。因此Redis底层会对SortedSet中的元素大小做判断。如果元素大小小于128且每个元素都小于64字节，SortedSet底层会采用ZipList，也就是压缩列表来代替HashTable和SkipList
 
 不过，`ZipList`存在连锁更新问题，因此而在Redis7.0版本以后，`ZipList`又被替换为Listpack（紧凑列表）。

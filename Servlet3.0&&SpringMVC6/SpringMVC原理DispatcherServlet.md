@@ -189,7 +189,7 @@ protected void doDispatch(HttpServletRequest request, HttpServletResponse respon
 }
 ```
 
-## 获取映射器HandlerExecutionChain
+## 获取映射器HanlderMapping
 
 查找映射器的时候实际就是找到「最佳匹配」的路径：比如我的测试请求路径是：com.springdebug.mvc.DebugController#testRequestParam(String)
 

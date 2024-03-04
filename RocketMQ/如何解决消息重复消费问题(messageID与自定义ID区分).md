@@ -11,7 +11,7 @@ Message(String topic, String tags, String keys, byte[] body)
 - BROADCASTING(广播)模式下，所有注册的消费者都会消费，而这些消费者通常是集群部署的一个个微服务，这样就会多台机器重复消费。
 - CLUSTERING（负载均衡）模式下：
 	- 有可能一个topic被多个consumerGroup订阅，也会重复消费。
-	- CLUSTERING（负载均衡）模式下还存在重新负载均衡情况，即使broker中的一个队列在同一个consumerGroup下，但是只要任何一个消费者新上线后，同组的所有消费者要重新负载均衡（反之一个消费者掉线后，也会重新负载）。一个队列所对应的新的消费者要获取之前消费的offset（偏移量，也就是消息消费的点位），但是消费者消费消息，和broker更新offset是分两步操作，此时之前的消费者可能已经消费了一条消息，但是并没有把offset提交给broker，那么新的消费者可能会重新消费一次。
+	- 即使broker中的一个队列Queue只被同一个consumerGroup订阅，但是只要任何一个消费者新上线后，同组的所有消费者要重新负载均衡（反之一个消费者掉线后，也会重新负载）。一个队列所对应的新的消费者要获取之前消费的offset（偏移量，也就是消息消费的点位），但是消费者消费消息，和broker更新offset是分两步操作，此时之前的消费者可能已经消费了一条消息，但是并没有把offset提交给broker，那么新的消费者可能会重新消费一次。
 ![[Pasted image 20240119214159.png]]
 
 ## 幂等性原则铺垫
@@ -42,7 +42,7 @@ Message(String topic, String tags, String keys, byte[] body)
 服务A调用服务B需要更新的时候，需要提前查询到version，然后作为参数传过去。
 
 数据更新的时候将version + 1，接口如果发生重试的时候，version已经发生变更，那么也能保证幂等性。
-### MySQL支付状态位State，类似于乐观锁
+### MySQL支付状态位State，本质还是乐观锁
 
 增加支付状态，0代表待支付 ， 1代表支付中 ， 2代表支付成功，3代表支付失败
 

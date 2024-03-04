@@ -7,193 +7,75 @@ SpringAOP的实现原理是动态代理，最终放入容器的是代理类的�
 AOP增强定位于Bean生命周期当中的后置处理操作`BeanPostProcessor`，如下图所示
 ![[Pasted image 20240105145914.png]]
 
-接下来让我们从@EnableAspectJAutoProxy注解入手，去束流AOP的原理：
+接下来让我们从@EnableAspectJAutoProxy注解入手，去梳理AOP的原理：
 
-1. 开启@EnableAspectJAutoProxy，注入Bean的后置处理器AnnotationAwareAspectJAutoProxyCreator同时AnnotationAwareAspectJAutoProxyCreator是一个InstantiationAwareBeanPostProcessor类型的后置处理器；
-    
-2. 找被切面增强的Advisor
-    
-    1. org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findEligibleAdvisors
-        
-    2. org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator#findCandidateAdvisors
-        
-    3. org.springframework.aop.support.AopUtils#findAdvisorsThatCanApply
-        
-3. 代理对象的创建
-    
-    1. org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#postProcessAfterInitialization
-        
-    2. org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#wrapIfNecessary
-        
-    3. org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#createProxy
-        
-    4. org.springframework.aop.framework.JdkDynamicAopProxy#getProxy(java.lang.ClassLoader)
-        
-4. 代理方法的执行
-    
+1. 注入Bean的后置处理器AnnotationAwareAspectJAutoProxyCreator，它是BeanPostProcessor
+2. 代理对象的创建wrapIfNecessary
+    1. 先是找被切面增强的Advisor：
+    2. org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findEligibleAdvisors
+    3. org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator#findCandidateAdvisors
+    4. org.springframework.aop.support.AopUtils#findAdvisorsThatCanApply
+    5. 下面是创建代理对象：
+    6. org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#postProcessAfterInitialization
+    7. org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#wrapIfNecessary
+    8. org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#createProxy
+    9. org.springframework.aop.framework.JdkDynamicAopProxy#getProxy(java.lang.ClassLoader)
+3. 代理对象执行目标方法
     1. org.springframework.aop.framework.JdkDynamicAopProxy#invoke
-        
     2. org.springframework.aop.framework.ReflectiveMethodInvocation#proceed，interceptorsAndDynamicMethodMatchers中第一个advice为org.springframework.aop.interceptor.ExposeInvocationInterceptor。
-        
-5. 拦截器链MethodInterceptor
-    
-    1. ExposeInvocationInterceptor
-        
-    2. 环绕通知的执行
-        
-    3. 前置通知的执行
-        
-    4. 后置通知的执行
-        
-    5. 返回后通知的执行
-        
-    6. 异常通知的执行
-## 一、创建与注册后置处理器AnnotationAwareAspectJAutoProxyCreator
+以后容器中获取到的就是代理对象，执行目标方法的时候，代理对象就会执行通知方法的流程，同时形成拦截器链MethodInterceptor
+1. ExposeInvocationInterceptor
+2. 环绕通知的执行
+3. 前置通知的执行
+4. 后置通知的执行
+5. 返回后通知的执行
+6. 异常通知的执行
+## 一、创建与注册Spring内置的后置处理器AnnotationAwareAspectJAutoProxyCreator
 
 1. 传入配置类，创建ioc容器
-    
 2. 注册配置类，调用refresh（）刷新容器；
-    
 3. registerBeanPostProcessors(beanFactory);注册bean的后置处理器来方便拦截bean的创建；注册BeanPostProcessor，实际上就是创建BeanPostProcessor对象，保存在容器中；
-    
     1. 先获取ioc容器已经定义了的需要创建对象的所有BeanPostProcessor
-        
     2. 给容器中加别的BeanPostProcessor
-        
     3. 优先注册实现了PriorityOrdered接口的BeanPostProcessor；
-        
     4. 再给容器中注册实现了Ordered接口的BeanPostProcessor；
-        
     5. 注册没实现优先级接口的BeanPostProcessor；创建internalAutoProxyCreator的BeanPostProcessor【`AnnotationAwareAspectJAutoProxyCreator`】
-        
         1. 创建Bean的实例Instantiation
-            
         2. populateBean；给bean的各种属性赋值
-            
         3. initializeBean：初始化bean；
-            
             1. invokeAwareMethods()：处理Aware接口的方法回调
-                
             2. applyBeanPostProcessorsBeforeInitialization()：应用后置处理器的postProcessBeforeInitialization（）
-                
             3. invokeInitMethods()；执行自定义的初始化方法
-                
             4. applyBeanPostProcessorsAfterInitialization()；执行后置处理器的postProcessAfterInitialization（）；
-                
         4. BeanPostProcessor(`AnnotationAwareAspectJAutoProxyCreator`)创建成功；aspectJAdvisorsBuilder
-            
         5. 把`AnnotationAwareAspectJAutoProxyCreator`注册到BeanFactory中；beanFactory.addBeanPostProcessor(postProcessor); =======以上是创建和注册AnnotationAwareAspectJAutoProxyCreator的过程========
-
-
 
 @EnableAspectJAutoProxy注解用于开启AOP功能，它使用@Import注解向Spring容器中注入了一个类型为`AspectJAutoProxyRegistrar`的`class`
 ![[Pasted image 20240105151241.png]]
 
 `AspectJAutoProxyRegistrar.class`实现了`ImportBeanDefinitionRegistrar`接口，而`ImportBeanDefinitionRegistrar`是spring提供的扩展点之一，主要用来向容器中注入`BeanDefinition`，Spring会根据BeanDefinion来生成Bean。通过`AspectJAutoProxyRegistrar`向IOC容器中注册一个`AnnotationAwareAspectJAutoProxyCreator`组件
 ![[Pasted image 20240105151248.png]]
+AnnotationAwareAspectJAutoProxyCreator属于BeanPostProcessor，在其postProcessAfterInitialization中创建并返回代理对象
 
-==AnnotationAwareAspectJAutoProxyCreator属于InstantiationAwareBeanPostProcessor，同时也是一个BeanPostProcessor。这说明InfrastructureAdvisorAutoProxyCreator会有两个触发时机==：(以模板类AbstractAutoProxyCreator.java为例)
-1. postProcessBeforeInstantiation，Bean生命周期中的第一个扩展点呀！！！
-2. postProcessAfterInitialization，Bean生命周期中的第二个扩展点呀！！！
-![[Pasted image 20240105151301.png]]
+# 二、代理对象创建 postProcessAfterInitialization
 
+finishBeanFactoryInitialization(beanFactory);完成BeanFactory初始化工作；创建剩下的单实例bean。遍历获取容器中所有的Bean，依次创建对象getBean(beanName)。getBean->doGetBean()->createBean()->doCreateBean()
 
-# 二、代理对象创建 
-## postProcessBeforeInstantiation
-第一个扩展点，上面的AnnotationAwareAspectJAutoProxyCreator也是InstantiationAwareBeanPostProcessor。
-
- ==InstantiationAwareBeanPostProcessor在bean实例化之前会有一个拦截，会调用postProcessBeforeInstantiation()。先从缓存中获取代理对象==，如果能获取到，说明bean是之前被创建过的，直接使用，否则再执行doCreateBean创建；只要创建好的Bean都会被缓存起来。
- createBean方法：
-```java
-......
-try {  
-    // Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.  
-    Object bean = resolveBeforeInstantiation(beanName, mbdToUse);  
-    if (bean != null) {  
-       return bean;  
-    }  
-}  
-catch (Throwable ex) {  
-    throw new BeanCreationException(mbdToUse.getResourceDescription(), beanName,  
-          "BeanPostProcessor before instantiation of bean failed", ex);  
-}  
-//如果从缓存中获取代理对象，说明bean是之前被创建过的，则上面提前return bean返回，否则再执行下面的doCreateBean创建
-try {  
-    Object beanInstance = doCreateBean(beanName, mbdToUse, args);  
-    if (logger.isTraceEnabled()) {  
-       logger.trace("Finished creating instance of bean '" + beanName + "'");  
-    }  
-    return beanInstance;  
-}  
-catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {  
-    // A previously detected exception with proper bean creation context already,  
-    // or illegal singleton state to be communicated up to DefaultSingletonBeanRegistry.    throw ex;  
-}
-......
-```
-
-postProcessBeforeInstantiation()拦截逻辑如下：// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-这里是获取用户自定义的 targetSource，Spring 提供了LazyInitTargetSourceCreator， QuickTargetSourceCreator，
-供用户自定义，如果获取到targetSource不为null
-- 加入到targetSourcedBeans 里面。
-- 提前创建代理对象
-- 返回代理对象
-```java
-@Override  
-public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {  
-    Object cacheKey = getCacheKey(beanClass, beanName);  
-  
-......
-  
-    // Create proxy here if we have a custom TargetSource.  
-    // Suppresses unnecessary default instantiation of the target bean:    
-    // The TargetSource will handle target instances in a custom fashion.    
-    TargetSource targetSource = getCustomTargetSource(beanClass, beanName);  
-    if (targetSource != null) {  
-       if (StringUtils.hasLength(beanName)) {  
-          this.targetSourcedBeans.add(beanName);  
-       }  
-       Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);  
-       Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);  
-       this.proxyTypes.put(cacheKey, proxy.getClass());  
-       return proxy;  
-    }  
-  
-    return null;  
-}
-```
-
-## postProcessAfterInitialization
-finishBeanFactoryInitialization(beanFactory);完成BeanFactory初始化工作；创建剩下的单实例bean。遍历获取容器中所有的Bean，依次创建对象getBean(beanName)。getBean->doGetBean()->getSingleton()-> 创建bean，doCreateBean
-
-
- ==AnnotationAwareAspectJAutoProxyCreator也是BeanPostProcessor，在Bean对象创建完成初始化后调用postProcessAfterInitialization，这里return wrapIfNecessary(bean, beanName, cacheKey)来创建增强对象。==
- ![[Pasted image 20240105151315.png]]
+在postProcessAfterInitialization这里return wrapIfNecessary(bean, beanName, cacheKey)来创建增强对象。
+![[Pasted image 20240105151315.png]]
  wrapIfNecessary方法会判断该Bean是否注册了切面，若是，则生成代理对象注入到容器中，下面是代理对象的生成逻辑：
 1. 获取当前bean的所有拦截器（通知方法） Object[] specificInterceptors
-	
 	1. 找到候选的所有的增强器（找哪些通知方法是需要切入当前bean方法的）
-		
 	2. 获取到能在bean使用的增强器。
-		
 	3. 给增强器advisor排序，
-		
 	4. 给增强器advisor转换为拦截器Interceptor
-		
 2. 创建当前bean的代理对象；
-	
 	1. 获取所有增强器（通知方法）
-		
 	2. 保存到proxyFactory
-		
 	3. 创建代理对象：Spring自动决定
-		
 		1. JdkDynamicAopProxy(config);jdk动态代理；
-			
 		2. ObjenesisCglibAopProxy(config);cglib的动态代理；
-			
-3. 以后容器中获取到的就是这个组件的代理对象，执行目标方法的时候，代理对象就会执行通知方法的流程；
-        
+3. 以后容器中获取到的就是代理对象，执行目标方法的时候，代理对象就会执行通知方法的流程；
 
 其实，在实例化createBeanInstance之后，initializeBean之前，doCreateBean方法中调用了这么一段代码addSingletonFactory来给三级缓存中添加早期引用
 ```java
@@ -236,19 +118,14 @@ public Object postProcessAfterInitialization(@Nullable Object bean, String beanN
         //如果之前调用过getEarlyBeanReference获取包装目标对象到AOP代理对象（如果需要），则不再执行
         //cacheKey保证不会重复生成代理对象
         if (this.earlyProxyReferences.remove(cacheKey) != bean) {
-                // 包装目标对象到AOP代理对象（如果需要）
-                return wrapIfNecessary(bean, beanName, cacheKey);
+			// 包装目标对象到AOP代理对象（如果需要）
+			return wrapIfNecessary(bean, beanName, cacheKey);
         }
     }
     return bean;
 }
 ```
-
-
-
-
 按需生成代理对象，org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#wrapIfNecessary
-
 ```Java
 protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
     if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
@@ -282,28 +159,11 @@ protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) 
     return bean;
 }
 ```
-
-即使当前的`abstract class AbstractAutoProxyCreator`还未实现`getAdvicesAndAdvisorsForBean`方法，但是没关系，有子类`AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator`并且实现了`getAdvicesAndAdvisorsForBean`方法
-![[Pasted image 20240105151356.png]]
-
-因此实际中使用的时候肯定用的是子类`AbstractAdvisorAutoProxyCreator` 。但为什么还要定义抽象父类`AbstractAutoProxyCreator`呢？
-
-原因是这里使用的抽象模板设计模式：
-
-- 父类是个抽象类
-    
-- 抽象父类可以实现部分方法，这部分方法是为了让子类代码复用
-    
-- 子类再去完成父类没有实现的方法即可
-    
-- 子类依然可以是个抽象类，依然可以留下一些方法不去实现
-    
-
-### 找到切面Bean对应的所有增强方法Advisor
+## 找到切面Bean对应的所有增强方法Advisor
 
 找被切面Bean增强的所有Advisor
 
-#### AbstractAdvisorAutoProxyCreator
+### AbstractAdvisorAutoProxyCreator
 
 来到`AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator`
 ![[Pasted image 20240105151402.png]]
@@ -338,7 +198,7 @@ protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName
 }
 ```
 
-##### findCandidateAdvisors
+#### findCandidateAdvisors
 
 `AbstractAdvisorAutoProxyCreator`中的成员变量：
 
@@ -399,7 +259,7 @@ public List<Advisor> findAdvisorBeans() {
 }
 ```
 
-##### findAdvisorsThatCanApply
+#### findAdvisorsThatCanApply
 ![[Pasted image 20240105151423.png]]
 
 org.springframework.aop.support.AopUtils#findAdvisorsThatCanApply
@@ -434,7 +294,7 @@ public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvi
 }
 ```
 
-###### 创建代理对象
+##### 创建代理对象
 
 当Bean对象初始化完成之后，`postProcessAfterInitialization`方法会判断该Bean是否注册了切面，若是，则生成代理对象注入到容器中。此后，其实是代理对象来执行目标方法。
 ```Java
@@ -478,11 +338,8 @@ protected Object createProxy(Class<?> beanClass, @Nullable String beanName,
 createAopProxy() 方法决定了是使用 JDK 还是 Cglib 来做动态代理：
 
 ![[Pasted image 20240105151443.png]]
-
 - 如果目标对象实现了接口，默认情况下会采用 JDK 的动态代理
-    
 - 如果目标对象没有实现了接口，会使用 CGLIB 动态代理
-    
 
 ```Java
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
@@ -511,23 +368,14 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 # 三、目标方法的执行JdkDynamicAopProxy#invoke
 
-这个代理对象创建完以后，IOC容器也就创建完了。接下来，便要来执行目标方法了。
-容器中保存了组件的代理对象（jdk增强或者cglib增强后的对象），这个代理对象里面保存了详细信息（比如拦截器链，目标对象，目标方法）；
-
-JDK动态代理时候`InvocationHandler`的实现类为org.springframework.aop.framework.JdkDynamicAopProxy。
-![[Pasted image 20240105151449.png]]
-
-那么代理方法的调用肯定会进入JdkDynamicAopProxy.invoke()方法
+这个代理对象创建完以后，IOC容器也就创建完了。接下来，便要来执行增强的目标方法了。
 ![[Pasted image 20240105151454.png]]
+JDK动态代理时候`InvocationHandler`的实现类为就是JdkDynamicAopProxy自己
+![[Pasted image 20240105151449.png]]
+因此h传了this
 ![[Pasted image 20240105151459.png]]
 1. ==jdk动态代理invoke();拦截目标方法的执行==
-    
-2. 获取将要执行的目标方法拦截器链；`List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);`
-    
-    1. 将增强器转为拦截器`List<MethodInterceptor>`；遍历所有的增强器advisor，调用registry.getInterceptors(advisor);转换完成返回MethodInterceptor数组；
-        
-    2. `List<Object> interceptorList`保存所有拦截器 5个，一个默认的ExposeInvocationInterceptor 和 4个增强器；
-        
+2. this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass)获取将要执行的目标方法拦截器链`List<Object> chain`保存所有拦截器 5个，一个默认的ExposeInvocationInterceptor 和 4个增强器；
 3. 把需要执行的目标对象，目标方法，拦截器链等信息传入创建一个 ReflectiveMethodInvocation 对象，并调用 Object retVal = mi.proceed();火炬方法
 ```Java
 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -623,7 +471,7 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
         }
 }
 ```
-## ReflectiveMethodInvocation#proceed火炬
+## 循环调用ReflectiveMethodInvocation火炬process
 MethodInvocation中封装了目标对象，目标方法，方法参数等信息。
 
 以JdkDynamicAopProxy的invoke方法为例，继续往下分析
@@ -668,7 +516,8 @@ public Object proceed() throws Throwable {
 }
 ```
 
-###  五个拦截器Interceptor的invoke
+### 传递火炬并执行Interceptor内置的invoke
+将火炬的传递与代理方法的执行解耦
 ```java
         else {
                 // It's an interceptor, so we just invoke it: The pointcut will have
@@ -677,17 +526,21 @@ public Object proceed() throws Throwable {
                 return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
         }
 ```
-
+虽然MethodInterceptor里面的invoke和反射无关，但是真正的代理方法在此，这里的invoke是拦截器自己定义的invoke
+```java
+@FunctionalInterface  
+public interface MethodInterceptor extends Interceptor {   
+    Nullable  
+    Object invoke(@Nonnull MethodInvocation invocation) throws Throwable;  
+  
+}
+```
 #### 第一个拦截器ExposeInvocationInterceptor#invoke
 interceptorsAndDynamicMethodMatchers中第一个advice为org.springframework.aop.interceptor.ExposeInvocationInterceptor。
 ![[Pasted image 20240105151542.png]]
 因此首先执行ExposeInvocationInterceptor的invoke调用，这个invoke干了两件事
-
-1. 就是将MethodInvocation（`ReflectiveMethodInvocation`）加入到了ThreadLocal中：
-    1. `ThreadLocal` 的特点是存在它里边的数据，哪个线程存的，哪个线程才能访问到。
-    2. 这样后续可以在其他地方（before/after/return/throw）通过ExposeInvocationInterceptor#currentInvocation获取到MethodInvocation。因为MethodInvocation中封装了【目标对象，目标方法，方法参数】等信息。所以每个拦截器都需要MethodInvocation里面的信息
-2. ==调用return mi.proceed();传递火炬，传递给下一个拦截器MethodBeforeAdviceInterceptor==
-
+1. 就是将MethodInvocation（`ReflectiveMethodInvocation`）加入到了ThreadLocal中，`ThreadLocal` 的特点是存在它里边的数据，哪个线程存的，哪个线程才能访问到，因此支持并发场景的AOP。这样后续可以在其他地方（before/after/return/throw）通过ExposeInvocationInterceptor#currentInvocation获取到MethodInvocation。因为MethodInvocation中封装了【目标对象，目标方法，方法参数】等信息。所以每个拦截器都需要MethodInvocation里面的信息
+2. 调用return mi.proceed();传递火炬，传递给下一个拦截器MethodBeforeAdviceInterceptor
 ```Java
     private static final ThreadLocal<MethodInvocation> invocation = new NamedThreadLocal<>("Current AOP method invocation");
 
@@ -695,10 +548,10 @@ interceptorsAndDynamicMethodMatchers中第一个advice为org.springframework.aop
         MethodInvocation oldInvocation = invocation.get();
         invocation.set(mi);
         try {
-                return mi.proceed();
+			return mi.proceed();
         }
         finally {
-                invocation.set(oldInvocation);
+			invocation.set(oldInvocation);
         }
     }
     
@@ -743,7 +596,7 @@ protected Object invokeAdviceMethod(
 
 
 ```
-
+打印getJoinPoint()信息
 ![[Pasted image 20240106155608.png]]
 继续追溯getJoinPoint()，可以看到，getJoinPoint()最终会调用到第一个拦截器ExposeInvocationInterceptor的静态方法currentInvocation()，取出ExposeInvocationInterceptor里面保存的火炬信息ReflectiveMethodInvocation【目标对象，目标方法，方法参数】
 ```java
@@ -849,4 +702,4 @@ CglibAopProxy的内部类CglibMethodInvocation实现了火炬`ReflectiveMethodIn
 
 拦截器的invoke方法返回，被火炬传递到下一个拦截器
 ![[Pasted image 20240105151519.png]]
-## CglibMethodInvocation#proceed火炬
+## CglibMethodInvocation火炬方法proceed

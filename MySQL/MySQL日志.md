@@ -67,8 +67,8 @@ binlog有三种记录格式，分别是ROW、STATEMENT、MIXED
 
 ==MySQL数据的主从同步一共设计三种文件：==
 - 主库的binlog
-- 从库的relaylog
-- 从库的master-info文件
+- 从库的relaylog，中继日志
+- 从库的master-info文件，缓存日志
 主从同步完整步骤如下：
 - 用户在主库master执行DDL和DML操作，修改记录顺序写入binlog;
 - 从库slave的I/O线程连接上Master，检查到主库产生了binlog，于是请求读取指定位置position及之后的日志内容;

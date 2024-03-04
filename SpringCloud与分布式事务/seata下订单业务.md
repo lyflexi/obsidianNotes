@@ -295,11 +295,8 @@ com.hmall.common.exception.BizIllegalException: 库存不足！
 - 执行业务sql并提交
 - 报告事务状态
 
-阶段二全局提交时`RM`的工作：
-- 删除undo-log即可
-
-阶段二全局回滚时`RM`的工作：
-- 根据undo-log恢复数据到更新前
+阶段二全局提交时`RM`的工作：删除undo-log即可
+阶段二全局回滚时`RM`的工作：根据undo-log中的两阶段记录，恢复数据到更新前
 
 ## 开启AT模式
 trade-service、cart-service、item-service三服务均开启AT模式

@@ -1,6 +1,6 @@
 正规的域名访问流程是输入www.baidu.com，然后由网络DNS解析出对应的ip地址
 
-我们现在通过配置C:\Windows\System32\drivers\etc\host文件添加映射规则，也可达到同样的效果
+我们现在通过配置`C:\Windows\System32\drivers\etc\host`文件添加映射规则，也可达到同样的效果
 ![[Pasted image 20240127164012.png]]
 
 Windows根据域名匹配到nginx服务器，然后通过`nginx.conf`的配置字段`location`再定位到后端product服务
@@ -35,7 +35,7 @@ step1:我们发送域名给nginx的时候是会带上当然是会带上host
 
 step2:但是nginx再次转发给我们的微服务网关的时候，是会丢失域名信息的，
 
-step3:我们的网关微服务这时候是以域名进行断言的，域名之后网关就无法根据host进行路由了
+step3:我们的网关微服务这时候是以域名进行断言的，请求头丢失之后网关就无法根据host进行路由了
 ![[Pasted image 20240127164038.png]]
 
 # 解决请求头丢失问题

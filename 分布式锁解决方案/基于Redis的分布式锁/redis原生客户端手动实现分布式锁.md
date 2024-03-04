@@ -382,6 +382,9 @@ Hash：ARGV1: 传入uuid+threadID，value:不用传因为redis内置hincrby递�
 ```
 另外调用redis的expire方法 ，传入用户自定义的过期时间
 
+
+为什么Hash里面的唯一标识是多拼接了threadID？下面解答
+
 ### 加锁脚本
 
 Redis 提供了 Hash （哈希表）这种可以存储键值对数据结构。所以我们可以使用 Redis Hash 存储的锁的重入次数，然后利用 lua 脚本判断逻辑。
@@ -429,7 +432,7 @@ else
 end;
 ```
 
-## java代码
+## java代码，重要！
 由于加解锁代码量相对较多，这里可以封装成工具类并引入工厂模式
 工厂DistributedLockClient，便于框架扩展
 ```java
@@ -451,11 +454,8 @@ public class DistributedLockClient {
 }
 ```
 DistributedRedisLock实现如下：
-==只有保证可重入方法获取到的uuid和外面方法的uuid相同，才代表同一把锁，才能够重入，所以上面的uuid必须只生成一次（Spring单实例DistributedLockClient）==
-但是这又带来了新的问题，并发线程获取的锁如何区分唯一性？
-解决方案：
-- uuid不再作为锁的唯一标识，而是作为服务的唯一标识，这可以保证集群情况下并发线程获取的锁id具有唯一性
-- 新的uuid由uuid和当前线程id拼接而成this.uuid = uuid + ":" + Thread.currentThread().getId()，这可以保证可重入锁
+==Spring单实例DistributedLockClient限制了UUID只生成一次，这又带来了新的问题并发线程的标识都是UUID，同服务下如何区分并发线程的唯一性？==
+解决方案，新的uuid由uuid和当前线程id拼接而成this.uuid = uuid + ":" + Thread.currentThread().getId()，这既保证了可重入锁，又区分了不同的并发线程
 ```java
 public class DistributedRedisLock implements Lock {
 

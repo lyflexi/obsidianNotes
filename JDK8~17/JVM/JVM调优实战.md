@@ -1,7 +1,7 @@
 我们知道，jdk打娘胎出来在`${JAVA_HOME/bin}`下有很多命令行工具，如：
 - jps：查看正在运行的Java进程
 - jstat：查看JVM统计信息
-- jinfo：实时查看JVM配置参数，在 Java 9 及更高版本中支持参数动态修改但也并非所有 VM 标志都支持动态修改，修改某些标志最好还是重启JVM。
+- jinfo：实时查看JVM配置参数，在 Java 9 及更高版本中支持参数动态修改但也并非所有JVM参数都支持动态修改，修改某些参数最好还是重启JVM。
 - jmap：用于生成堆内存映射或堆转储文件（heap dump）
 - jstack：打印JVM中的线程快照
 ![[Pasted image 20240303105959.png]]

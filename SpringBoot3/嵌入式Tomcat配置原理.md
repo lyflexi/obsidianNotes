@@ -65,6 +65,7 @@ public WebServer getWebServer(ServletContextInitializer... initializers) {
 
 从TomcatServletWebServerFactory的getWebServer方法处回溯Debug栈
 ## Spring子容器：ServletWebServerApplicationContext
+回溯到ServletWebServerApplicationContext的createWebServer()方法
 ```java
 private void createWebServer() {  
     WebServer webServer = this.webServer;  
@@ -91,8 +92,7 @@ private void createWebServer() {
     initPropertySources();  
 }
 ```
-
-继续跟踪createWebServer，来到ServletWebServerApplicationContext的onRefresh方法：
+继续回溯，来到ServletWebServerApplicationContext的onRefresh方法，createWebServer正式在此创建
 ServletWebServerApplicationContext是AbstractApplicationContext的子类，重写的onRefresh如下
 ```java
 @Override  

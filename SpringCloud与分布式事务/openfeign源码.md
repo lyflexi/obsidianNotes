@@ -1,7 +1,7 @@
 Feign是Spring Cloud组件中一个轻量级RESTful的HTTP服务客户端，Feign内置了Ribbon，用来做客户端负载均衡，去调用服务注册中心的服务。Feign的使用方式是：使用Feign的注解定义接口，调用接口，就可以调用服务注册中心的服务。
 
 2019年feign停更，springcloud F 及F版本以上 ，springboot 2.0 以上基本上使用openfeign，目前大多数新项目都用openfeign：
-- ==自SpringCloud2020版本开始，已经弃用内置的Ribbon，改用Spring自己开源的Spring Cloud LoadBalancer了（响应式负载均衡器），我们使用的OpenFeign的也已经与其整合。==
+- ==自SpringCloud2020版本开始，已经弃用内置的Ribbon，改用Spring自己开源的Spring Cloud LoadBalancer(响应式)了，我们使用的OpenFeign的也已经与其整合。==
 -  ==OpenFeign在Feign的基础上支持了SpringMVC的注解，因此OpenFeign可以在FeignClient定义的远程调用接口上声明@RequestMapping等SpringMVC注解==
 - 作为消费者，OpenFeign通过动态代理的方式进行远程调用。
 - 作为生产者，OpenFeign通过反射的方式生成服务实例。
@@ -382,7 +382,7 @@ loadBalancerClient的类型是`org.springframework.cloud.client.loadbalancer.Loa
 `ReactiveLoadBalancer`是`Spring-Cloud-Common`组件中定义的负载均衡器接口规范，而`Spring-Cloud-Loadbalancer`组件给出了两个个实现：
 - RoundRobinLoadBalancer
 - RoundLoadBalancer
-==这也印证了文章开头处，自SpringCloud2020版本开始，已经弃用内置的Ribbon，改用Spring自己开源的Spring Cloud LoadBalancer了，我们使用的OpenFeign的也已经与其整合。==
+==这也印证了文章开头处，自SpringCloud2020版本开始，已经弃用内置的Ribbon，改用Spring自己开源的Spring Cloud LoadBalancer(响应式)了，我们使用的OpenFeign的也已经与其整合。==
 ![[Pasted image 20240127143210.png]]
 此处用的是默认实现`RoundRobinLoadBalancer`，即轮询负载均衡器：下图中代码的核心逻辑如下：
 - 根据serviceId找到这个服务采用的负载均衡器（`ReactiveLoadBalancer`），也就是说我们可以给每个服务配不同的负载均衡算法。

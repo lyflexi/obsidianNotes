@@ -1,7 +1,7 @@
 `BeanFactoryPostProcessor`接口是Bean工厂的后置处理器
 ![[Pasted image 20231226150111.png]]
 
-# BeanFactoryPostProcessor不注册Bean
+# BeanFactoryPostProcessor通过beanFactory注册bean
 
 `BeanFactoryPostProcessor`接口优先于Bean的创建和初始化
 
@@ -195,7 +195,41 @@ blue...constructor
 ```
 
 细心一点看的话，从Bean的定义信息中还能看到Blue组件注册到容器中的名字，只是此刻还没创建对象，说明BeanFactoryPostProcessor是在所有的Bean定义信息都被加载之后，Bean的创建与初始化之前，调用的
-# BeanDefinitionRegistryPostProcessor注册Bean
+
+BeanFactoryPostProcessor通过方法参数beanFactory来注册bean，如下
+```java
+@Component
+public class MsgHandlerProcessor implements BeanFactoryPostProcessor {
+
+    private static final String HANDLER_PACKAGE = "com.iwhalecloud.aiFactory.aspect.msghandler.process";
+
+    /*
+     * 扫描@PassiveMsgHandlerType，MsgHandlerContext，将其注册到spring容器
+     *
+     * @param beanFactory bean工厂
+     */
+     
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        Map<String, Class> handlerMap = Maps.newHashMapWithExpectedSize(3);
+        //只扫描带有@PassiveMsgHandlerType注解的handler
+        ClassScaner.scan(HANDLER_PACKAGE, PassiveMsgHandlerType.class).forEach(clazz -> {
+            // 获取注解中的类型值
+            String type = clazz.getAnnotation(PassiveMsgHandlerType.class).value();
+            // 将注解中的类型值作为key，对应的类作为value，保存在Map中
+            handlerMap.put(type, clazz);
+            beanFactory.registerSingleton(clazz.getName(),clazz);
+        });
+        // 创建自己的HandlerContext，也将其注册到spring容器中，HandlerContext用于后续获取handler
+        MsgHandlerContext context = new MsgHandlerContext(handlerMap);
+        beanFactory.registerSingleton(MsgHandlerContext.class.getName(), context);
+    }
+
+}
+```
+
+
+# BeanDefinitionRegistryPostProcessor通过registry注册Bean
 BeanDefinitionRegistryPostProcessor是BeanFactoryPostProcessor的一个子接口：
 
 当用户自定义BeanDefinitionRegistryPostProcessor的时候，必将同时实现两个方法
@@ -357,7 +391,7 @@ public class MyBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegi
                  * 第二个参数：BeanDefinition对象
                  */
                 // RootBeanDefinition beanDefinition = new RootBeanDefinition(Blue.class); // 现在我准备给容器中添加一个Blue对象
-                // 咱们也可以用另外一种办法，即使用BeanDefinitionBuilder这个构建器生成一个BeanDefinition对象，很显然，这两种方法的效果都是一样的
+                // 咱们也可以用另外一种办法，即使用BeanDefinitionBuilder来生成一个BeanDefinition对象，很显然，这两种方法的效果都是一样的
                 AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(Blue.class).getBeanDefinition();
                 registry.registerBeanDefinition("hello", beanDefinition);
         }

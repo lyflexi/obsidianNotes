@@ -152,89 +152,224 @@ if (flag) { // 3
 synchronized 会保证上述程序顺序执行，不会出现问题
 
 # synchronized 关键字的底层原理
+Java源码下载链接：http://hg.openjdk.java.net/jdk8/jdk8/hotspot
 
-在jdk1.6之前，`synchronized`只能实现重量级锁，Java虚拟机是基于Monitor对象来实现重量级锁的。因为监视器锁(monitor)是依赖于底层的操作系统的Mutex Lock来实现的，挂起线程和恢复线程都需要转入内核态去完成，阻塞或唤醒一个Java线程需要操作系统切换CPU状态来完成，这种状态切换需要耗费处理器时间，如果同步代码块中内容过于简单，这种切换的时间可能比用户代码执行的时间还长”，时间成本相对较高，这也是为什么早期的synchronized效率低的原因。
-![[Pasted image 20231225135351.png]]
+在Hotspot虚拟机中，锁的实现依赖于对象监视器src/share/vm/runtime/objectMonitor.hpp。wait/notify等方法就依赖于`ObjectMonitor`对象，所以wait/notify等方法必需在获得ObjectMonitor锁的代码块内调用，否则会抛出java.lang.IllegalMonitorStateException的异常的原因。
 
-在Hotspot虚拟机中，ObjectMonitor源码是用C++语言编写的，首先我们先下载Hotspot的源码，源码下载链接：http://hg.openjdk.java.net/jdk8/jdk8/hotspot，找到src/share/vm/runtime/objectMonitor.hpp文件。通过`ObjectMonitor.hpp`源码我们知道，wait/notify等方法就依赖于`ObjectMonitor`对象，这就是为什么只有在同步的块或者方法中才能调用wait/notify等方法，否则会抛出java.lang.IllegalMonitorStateException的异常的原因。
-## ObjectMonitor#wait/notify测试
+## 原生方法wait/notify-重要！
 
+在Java程序中，`synchronized`解决了多线程竞争的问题(原子性)。例如，对于一个任务管理器，多个线程同时往队列中添加任务，可以用`synchronized`加锁：
 ```java
-  
-/*请注意，wait()和notify()方法必须在synchronized块或synchronized方法中使用，否则将抛出IllegalMonitorStateException异常。*/  
-public class WaitAndNotify {  
-    public static void main(String[] args) {  
-        Counter counter = new Counter();  
-  
-        Thread incrementThread = new Thread(() -> {  
-            for (int i = 0; i < 10; i++) {  
-                counter.increment();  
-            }  
-        });  
-  
-        Thread decrementThread = new Thread(() -> {  
-            for (int i = 0; i < 10; i++) {  
-                counter.decrement();  
-            }  
-        });  
-  
-        incrementThread.start();  
-        decrementThread.start();  
-    }  
-  
-    static public class Counter {  
-        private int count = 0;  
-        private final Object lock = new Object();  
-  
-        public void increment() {  
-            synchronized (lock) {  
-                if (count == 10) {  
-                    try {  
-                        lock.wait();  
-                    } catch (InterruptedException e) {  
-                        e.printStackTrace();  
-                    }  
-                }  
-                count++;  
-                System.out.println("Count incremented. Current count: " + count);  
-                lock.notify();  
-            }  
-        }  
-  
-        public void decrement() {  
-            synchronized (lock) {  
-                if (count == 0) {  
-                    try {  
-                        lock.wait();  
-                    } catch (InterruptedException e) {  
-                        e.printStackTrace();  
-                    }  
-                }  
-                count--;  
-                System.out.println("Count decremented. Current count: " + count);  
-                lock.notify();  
-            }  
-        }  
-    }  
+class TaskQueue {
+    Queue<String> queue = new LinkedList<>();
+
+    public synchronized void addTask(String s) {
+        this.queue.add(s);
+    }
 }
 ```
-## ObjectMonitor数据结构与可重入原理：五大字段
+
+但是`synchronized`并没有解决多线程协调的问题。
+仍然以上面的`TaskQueue`为例，我们再编写一个`getTask()`方法取出队列的第一个任务：
+
+```java
+class TaskQueue {
+    Queue<String> queue = new LinkedList<>();
+
+    public synchronized void addTask(String s) {
+        this.queue.add(s);
+    }
+
+    public synchronized String getTask() {
+        while (queue.isEmpty()) {
+        }
+        return queue.remove();
+    }
+}
+```
+
+上述代码看上去没有问题：`getTask()`内部先判断队列是否为空，如果为空，就循环等待，直到另一个线程往队列中放入了一个任务，`while()`循环退出，就可以返回队列的元素了。
+
+但实际上`while()`循环永远不会退出。因为线程在执行`while()`循环时，已经在`getTask()`入口获取了`this`锁，其他线程根本无法调用`addTask()`，因为`addTask()`执行条件也是获取`this`锁。
+
+因此，执行上述代码，线程会在`getTask()`中因为死循环而100%占用CPU资源。
+
+如果深入思考一下，我们想要的执行效果是：
+- 线程1可以调用`addTask()`不断往队列中添加任务；
+- 线程2可以调用`getTask()`从队列中获取任务。如果队列为空，则`getTask()`应该等待，直到队列中至少有一个任务时再返回。
+
+因此，多线程协调运行的原则就是：当条件不满足时，线程进入等待状态；当条件满足时，线程被唤醒，继续执行任务。
+
+对于上述`TaskQueue`，我们先改造`getTask()`方法，在条件不满足时，线程进入等待状态，直到将来某个时刻，线程从等待状态被其他线程唤醒后，`wait()`方法才会返回，然后，继续执行下一条语句。
+```java
+public synchronized String getTask() {
+    while (queue.isEmpty()) {
+        // 释放this锁:
+        this.wait();
+        // 重新获取this锁
+    }
+    return queue.remove();
+}
+```
+有些仔细的童鞋会指出：即使线程在`getTask()`内部等待，其他线程如果拿不到`this`锁，照样无法执行`addTask()`，肿么办？
+这个问题的关键就在于`wait()`方法的执行机制非常复杂：
+- `wait()`方法调用时，会释放线程获得的锁
+- `wait()`方法返回后，线程又会重新试图获得锁。
+
+现在我们面临第二个问题：如何让等待的线程被重新唤醒，然后从`wait()`方法返回？答案是在相同的锁对象上调用`notify()`方法。我们修改`addTask()`如下：
+```java
+public synchronized void addTask(String s) {
+    this.queue.add(s);
+    this.notify(); // 唤醒在this锁等待的线程
+}
+```
+
+我们来看一个完整的例子：这个例子中，我们重点关注`addTask()`方法，内部调用了`this.notifyAll()`而不是`this.notify()`，使用`notifyAll()`将唤醒所有当前正在`this`锁等待的线程，而`notify()`只会唤醒其中一个（具体哪个依赖操作系统，有一定的随机性）。这是因为可能有多个线程正在`getTask()`方法内部的`wait()`中等待，使用`notifyAll()`将一次性全部唤醒。通常来说，`notifyAll()`更安全。有些时候，如果我们的代码逻辑考虑不周，用`notify()`会导致只唤醒了一个线程，而其他线程可能永远等待下去醒不过来了。
+```java
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+        var q = new TaskQueue();
+        var ts = new ArrayList<Thread>();
+        for (int i=0; i<5; i++) {//5个消费者线程
+            var t = new Thread() {
+                public void run() {
+                    // 执行task:
+                    while (true) {
+                        try {
+                            String s = q.getTask();
+                            System.out.println("execute task: " + s);
+                        } catch (InterruptedException e) {
+                            return;
+                        }
+                    }
+                }
+            };
+            t.start();
+            ts.add(t);
+        }
+        var add = new Thread(() -> {//1个消费者线程
+            for (int i=0; i<10; i++) {
+                // 放入task:
+                String s = "t-" + Math.random();
+                System.out.println("add task: " + s);
+                q.addTask(s);
+                try { Thread.sleep(100); } catch(InterruptedException e) {}
+            }
+        });
+        add.start();
+        add.join();
+        Thread.sleep(100);
+        for (var t : ts) {
+            t.interrupt();
+        }
+    }
+}
+
+class TaskQueue {
+    Queue<String> queue = new LinkedList<>();
+
+    public synchronized void addTask(String s) {
+        this.queue.add(s);
+        this.notifyAll();
+    }
+
+    public synchronized String getTask() throws InterruptedException {
+        while (queue.isEmpty()) {
+            this.wait();
+        }
+        return queue.remove();
+    }
+}
+
+```
+打印如下：
+```shell
+add task: t-0.9219689522548505
+execute task: t-0.9219689522548505
+add task: t-0.271813708432178
+execute task: t-0.271813708432178
+add task: t-0.8644114626575558
+execute task: t-0.8644114626575558
+add task: t-0.32891791164139694
+execute task: t-0.32891791164139694
+add task: t-0.011217614729680414
+execute task: t-0.011217614729680414
+add task: t-0.06744186559914589
+execute task: t-0.06744186559914589
+add task: t-0.5643259633238602
+execute task: t-0.5643259633238602
+add task: t-0.9453978156714784
+execute task: t-0.9453978156714784
+add task: t-0.6959170743585548
+execute task: t-0.6959170743585548
+add task: t-0.6532340394528874
+execute task: t-0.6532340394528874
+
+Process finished with exit code 0
+```
+但是，注意到`wait()`方法返回时需要重新获得`this`锁。假设当前有3个线程被唤醒，唤醒后，首先要等待执行`addTask()`的线程结束此方法后，才能释放`this`锁，随后，这3个线程中只能有一个获取到`this`锁，剩下两个将继续等待。
+
+再注意到我们在`while()`循环中调用`wait()`，而不是`if`语句，这是因为线程被唤醒时，需要再次获取this锁。多个线程被唤醒后，只有一个线程能获取this锁，此刻，该线程执行queue.remove()可以获取到队列的元素，然而，剩下的线程如果获取this锁后执行queue.remove()，此刻队列可能已经没有任何元素了，所以，要始终在while循环中wait()，并且每次被唤醒后拿到this锁就必须再次判断：
+
+```java
+public synchronized String getTask() throws InterruptedException {
+	while (queue.isEmpty()) {
+		this.wait();
+	}
+	return queue.remove();
+}
+```
+
+所以，正确编写多线程代码是非常困难的，需要仔细考虑的条件非常多，任何一个地方考虑不周，都会导致多线程运行时不正常。总结以下，`wait`和`notify`用于多线程协调运行：
+- 在`synchronized`内部可以调用`wait()`使线程进入等待状态；
+- 必须在已获得的锁对象上调用`wait()`方法；
+- 在`synchronized`内部可以调用`notify()`或`notifyAll()`唤醒其他等待线程；
+- 必须在已获得的锁对象上调用`notify()`或`notifyAll()`方法；
+- 已唤醒的线程还需要重新获得锁后才能继续执行。
+## 线程的六种状态两条队列
+从上面的例子中我们能够感受到，synchronized保证原子性依赖于锁阻塞队列，wait/notify协调多线程工作用到的是等待队列
+
+所以在Java中线程的六大状态中，有三大状态都与锁阻塞队列和线程等待队列有关：
+- 锁阻塞队列：对应于BLOCKED状态
+- 线程等待队列：对应于无限期等待WAITING状态和限期等待TIMED_WAITING状态
+```java
+public enum State {
+	NEW,
+	RUNNABLE,
+	BLOCKED,
+	WAITING,
+	TIMED_WAITING,//既可以被其他线程显式地唤醒，也可以在一定时间之后会由系统自动唤醒
+	TERMINATED;
+}
+```
+Java线程的六大状态图示：
+![[Pasted image 20240224182840.png]]
+最重要的阻塞状态与等待状态的对比如下：
+#### 阻塞队列（Blocked）
+线程被阻塞了，“阻塞状态”与“等待状态”的区别是：“阻塞状态”一般在等待着获取到一个排他锁，这个事件将在另外一个线程放弃这个锁的时候发生，在程序等待进入同步区域的时候，线程将进入这种阻塞状态。
+#### 等待队列（Waiting）：
+处于这种状态的线程不会被分配CPU执行时间，它们要等待被其他线程显式地唤醒。某一线程因为调用下列方法之一而处于等待状态：
+- 不带超时值的 Object.wait ()
+- 不带超时值的 Thread.join ()
+- LockSupport.park ()
+==与阻塞状态不同的是，等待状态下的线程通常需要其他线程显式调用该对象的notify()或notifyAll()方法来唤醒它。==
+## ObjectMonitor五大字段与可重入原理
 下面简单介绍下ObjectMonitor.hpp数据结构
 ```C++
 ObjectMonitor() {
     _header       = NULL;
-    _count        = 0; //锁的计数器，获取锁时count数值加1，释放锁时count值减1，直到
-    _waiters      = 0, //等待线程数
-    _recursions   = 0; //锁的重入次数
+    _count        = 0; 
+    _waiters      = 0, 
+    _recursions   = 0; 
     _object       = NULL; 
-    _owner        = NULL; //指向持有ObjectMonitor对象的线程地址
-    _WaitSet      = NULL; //处于wait状态的线程，会被加入到_WaitSet
+    _owner        = NULL;
+    _WaitSet      = NULL; 
     _WaitSetLock  = 0 ;
     _Responsible  = NULL ;
     _succ         = NULL ;
-    _cxq          = NULL ; //阻塞在EntryList上的单向线程列表
+    _cxq          = NULL ; 
     FreeNext      = NULL ;
-    _EntryList    = NULL ; //处于等待锁block状态的线程，会被加入到该列表
+    _EntryList    = NULL ; 
     _SpinFreq     = 0 ;
     _SpinClock    = 0 ;
     OwnerIsThread = 0 ;
@@ -242,90 +377,25 @@ ObjectMonitor() {
 ```
 
 其中 `_owner`、`_count`、`_recursions`、`_WaitSet`和`_EntryList` 字段比较重要
-### `_count`和`_recursions`的区别
-其中`_count`和`_recursions`的区别如下：
-1. `_count`：
-    - `_count` 表示当前持有该锁的线程数量。
-    - 当 `_count` 为 0 时，表示锁当前未被任何线程持有，其他线程可以尝试获取该锁。
-    - 当 `_count` 大于 0 时，表示有一个或多个线程正在持有该锁。
-2. `_recursions`：
-    - `_recursions` 表示当前线程持有该锁的重入次数。
-    - 当一个线程重复获取同一把锁时，它的 `_recursions` 会递增。
-    - `_recursions` 主要用于跟踪同一线程对锁的重入情况，允许同一线程多次获取同一把锁而不会导致死锁。
-
-举例来说，假设有一个方法 A 中包含同步块，线程 T1 首次执行该方法时获取了锁，此时 `_count` 为 1，`_recursions` 为 1。然后方法 A 中又调用了另一个同步方法 B，B 方法中同样有一个同步块，这时如果线程 T1 再次获取这个锁，那么 `_count` 不变，但 `_recursions` 会增加。当线程 T1 退出方法 B 后，`_recursions` 会减少，当 `_recursions` 为 0 时，锁才会被释放，`_count` 也会减少，其他线程才有机会获取该锁。
-
-总之，`_count` 表示当前持有锁的线程数，而 `_recursions` 表示当前线程对锁的重入次数。==在标准的Java虚拟机实现中，`_count` 通常不会大于 1。因为Java的锁通常是独占锁，一次只能由一个线程持有。因此，在大多数情况下，`_count` 的最大值为 1。如果 `_count` 大于 1，则意味着某些异常情况发生了，比如可能是虚拟机的实现错误或者是某些非标准的行为。==
-
-### `_EntryList`和`_WaitSet`的区别
-1. `_EntryList`：存储了已经获取到锁的线程列表（锁池队列）。
-    - 当一个线程成功获取到锁时，它会被加入到 `_EntryList` 中。==虽说`_count` 的最大值为 1，但是`_EntryList`中往往存在许多等待锁的线程，因此`_EntryList`的长度远远不止1==
-    - 当该线程释放锁时它会从 `_EntryList` 中移除，同时唤醒 `_WaitSet` 中的线程让新的等待线程参与锁竞争。
-2. `_WaitSet`：存储了等待获取锁的线程列表（等待队列）。
-    - 当一个线程尝试获取锁但无法立即获得时（锁被其他线程持有），它会被加入到 `_WaitSet` 中，进入等待状态。
-    - 当持有锁的线程释放锁时，会从 `_WaitSet` 中选择一个或多个线程唤醒，从 `_WaitSet` 移动到 `_EntryList`让它们尝试再次获取锁。
-为什么要设置上述两个队列？在Java中，线程状态被划分为多种，通过查看Thread内的枚举类State，我们可以看到Java线程其实是六种状态
-```java
-public enum State {
-        NEW,
-        RUNNABLE,
-
-		/*
-		*Thread state for a thread blocked waiting for a monitor lock. A thread in the blocked state is waiting for a           *monitor lock to enter a synchronized block/method or reenter a synchronized block/method after calling 
-		*Object.wait.
-		*/
-        BLOCKED,
-        /**
-         * Thread state for a waiting thread.
-         * A thread is in the waiting state due to calling one of the
-         * following methods:
-         * <ul>
-         *   <li>{@link Object#wait() Object.wait} with no timeout</li>
-         *   <li>{@link #join() Thread.join} with no timeout</li>
-         *   <li>{@link LockSupport#park() LockSupport.park}</li>
-         * </ul>
-         *
-         * <p>A thread in the waiting state is waiting for another thread to
-         * perform a particular action.
-         *
-         * For example, a thread that has called <tt>Object.wait()</tt>
-         * on an object is waiting for another thread to call
-         * <tt>Object.notify()</tt> or <tt>Object.notifyAll()</tt> on
-         * that object. A thread that has called <tt>Thread.join()</tt>
-         * is waiting for a specified thread to terminate.
-         */
-        WAITING,
-        TIMED_WAITING,
-        TERMINATED;
-    }
-```
-#### Java线程的六大状态图示：
-![[Pasted image 20240224182840.png]]
-线程状态区分为阻塞和等待两种，对比如下：
-- 阻塞状态（Blocked）通常发生在线程试图获取对象的同步锁，但该锁被其他线程占用时。在这种情况下，线程会进入锁池，等待锁被释放。阻塞状态是线程主动放弃CPU使用权，暂时停止运行的状态。
-- 等待状态（Waiting）则通常发生在线程执行了某些方法，如wait()、join()或sleep()，这些方法会使线程进入等待状态。例如，当线程执行wait()方法时，它会被放入等待池中。==与阻塞状态不同的是，等待状态下的线程通常需要其他线程调用了该对象的notify()或notifyAll()方法来唤醒它，或者等待的时间超时，线程才可以继续执行。==
-### 获取Monitor和释放Monitor的整体流程：`_owner`
+- `_owner`指向持有ObjectMonitor对象的线程地址，也即代表了持有锁的当前线程
+- `_count`锁的计数器， `_count` 为 0 时表示锁当前未被任何线程持有，其他线程可以尝试获取该锁。一般是互斥锁，该值最大为1。该值不负责可重入计数。
+- `_recursions`：锁的重入次数
+- `_WaitSet`处于wait状态的线程，会被加入到_WaitSet
+- `_EntryList`处于等待锁block状态的线程，会被加入到_EntryList
 
 依据`_recursions`，所以synchronized是可重入锁，synchronized获取Monitor和释放Monitor的流程如下：
 ![[Pasted image 20231225134517.png]]
 ![[Pasted image 20231225134525.png]]
   
 获取 Monitor 流程：
-1. 当一个线程尝试获取某个对象的 Monitor 时，首先检查该 Monitor 是否已被其他线程持有。
-2. 如果 Monitor 未被其他线程持有，则当前线程获取该 Monitor，`_EntryList`入队，设置 `_owner` 为当前线程，并将 `_count` 设置为 1，表示当前线程持有该锁，并将 `_recursions` 设置为 0，表示尚未进行重入。
-3. 如果`_owner` 为当前线程，则执行可重入， `_recursions+1` 
-4. 如果 Monitor 已被其他线程持有，则当前线程会被放入该 Monitor 的 `_WaitSet` 中，进入等待状态，直到 Monitor 被释放。
-
+1. 如果 Monitor 已被其他线程持有，则当前线程会被放入该 Monitor 的 `_EntryList` 中，表示阻塞
+2. 直到 Monitor 被释放，`_count`为0，当前线程与其他阻塞线程一同竞争锁，看是否能争抢到锁
+3. 当前线程获取到锁，将`_count` 设置为 1，并设置 `_owner` 指向当前线程，并将 `_recursions` 初始化为 0，表示尚未进行重入。
+4. 同一个线程根据`_owner`判断是否允许重入，如果`_owner` 为当前线程，则执行可重入， `_recursions+1` 
+5. 上述过程与`_WaitSet`无关
 释放 Monitor 流程：
-1. 当持有 Monitor 的线程希望释放 Monitor 时，首先会检查是否有其他线程在等待获取该 Monitor。
-2. 如果没有等待的线程，则直接释放该 Monitor，将 `_owner` 设置为 null，清空 `_EntryList`，并将 `_count` 设置为 0。
-3. 如果有等待的线程，则从 `_WaitSet` 中选择一个或多个线程唤醒，让它们尝试再次获取 Monitor。同时，当前持有 Monitor 的线程会释放该 Monitor，并将 `_owner` 设置为 null，清空 `_EntryList`，并将 `_count` 设置为 0。
-
-在获取 Monitor 和释放 Monitor 的过程中，需要注意以下几点：
-
-- 获取 Monitor 时，如果是同一线程再次获取 Monitor（即重入），则会增加 `_recursions`，而不会加入到 `_EntryList` 中。
-- 当释放 Monitor 时，需要根据情况决定是否唤醒等待线程，以及如何选择唤醒的线程。
-
+1. `_recursions`大于0，则先执行`_recursions-1`，直至`_recursions`为0
+2. 释放锁，将 `_owner` 设置为 null，并将 `_count` 设置为 0。此时允许 `_EntryList`中的阻塞线程来争抢这把锁
 
 ## synchronized 同步语句块的情况
 测试程序：

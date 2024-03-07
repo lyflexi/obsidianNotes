@@ -24,6 +24,10 @@ save <seconds> <changes>
 ## bgsave
 save：在主程序中执行会阻塞当前redis服务器直到持久化工作完成，执行save命令期间Redis不能处理其他命令，线上禁止使用
 bgsave(默认)：redis会在后台异步进行快照操作，不阻塞快照同时还可以相应客户端请求，该方式操作系统会fork一个子进程由子进程复制持久化过程
+
+==注意是fork了子进程而不是子线程！==
+![[Pasted image 20240307155750.png]]
+父进程执行 fork 操作创建子进程，fork 操作过程中父进程会阻塞，fork 完成后父进程将不在阻塞可以接受其他命令。
 ## lastsave
 还可以通过lastsave命令获取最后一次成功执行快照的时间
 ![[Pasted image 20240120165456.png]]

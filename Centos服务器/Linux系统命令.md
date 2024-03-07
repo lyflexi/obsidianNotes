@@ -7,37 +7,31 @@ cat /etc/redhat-release
 ```
 
 # 查CPU
-
-**多核超线程cpu**
-
-- 不同的核通过L2 cache进行通信，存储和外设通过总线与CPU通信
-    
-- 假设每个核有两个逻辑的处理单元，两个核共同分享一个核的资源
-    
-- 所以逻辑cpu个数为: **cpu数*核数*线程数**
-    
-
-```Java
-查看CPU信息（型号）
+计算逻辑cpu线程总数
+```shell
+# 查看CPU信息（型号）
 cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
-     24         Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz
+24    Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz
 
-# 查看物理CPU个数
+
+# 查看物理CPU块数
 cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l
 2
 
-# 查看每个物理CPU中core的个数(即核数)
+# 查看每个物理CPU中核数
 cat /proc/cpuinfo| grep "cpu cores"| uniq
 cpu cores    : 6
 
-# 查看逻辑CPU的个数=个数*核数*线程数
+# 查看逻辑CPU的个数=cpu块数*核数*线程数，可以推断出线程数为2
 cat /proc/cpuinfo| grep "processor"| wc -l
 24
 
-#查看cpu占用
+
+```
+查看cpu占用情况
+```shell
 top
 ```
-
 # 查磁盘
 
 ```Shell

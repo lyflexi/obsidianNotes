@@ -32,7 +32,12 @@ znode节点有四种类型：
 - PERSISTENT_SEQUENTIAL：永久节点、序列化。可以重复设置节点，Zookeeper会给该节点名称进行顺序编号
 - EPHEMERAL_SEQUENTIAL：临时节点、序列化。可以重复设置节点，Zookeeper给该节点名称进行顺序编号
 
-执行`./zkCli.sh` 进入zk客户端，并创建这四种节点：
+执行`./zkCli.sh` 进入zk客户端，演示四种节点的常用操作：
+- create创建节点
+- ls查看节点下的子节点
+- stat查看节点的状态
+- get查看节点的内容
+- delete删除节点
 ```shell
 [zk: localhost:2181(CONNECTED) 0] create /aa test  # 创建持久化节点
 Created /aa
@@ -163,7 +168,7 @@ public class ZkTest {
     }
 }
 ```
-# zk分布式锁实现思路
+# zk分布式锁实现思路-临时节点
 分布式锁的步骤：
 1. 获取锁：create一个节点。多个请求同时添加一个相同的临时节点，只有一个可以添加成功。添加成功的获取到锁
 2. 执行业务逻辑
@@ -171,13 +176,13 @@ public class ZkTest {
 4. 重试：没有获取到锁的请求重试
 
 参照redis分布式锁的特点：互斥 排他
-1. 防死锁：设置临时节点，客户端宕机后，过了一定时间zookeeper没有收到客户端的心跳包判断会话失效，将临时节点删除从而释放锁。    
+1. 防死锁：节点必须是临时的，客户端宕机后，过了一定时间zookeeper没有收到客户端的心跳包判断会话失效，将临时节点删除从而释放锁。    
 2. 可重入锁：借助于ThreadLocal
 3. 防误删：因为不需要设置过期时间，也就不存在误删问题。
 4. 加锁/解锁要具备原子性
 5. 单点问题：使用zookeeper可以有效的解决单点问题，ZK一般是集群部署的。
 6. 集群问题：zookeeper集群是强一致性的，只要集群中有半数以上的机器存活，就可以对外提供服务。
-# zk分布式锁实现-自旋锁
+## 建立连接
 由于zookeeper获取链接是一个耗时过程，这里可以在项目启动时，初始化链接，并且只初始化一次。借助于spring特性，代码实现如下：
 ```java
 @Component
@@ -231,9 +236,11 @@ public class ZkClient {
     }
 }
 ```
+## 自旋锁
 zk分布式锁具体实现：
 - 在zk里面一个节点代表着一个全路径名
 - 为了预防死锁，我们创建临时节点EPHEMERAL
+与Redis分布式锁一样，我们只需要key，而value没有实际意义因此这里随便设置为null
 ```java
 public class ZkDistributedLock {
 
@@ -322,13 +329,12 @@ Jmeter压力测试：
 1. 性能一般（比mysql分布式锁略好）
 2. 不可重入
 接下来首先来提高性能
-
-# 性能优化-实现监听阻塞锁
+# 性能优化-临时序列化节点
 上面实现中由于重试操作使用的是自旋，在并发高的情况下会严重影响Cpu性能：
 ![[1607048160051.png]]
 试想：每个请求要想正常的执行完成，最终都是要创建节点，如果能够避免争抢必然可以提高性能。
 ==这里借助于zk的临时序列化节点，实现阻塞锁，并且加入监听机制==
-1. 序列号小的节点先获取到锁
+1. 在同一目录下生成多个序列化子节点，序列号小的节点先获取到锁
 2. 监听同一目录下的序列化节点中的前驱节点，若前驱节点释放，则当前序列化节点获取到锁
 ![[1607048783043.png]]
 ## 阻塞锁实现-SEQUENTIAL
@@ -403,12 +409,13 @@ public class ZkDistributedLock {
                 return null;  
             }  
   
-            // 获取前一个节点  
+              
             Long flag = 0L;  
             String preNode = null;  
             for (String node : nodes) {  
                 // 获取每个节点的序列化号  
                 Long serial = Long.valueOf(StringUtils.substringAfterLast(node, "-"));  
+                // 获取前一个节点
                 if (serial < curSerial && serial > flag){  
                     flag = serial;  
                     preNode = node;  
@@ -430,14 +437,13 @@ jmeter测试
 ![[1607051896117.png]]
 性能反而更弱了。
 
-==原因：虽然不用反复争抢创建节点了，但是会自旋判断自己是最小的节点，因为对于getPreNode来说假如当前有1000个节点在等待锁，如果获得锁的线程释放锁时，这1000个并发线程都会被唤醒，这种情况称为“羊群效应”；在这种羊群效应中，zookeeper需要通知1000个客户端，这会阻塞zookeeper的其他的操作，这个判断逻辑更复杂更耗时。==
+==原因：虽然不用自旋争抢创建节点了，但是会自旋判断自己是最小的节点，因为对于getPreNode来说假如当前有1000个节点在等待锁，如果获得锁的线程释放锁时，这1000个并发线程都会被唤醒，这种情况称为“羊群效应”；在这种羊群效应中，zookeeper需要通知1000个客户端，这会阻塞zookeeper的其他的操作，这个判断逻辑更复杂更耗时。==
 
 最好的情况应该只唤醒新的最小节点对应的并发线程。
 
 解决方案：监听。
 ## 监听阻塞锁实现-Watcher
-应该怎么做呢？在设置事件监听时，每个客户端应该对刚好在它之前的子节点设置事件监听，例如：
-子节点列表为/distributed/lock-0000000000、/distributed/lock-0000000001、/distributed/lock-0000000002，
+应该怎么做呢？在设置事件监听时，每个客户端应该对刚好在它之前的子节点设置事件监听，举例说明：假如子节点列表为/distributed/lock-0000000000、/distributed/lock-0000000001、/distributed/lock-0000000002，
 - 序号为1的客户端监听序号为0的子节点删除消息，
 - 序号为2的监听序号为1的子节点删除消息。
 所以调整后的分布式锁算法流程如下：
@@ -536,14 +542,11 @@ import java.util.stream.Collectors;
         try {  
             // 获取当前节点的序列化号43423525256  
             Long curSerial = Long.valueOf(StringUtils.substringAfterLast(path, "-"));  
-            // 获取根路径distributed下的所有序列化子节点名称，如lock-43423525256，但是有可能是别的资源的锁如lockxx-111,lockyy-111  
             List<String> children = this.zooKeeper.getChildren(ROOT_PATH, false);  
-  
             // 判空  
             if (CollectionUtils.isEmpty(children)){  
                 throw new IllegalMonitorStateException("非法操作");  
             }  
-            //对children去重，让当前资源和当前锁匹配  
             List<String> nodes = children.stream().filter(node -> StringUtils.startsWith(node, lockName + '-')).collect(Collectors.toList());  
   
             if (CollectionUtils.isEmpty(nodes)){  
@@ -573,12 +576,12 @@ import java.util.stream.Collectors;
 压力测试效果如下：
 ![[1607052541669.png]]
 由此可见性能提高不少，接近于redis的分布式锁
-# 可重入实现
-实现方式1.在节点的内容中记录服务器、线程以及重入信息
-实现方式2.ThreadLocal：线程的局部变量，线程私有，我们使用这种方案：
+# 可重入实现-ThreadLocal
+实现方式1.在节点的内容中记录服务器、线程以及重入信息，这类似于Redis分布式可重入的实现方式
+实现方式2.ThreadLocal：线程的局部变量，线程私有，能够用于当前线程的重入计数我们使用这种方案：
 1. 修改构造方法：如果我这次是重入的，那就不要再重新创建锁了 
 2. 修改lock：如果ThreadLocal不为0则重入，否则置为1表示第一次获取锁
-3. 修改unlock方法：如果ThreadLocal为0再删除锁
+3. 修改unlock方法：如果ThreadLocal为0记得remove，因为ZkDistributedLock是单实例的导致ThreadLocal也是单实例的，所以可能存在复用
 ```java
 package org.lyflexi.zkhandsondistrilock.lock;  
   

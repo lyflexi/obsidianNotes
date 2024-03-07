@@ -18,9 +18,7 @@ public void interrupt()
 
 /**
 这个方法做了两件事：返回当前线程的中断状态，并将当前线程的中断状态清除即设为false
-假设有两个线程A、B，线程B调用了interrupt方法。后面如果我们连续调用两次interrupted方法，
-第一次会返回true，然后这个方法会将中断标识位设置位false,
-所以第二次调用interrupted将返回false
+假设有两个线程t1、t2，线程t2调用了t1.interrupt()方法。后面如果我们连续调用两次interrupted方法，第一次会返回true，第二次将返回false
 */
 public static boolean interrupted() 
 

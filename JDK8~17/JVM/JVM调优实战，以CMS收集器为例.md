@@ -118,7 +118,7 @@ jstack 10217
 演示效果：
 ![[Pasted image 20240303112319.png]]
 # JVM监控工具
-使用命令行工具或组合能帮您获取目标Java应用性能相关的基础信息，但它们无法获取方法级别的分析数据，如方法间的调用关系、各方法的调用次数和调用时间等（这对定位应用性能瓶颈至关重要）。而且结果展示不够直观。
+上面使用命令行工具或组合能帮您获取目标Java应用性能相关的基础信息，但它们无法获取方法级别的分析数据，如方法间的调用关系、各方法的调用次数和调用时间等（这对定位应用性能瓶颈至关重要）。而且结果展示不够直观。
 
 为此，JDK提供了一些内存泄漏的分析工具，如`jconsole，jvisualvm`等，用于辅助开发人员定位问题，但是这些工具很多时候并不足以满足快速定位的需求。
 
@@ -174,7 +174,10 @@ java -jar -Xms8m -Xmx8m -XX:+PrintGC -XX:+PrintGCDetails -XX:+HeapDumpOnOu
 
 # JVM调优参数
 
-## 设置堆、栈、方法区等内存大小
+## 一、设置堆、栈、方法区等内存大小
+堆（Heap）：可以设置初始大小和最大大小。通常，建议将堆大小设置为总内存的一半，以留出足够的空间给操作系统和其他 JVM 组件使用。
+栈（Stack）：栈大小指的是每个线程的栈空间大小。默认情况下栈大小取决于操作系统和 JVM 的不同配置。栈大小通常不需要特别调整，但在某些情况下，可能需要增加栈大小以支持更深的方法调用或更多的线程。
+方法区（Metaspace）：方法区是用于存储类元数据的区域，Java 8 及之后的版本通常使用 Metaspace 替代了传统的永久代（Permanent Generation）。Metaspace 的大小会随着应用程序的需要而动态增长，但你可以设置其初始大小和最大大小以限制其大小。
 
 - `-Xmx4g`: 设置进程占用的最大堆空间大小为4GB，超出后会导致OutOfMemoryError。
 - `-Xms2g`: 设置初始化堆空间大小为2GB。
@@ -182,14 +185,14 @@ java -jar -Xms8m -Xmx8m -XX:+PrintGC -XX:+PrintGCDetails -XX:+HeapDumpOnOu
 - -XX:NewSize=1024m：新生代分配最大1024m的内存
 - `-Xmn1g`: 设置年轻代大小为1GB，意味着`MaxNewSize==NewSize`
 - `-XX:NewRatio=n`: 设置年轻代和老年代空间大小的比值。
-- `-Xss512k`: 设置每个线程占用的内存大小为512KB。
+- ==`-Xss512k`: 设置每个线程占用的内存大小为512KB，也即栈的大小设置为 512KB==
 - `-XX:SurvivorRatio=n`: 设置年轻代中Eden区与Survivor区的比值，例如n=4时，Eden和Survivor的比值为4:2。
 - `-XX:MetaspaceSize=512m`: 设置元空间（Metaspace）的初始大小为512MB。
 - `-XX:MaxMetaspaceSize=512m`: 设置元空间（Metaspace）增长的上限，防止无限制地使用本地内存。
 - `-XX:MinMetaspaceFreeRatio=N`: 设置Metaspace空闲空间的最小比例，控制Metaspace的增长速度。
 - `-XX:MaxMetaspaceFreeRatio=N`: 设置Metaspace空闲空间的最大比例，控制Metaspace的释放。
 - `-XX:MaxMetaspaceExpansion=N`: 设置Metaspace增长时的最大幅度。
-## 设置垃圾收集器
+## 二、指定垃圾收集器及收集器参数
 
 - `-XX:+UseSerialGC`: 设置使用串行收集器。
 - `-XX:+UseParallelGC`: 设置使用并行收集器。
@@ -201,7 +204,7 @@ java -jar -Xms8m -Xmx8m -XX:+PrintGC -XX:+PrintGCDetails -XX:+HeapDumpOnOu
 - `-XX:GCTimeRatio=n`: 设置垃圾回收时间占程序运行时间的百分比，1/(1+n)。
 - `-XX:+DisableExplicitGC`: 禁止外部调用`System.gc()`。
 - `-XX:MaxTenuringThreshold`: 设置年轻代对象复制到老年代前的最大复制次数。
-## 垃圾回收信息统计
+## 三、开启垃圾回收信息统计
 使用以下参数，我们可以记录_GC_活动：
 - `-XX:+PrintGC`: 打印垃圾回收信息。
 - `-XX:+PrintGCDetails`: 打印详细的垃圾回收信息。
@@ -212,3 +215,49 @@ java -jar -Xms8m -Xmx8m -XX:+PrintGC -XX:+PrintGCDetails -XX:+HeapDumpOnOu
 - `-XX:+PrintHeapAtGC`: 打印GC前后的详细堆栈信息。
 - `-XX:+HeapDumpOnOutOfMemoryError`: 在OutOfMemoryError时生成堆转储。
 - `-XX:HeapDumpPath=/dump`: 设置堆转储文件的路径。
+
+# 如果服务器是4G内存，你怎么设置JVM参数
+假如是CMS收集器，以下是一种可能的 JVM 参数设置：
+```shell
+java -Xms1g -Xmx2g -Xss512k -XX:MaxMetaspaceSize=256m
+-XX:+UseConcMarkSweepGC 
+-XX:+UseParNewGC 
+-XX:CMSInitiatingOccupancyFraction=70 
+-XX:+CMSParallelRemarkEnabled 
+-XX:+UseCMSInitiatingOccupancyOnly 
+-XX:+HeapDumpOnOutOfMemoryError 
+-XX:HeapDumpPath=/path/to/heapdump.hprof 
+-XX:+PrintGCDetails 
+-XX:+PrintGCDateStamps 
+-Xloggc:/path/to/gc.log 
+-XX:+UseGCLogFileRotation 
+-XX:NumberOfGCLogFiles=5 
+-XX:GCLogFileSize=10M 
+-jar your-application.jar
+
+```
+
+解释一下这些参数：
+一、设置堆、栈、方法区等内存大小
+- `-Xms1g`: 设置堆的初始大小为 1GB。
+- `-Xmx2g`: 设置堆的最大大小为 2GB。
+- 栈的大小设置为 512KB，支持当前线程方法的调用深度，线程私有的。
+- 方法区的大小设置为 256MB：
+二、指定垃圾回收器与回收器相关参数
+- `-XX:+UseConcMarkSweepGC`: 指定 CMS 垃圾回收器。
+- `-XX:+UseParNewGC`: 启用 ParNew 垃圾回收器（CMS 垃圾回收器的辅助， ParNew 用于年轻代）。
+- `-XX:CMSInitiatingOccupancyFraction=70`: 设置 CMS 触发垃圾回收的老年代占用比例阈值为 70%。当老年代占用达到这个比例时，将触发 CMS 垃圾回收。
+- `-XX:+CMSParallelRemarkEnabled`: 启用 CMS 并发标记阶段的并行处理。
+- `-XX:+UseCMSInitiatingOccupancyOnly`: 使用固定的 CMS 触发阈值。
+三、垃圾回收信息统计
+- `-XX:+HeapDumpOnOutOfMemoryError`: 在内存溢出时生成堆转储文件。
+- `-XX:HeapDumpPath=/path/to/heapdump.hprof`: 指定堆转储文件的路径。
+- `-XX:+PrintGCDetails`: 打印详细的垃圾回收日志。
+- `-XX:+PrintGCDateStamps`: 在垃圾回收日志中打印日期时间戳。
+- `-Xloggc:/path/to/gc.log`: 指定垃圾回收日志文件的路径。
+- `-XX:+UseGCLogFileRotation`: 启用垃圾回收日志文件的轮换。
+- `-XX:NumberOfGCLogFiles=5`: 设置保留的垃圾回收日志文件数量为 5 个。
+- `-XX:GCLogFileSize=10M`: 设置单个垃圾回收日志文件的大小为 10MB。
+- `your-application.jar`: 你的 Java 应用程序的 JAR 文件路径。
+
+这些参数配置将确保 JVM 在 4GB 内存环境下合理地运行，并使用 CMS 垃圾回收器来尽量减少停顿时间。请根据你的具体应用场景和性能要求进行调整。

@@ -33,7 +33,7 @@ System.out.println(list);
 
 泛型擦除是有范围的，定义在类上的泛型信息是不会被擦除的。因为Java编译器在`class`类文件中以`Signature`属性的方式保留了类的泛型信息。
 
-我们可以通过Type接口，在运行时获取泛型类`class`相关的信息，`Type`作为顶级接口，`Type`下还有几种类型比如
+在运行时获取泛型类`class`相关的信息，其中就包括泛型信息Type，Type的四个实现类如下：
 - `TypeVariable`
 - `ParameterizedType`
 - `WildCardType`

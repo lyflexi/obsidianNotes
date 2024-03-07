@@ -250,6 +250,7 @@ buildTemplateFromArgs.create执行过后返回了RequestTemplate对象，Request
 RequestTemplate只有远程方法信息，却没有请求地址信息：
 - 没有请求ip
 - 没有请求端口
+也就是说此时还不知道目标服务是哪个
 ![[Pasted image 20240125191846.png]]
 继续向下执行到return executeAndDecode(template, options)这行
 
@@ -389,18 +390,15 @@ loadBalancerClient的类型是`org.springframework.cloud.client.loadbalancer.Loa
 - 利用负载均衡器（`ReactiveLoadBalancer`）中的负载均衡算法，选出一个服务实例
 ![[Pasted image 20240127143141.png]]
 ## RoundRobinLoadBalancer
-默认RoundRobinLoadBalancer的负载均衡器choose的核心逻辑如下：
-![[Pasted image 20240127143338.png]]
-核心流程就是两步：
+默认RoundRobinLoadBalancer的负载均衡器choose的核心逻辑如下，两步：
 - 利用`ServiceInstanceListSupplier#get()`方法拉取服务的实例列表，这一步是采用响应式编程
 - 利用本类，也就是`RoundRobinLoadBalancer`的`getInstanceResponse()`方法挑选一个实例，这里采用了轮询算法来挑选。
+![[Pasted image 20240127143338.png]]
 ## ServiceInstanceListSupplier
 这里的ServiceInstanceListSupplier有很多实现：
+- 其中CachingServiceInstanceListSupplier采用了装饰模式，加了服务实例列表缓存，避免每次都要去注册中心拉取服务实例列表。
+- 还有DiscoveryClientServiceInstanceListSupplier会异步的基于DiscoveryClient去拉取服务的实例列表
 ![[Pasted image 20240127143441.png]]
-其中CachingServiceInstanceListSupplier采用了装饰模式，加了服务实例列表缓存，避免每次都要去注册中心拉取服务实例列表。而其内部是基于`DiscoveryClientServiceInstanceListSupplier`来实现的。
-
-在这个DiscoveryClientServiceInstanceListSupplier类的构造函数中，就会异步的基于DiscoveryClient去拉取服务的实例列表：
-![[Pasted image 20240127143510.png]]
 # Feign的一些自定义配置
 
 ## 超时时间设置

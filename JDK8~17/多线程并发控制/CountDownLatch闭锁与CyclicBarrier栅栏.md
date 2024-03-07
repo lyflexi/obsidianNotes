@@ -26,7 +26,7 @@ public class CountDownLatchDemo {
 }
 ```
 
-CountDownLatch是基于AQS实现的，它的实现机制很简单：
+CountDownLatch是基于AQS实现的，它的实现机制很简单，当我们在构建CountDownLatch对象时，传入的count会赋值给 AQS 的关键变量state
 ```java
 /*
 Constructs a CountDownLatch initialized with the given count.
@@ -40,15 +40,14 @@ public CountDownLatch(int count) {
     this.sync = new Sync(count);  
 }
 ```
-- 当我们在构建CountDownLatch对象时，传入的值其实就会赋值给 AQS 的关键变量state
-- 执行CountDownLatch的countDown方法时，其实就是利用CAS 将state 减一
-- 执行await方法时，其实就是判断state是否为0
-    - 如果state不为0，则将调用await方法的当前线程加入到阻塞队列中，将该线程阻塞掉（除了头结点）
-    - AQS头节点会一直自旋等待state为0，当state为0时，头节点把剩余的在锁阻塞队列中的节点==全部唤醒==
-
+使用CountDownLatch涉及两个API，分别是countDown方法和await方法：
+1. 执行countDown方法时，其实就是利用CAS 将state 减一（类似于可重入的解锁操作）
+2. 执行await方法时，其实就是判断state是否为0
+    - 如果state不为0，则将调用await方法的当前线程（这里是主线程）加入到阻塞队列中，将该线程阻塞掉
+    - AQS头节点会一直自旋等待state为0，当state为0时，头节点把剩余的在锁阻塞队列中的节点唤醒
 # CyclicBarrier原理介绍
 
-回到CyclicBarrier上，代码也不难，只有await方法。从源码不难发现的是：它没有像CountDownLatch和ReentrantLock使用AQS的state变量，而是传入parties变量，同时也会赋值给CyclicBarrier内部维护count变量（这是可以复用的关键）
+CyclicBarrier稍微复杂一点，它没有像CountDownLatch和ReentrantLock使用AQS的state变量，而是传入parties变量（这是可以复用的关键）并赋值给CyclicBarrier内部维护count变量
 ```Java
 //parties表示屏障拦截的线程数量，当屏障撤销时，先执行barrierAction，然后在释放所有线程
 public CyclicBarrier(int parties, Runnable barrierAction) {  
@@ -60,11 +59,10 @@ public CyclicBarrier(int parties, Runnable barrierAction) {
 //barrierAction默认为null
 public CyclicBarrier(int parties)
 ```
-==与闭锁不同，CyclicBarrier栅栏的等待唤醒操作均由一个api实现：await()==
 
-CyclicBarrier#await的==原理是ReentrantLock+Condition条件等待队列+AQS锁池阻塞队列==
+1. ==与闭锁不同，CyclicBarrier栅栏的等待唤醒操作均由一个api实现：await()，原理是ReentrantLock+Condition条件等待队列+AQS锁池阻塞队列==
 
-每次调用await时，会将count -1 ，操作count值是直接使用ReentrantLock来保证线程安全性。
+- 每次调用await时，会将count -1 ，操作count值是直接使用ReentrantLock来保证线程安全性。
 ```java
 /**  
  * Main barrier code, covering the various policies. */
@@ -107,7 +105,7 @@ CyclicBarrier#await的==原理是ReentrantLock+Condition条件等待队列+AQS�
     }  
 }
 ```
-==如果count--之后等于0，则打开栅栏执行signalAll()，相当于把等待队列中的节点从condition队列添加至AQS的队列中并进行全部唤醒==，并且将parties的值重新赋值为count的值（实现复用）
+- 如果count--之后等于0，则打开栅栏执行signalAll()，相当于把等待队列中的节点从condition队列添加至AQS的队列中并进行全部唤醒，并将count重新设置为parties（实现复用）
 ```java
 /**  
  * Sets current barrier generation as broken and wakes up everyone. * Called only while holding lock. */
@@ -117,7 +115,7 @@ private void breakBarrier() {
     trip.signalAll();  
 }
 ```
-如果count--之后不为0，则添加到condition队列中
+- 如果count--之后不为0，则添加到condition队列中
 ```java
   
 /**  

@@ -190,7 +190,7 @@ future获取返回值阻塞结束:张三
 Process finished with exit code 0
 ```
 
-# Spring框架中的回调机制
+# Spring框架中的回调机制-监听器/事件驱动模型/发布订阅模式
 
-回调机制在Spring当中广泛的用于事件驱动模式的实现，比如监听器ApplicationListener接口（高层定义）中定义了回调函数`onApplicationEvent`，同时框架将回调函数传递到了底层SimpleApplicationEventMulticaster，一旦有`ApplicationEvent`类型的事件发布时，SimpleApplicationEventMulticaster（底层框架）就会执行回调函数
+回调机制在Spring当中广泛的用于事件驱动模式的实现，比如监听器ApplicationListener接口（高层定义）中定义了回调函数`onApplicationEvent`，同时框架将Listener接口传递到了底层SimpleApplicationEventMulticaster，一旦有`ApplicationEvent`类型的事件发布时SimpleApplicationEventMulticaster（底层框架）就会触发doInvokeListener，就会执行Listener接口中的回调函数，该回调机制有个特殊的叫法：发布订阅模式
 ![[Pasted image 20231225131304.png]]

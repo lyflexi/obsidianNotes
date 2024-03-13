@@ -5,6 +5,7 @@
 - `state>1`，大于1是可重入锁
 
 # 同步队列AQS：CLH变体的虚拟双向队列
+阻塞队列结构如下：
 ![[Pasted image 20231225160355.png]]
 ## 节点包装
 在`AQS`中如果线程获取资源失败，会包装成一个节点挂载到AQS队列上，`AQS`中定义了`Node`类用于包装线程。
@@ -49,11 +50,26 @@ AQS的方法只是空方法，比如
 ![[Pasted image 20231225160450.png]]
 - 如实现类想要实现独占锁功能，则可只实现`tryAcquire/tryRelease`
 - 如实现类想要实现共享锁功能，则可只实现`tryAcquireShared/tryReleaseShared`
+`tryAcquire/tryRelease/tryAcquireShared/tryReleaseShared`内部使用的是`compareAndSetState`方法对`state`变量进行操作以实现同步类。
 
-虽然实现`tryAcquire/tryRelease/tryAcquireShared/tryReleaseShared`可自行设定逻辑，但建议使用`compareAndSetState`方法对`state`变量进行操作以实现同步类。
+## 使用姿势手写Lock
+获取锁的姿势 
+```java
+// 如果获取锁失败 
+if (!tryAcquire(arg)) { 
+	// 入队, 使用park阻塞当前线程
+}
+```
+释放锁的姿势
+```java
+// 如果释放锁成功 
+if (tryRelease(arg)) { 
+	// 让阻塞线程恢复运行 
+}
+```
+
 
 如下是一个简单的同步锁实现示例：示例代码简单通过`AQS`实现一个互斥操作，线程1获取`mutex`后，线程2的`acquire`陷入阻塞，直到线程1释放。其中`tryAcquire/acquire/tryRelease/release`的`arg`参数可按实现逻辑自定义传入值，无具体要求。
-
 ```Java
 public class Mutex extends AbstractQueuedSynchronizer {
     

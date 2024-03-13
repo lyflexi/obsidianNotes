@@ -10,8 +10,8 @@ Thread的中断API如下：
 /**
 具体来说，线程t1线程t2，当线程t2调用t1.interrupt()时，开始中断协商：
 1.如果t1线程处于正常活动状态，当线程t2调用t1.interrupt()时，那么会将t1线程的中断标志设置为true，仅此而已。t1线程将继续正常运行不受影响
-2.如果t1线程处于被阻塞状态，例如处于sleep，wait，join等状态，当线程t2调用t1.interrupt()时，那么t1线程将立即退出被阻塞状态并且抛出interruptedException异常并且把中断状态清除
-3.如果t1线程已经结束停止了，则线程t2调用t1.interrupt()返回false，对t1不会造成任何影响因为t1早就停止了，不活动的线程不会受到任何影响，
+2.如果t1线程已经结束停止了，则线程t2调用t1.interrupt()返回false，对t1不会造成任何影响因为t1早就停止了，不活动的线程不会受到任何影响，
+3.如果t1线程处于被阻塞状态，例如处于sleep，wait，join等状态，当线程t2调用t1.interrupt()时，那么t1线程将立即退出被阻塞状态并且抛出interruptedException异常并且把中断状态清除
 */
 public void interrupt()
 

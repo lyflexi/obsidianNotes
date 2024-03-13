@@ -14,10 +14,9 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Netty网络编程与NIO/sendFile系统调用-实现磁盘零拷贝.md"
+                "file": "JDK8~17/Java设计模式/11.责任链模式(Chain of Responsibility Pattern).md"
               }
-            },
-            "group": "e65e8ecad3329a33"
+            }
           }
         ]
       },
@@ -27,17 +26,16 @@
         "dimension": 79.79351032448378,
         "children": [
           {
-            "id": "cb04191d574d8c8b",
+            "id": "46edece85008acc7",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Netty网络编程与NIO/sendFile系统调用-实现磁盘零拷贝.md",
+                "file": "JDK8~17/Java设计模式/11.责任链模式(Chain of Responsibility Pattern).md",
                 "mode": "source",
                 "source": false
               }
-            },
-            "group": "e65e8ecad3329a33"
+            }
           }
         ]
       }
@@ -89,7 +87,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 330.51103591918945
+    "width": 353.51103591918945
   },
   "right": {
     "id": "42bec07740fd88a4",
@@ -105,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Netty网络编程与NIO/sendFile系统调用-实现磁盘零拷贝.md",
+                "file": "JDK8~17/Java设计模式/11.责任链模式(Chain of Responsibility Pattern).md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Netty网络编程与NIO/sendFile系统调用-实现磁盘零拷贝.md",
+                "file": "JDK8~17/Java设计模式/11.责任链模式(Chain of Responsibility Pattern).md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,53 +155,53 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "cb04191d574d8c8b",
+  "active": "46edece85008acc7",
   "lastOpenFiles": [
+    "JDK8~17/Java设计模式/10.建造者模式(Builder Pattern).md",
+    "JDK8~17/Java设计模式/11.责任链模式(Chain of Responsibility Pattern).md",
+    "JDK8~17/Java设计模式/03.委派模式（Delegate Pattern）.md",
+    "JDK8~17/Java设计模式/09.包装模式(Wrapper Pattern).md",
+    "JDK8~17/Java设计模式/08.动态代理模式（Proxy Pattern）.md",
+    "JDK8~17/Java设计模式/07.原型模式or克隆(Prototype Pattern).md",
+    "JDK8~17/Java设计模式/06.单例模式(Singleton Pattern).md",
     "Netty网络编程与NIO/NIO/1.NIO三大组件与手写代码.md",
-    "Netty网络编程与NIO/sendFile系统调用-实现磁盘零拷贝.md",
-    "Netty网络编程与NIO/epoll系统调用-实现多路复用.md",
-    "Netty网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
-    "Redis/expire原理.md",
-    "Redis/scan查询 推荐！.md",
-    "JDK8~17/集合Collection/LinkedHashMap实现LRU缓存.md",
-    "JDK8~17/集合Collection/LinkedList.md",
-    "JDK8~17/反射reflect 用于分析注解.md",
-    "Redis/fork系统调用原理.md",
-    "Redis/Redis持久化原理.md",
-    "SpringCloud与分布式事务/openfeign和dubbo的区别.md",
-    "Attachments/pics/Pasted image 20240307181640.png",
-    "Attachments/pics/Pasted image 20240307181336.png",
-    "Attachments/pics/Pasted image 20240307180910.png",
-    "408计网/计算机网络知识点总结.md",
-    "Attachments/pics/Pasted image 20240307175940.png",
-    "Attachments/pics/Pasted image 20240307174417.png",
-    "Nginx负载均衡/五大负载均衡策略.md",
-    "Nginx负载均衡/Nginx超时时间设置.md",
-    "408计网/未命名.md",
-    "SpringCloud与分布式事务/openfeign源码.md",
-    "SpringCloud与分布式事务/手写RPC原理.md",
-    "SpringCloud与分布式事务/Eureka已过时.md",
-    "408操作系统/计算机操作系统知识点总结.md",
-    "Attachments/pics/Pasted image 20240307155750.png",
-    "JDK8~17/JVM/JVM内存结构.md",
-    "JDK8~17/JVM/常量池与运行时常量池.md",
+    "JDK8~17/Java设计模式/05.观察者模式or发布订阅模式（Observer Pattern）.md",
+    "JDK8~17/多线程并发控制/设置中断标志interrupt.md",
+    "JDK8~17/Java设计模式/回调机制-监听器or事件驱动模型or发布订阅模式.md",
+    "JDK8~17/Java设计模式/04.模板设计模式（Template Method Pattern）.md",
+    "JDK8~17/Java设计模式/00.七大设计原则.md",
+    "JDK8~17/Java设计模式/01.工厂模式（Factory Pattern).md",
+    "JDK8~17/Java设计模式/02.策略模式（Strategy Pattern）.md",
+    "Attachments/pics/R (1).png",
+    "Attachments/pics/R.jfif",
+    "JDK8~17/Java设计模式/00.六种类间关系.md",
+    "JDK8~17/多线程并发控制/Monitor套装/synchronized等待队列WaitSet.md",
+    "JDK8~17/多线程并发控制/Monitor套装/synchronized锁阻塞队列与对比.md",
+    "Attachments/pics/Pasted image 20240313141050.png",
+    "Attachments/pics/Pasted image 20240313140944.png",
+    "Attachments/pics/Pasted image 20240313140900.png",
+    "JDK8~17/多线程并发控制/Header关键结构分析-Markword/类型指针压缩与对齐填充测试程序JOL.md",
+    "JDK8~17/多线程并发控制/Header关键结构分析-Markword/synchronized锁升级过程.md",
+    "JDK8~17/多线程并发控制/Monitor套装",
+    "JDK8~17/多线程并发控制/AQS套装",
+    "JDK8~17/多线程并发控制/Header关键结构分析-Markword",
+    "SpringFrameWork/事务控制/Spring事务参数配置.md",
+    "Attachments/pics/Pasted image 20240313103516.png",
+    "Attachments/pics/Pasted image 20240313103406.png",
+    "JDK8~17/多线程并发控制/AQS套装/(锁池-阻塞-Blocked)同步队列AQS.md",
+    "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
+    "JDK8~17/多线程并发控制/CountDownLatch闭锁与CyclicBarrier栅栏.md",
+    "Attachments/pics/Pasted image 20240312163036.png",
+    "Attachments/pics/Pasted image 20240312162828.png",
+    "Attachments/pics/Pasted image 20240312162547.png",
+    "Attachments/pics/Pasted image 20240312161518.png",
     "JDK8~17/JVM/JVM调优实战，以CMS收集器为例.md",
-    "JDK8~17/JVM/源代码的执行过程（执行引擎）.md",
-    "JDK8~17/Java设计模式/单例模式Singleton.md",
-    "JDK8~17/JVM/各种垃圾回收器/03.并发收集器CMS oldgc.md",
-    "Attachments/pics/Pasted image 20240303194129.png",
-    "Attachments/pics/Pasted image 20240303155805.png",
-    "Attachments/pics/Pasted image 20240303125004.png",
-    "Attachments/pics/Pasted image 20240303112720.png",
+    "Nginx负载均衡/请求头Host丢失问题.md",
     "JDK8~17/JVM/各种垃圾回收器",
     "JDK8~17/线程与线程池",
     "SpringFrameWork/Aware使用场景和源码解读",
     "Netty网络编程与NIO/NIO",
     "Centos服务器/DevOps",
-    "Centos服务器/K8s环境/分布式文件系统搭建",
-    "Centos服务器/K8s环境/PVPVC细述",
-    "Centos服务器/K8s环境/服务暴露与负载均衡细述",
-    "Centos服务器/K8s环境/Deployment控制器细述",
-    "Centos服务器/K8s环境/Pod细述"
+    "Centos服务器/K8s环境/分布式文件系统搭建"
   ]
 }

@@ -31,9 +31,9 @@ TOC项目部署细节:
 8.使用jmeter压测工具，对秒杀接口进行压力测试，在8C16G的服务器上，qps2k+，达到压测预期  
 9.（可选）使用sentinel的热点参数限流规则，针对爆款商品和普通商品的区别，区分限制
 ![[秒杀架构.png]]
-库存表
+库存表，seckill-service模块真实sql，执行stock--
 ![[Pasted image 20240123094757.png]]
-订单表
+==订单表，seckill-service模块真实sql，用于持久化用户与购买商品真实的映射关系！！！！==
 ![[Pasted image 20240123094811.png]]
 # seckill-web模块
 yml配置
@@ -385,7 +385,7 @@ public class SeckillListener implements RocketMQListener<MessageExt> {
 ## seckill-service验证
 3000条消息已经完全被消费
 ![[Pasted image 20240123095529.png]]
-数据库订单表新增3000条订单
+数据库订单表新增3000条订单，用于持久化用户与购买商品真实的映射关系
 ![[Pasted image 20240123095827.png]]
 最重要的是库存表商品余量为0，没有超卖现象发生
 ![[Pasted image 20240123095931.png]]

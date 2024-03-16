@@ -1,0 +1,364 @@
+现在再来设想一个场景：现在有三个生产数据的线程1、3、5，三个获取数据的线程0、2、4，我们希望每个获取数据线程都只拿到其中一个生产线程的数据，不能多拿也不能少拿，这要求发送线程和接收线程之间一一对应。
+- t0拿t1的结果
+- t2拿t3的结果
+- t4拿t5的结果
+这里引入一个Futures模型，这个模型为每个资源GuardedObject进行编号并存储在容器中，一直到容器为空结束。
+![[Pasted image 20240316110048.png]]
+# 手写多线程rpc设计模式
+首先对GuardedObject进行增强，添加标识id
+```java
+package org.lyflexi.multiThread.designParten.guardedSuspension.rpcDubbo_OneToOne;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/16 10:58  
+ */  
+// 增加超时效果  
+class GuardedObject {  
+  
+    // 标识 Guarded Object    
+    private int id;  
+  
+    public GuardedObject(int id) {  
+        this.id = id;  
+    }  
+  
+    public int getId() {  
+        return id;  
+    }  
+  
+    // 结果  
+    private Object response;  
+  
+    // 获取结果  
+    // timeout 表示要等待多久 2000    public Object get(long timeout) {  
+        synchronized (this) {  
+            // 开始时间 15:00:00            long begin = System.currentTimeMillis();  
+            // 经历的时间  
+            long passedTime = 0;  
+            while (response == null) {  
+                // 这一轮循环应该等待的时间  
+                long waitTime = timeout - passedTime;  
+                // 经历的时间超过了最大等待时间时，退出循环  
+                if (timeout - passedTime <= 0) {  
+                    break;  
+                }  
+                try {  
+                    this.wait(waitTime); // 虚假唤醒 15:00:01                } catch (InterruptedException e) {  
+                    e.printStackTrace();  
+                }  
+                // 求得经历时间  
+                passedTime = System.currentTimeMillis() - begin; // 15:00:02  1s  
+            }  
+            return response;  
+        }  
+    }  
+  
+    // 产生结果  
+    public void complete(Object response) {  
+        synchronized (this) {  
+            // 给结果成员变量赋值  
+            this.response = response;  
+            this.notifyAll();  
+        }  
+    }  
+}
+```
+接着新建GuardedObject集合的维护者Mailboxes：
+- 负责创建id，generateId方法要加synchronized锁保证多线程下的id++的原子性
+- 负责创建GuardedObject，创建完之后存入容器boxes
+- 负责获取GuardedObject，注意获取方式为从集合boxes中remove
+```java
+package org.lyflexi.multiThread.designParten.guardedSuspension.rpcDubbo_OneToOne;  
+  
+import java.util.Hashtable;  
+import java.util.Map;  
+import java.util.Set;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/16 10:59  
+ */class Mailboxes {  
+    private static Map<Integer, GuardedObject> boxes = new Hashtable<>();  
+  
+    private static int id = 1;  
+    // 产生唯一 id    
+    private static synchronized int generateId() {  
+        return id++;  
+    }  
+  
+    public static GuardedObject getGuardedObject(int id) {  
+        return boxes.remove(id);  
+    }  
+  
+    public static GuardedObject createGuardedObject() {  
+        GuardedObject go = new GuardedObject(generateId());  
+        boxes.put(go.getId(), go);  
+        return go;  
+    }  
+  
+    public static Set<Integer> getIds() {  
+        return boxes.keySet();  
+    }  
+}
+```
+创建接收者线程People：
+- 负责向Mailboxes创建空的GuardedObject集合
+- 创建完GuardedObject之后执行接收方法get陷入等待
+```java
+package org.lyflexi.multiThread.designParten.guardedSuspension.rpcDubbo_OneToOne;  
+  
+import lombok.extern.slf4j.Slf4j;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/16 10:58  
+ */@Slf4j(topic = "c.People")  
+class People extends Thread{  
+    @Override  
+    public void run() {  
+        // 收信  
+        GuardedObject guardedObject = Mailboxes.createGuardedObject();  
+        log.debug("开始收信 id:{}", guardedObject.getId());  
+        Object mail = guardedObject.get(5000);  
+        log.debug("收到信 id:{}, 内容:{}", guardedObject.getId(), mail);  
+    }  
+}
+```
+创建发送者线程Postman确保发送线程和接收线程之间一一对应：
+- Postman自身也有id标识
+- 获取与Postmanid对应的GuardedObject，并向该指定的GuardedObject中送内容，以达到Postmanid1->GuardedObject1、Postmanid2->GuardedObject2、Postmanid3->GuardedObject3发送的效果
+```java
+package org.lyflexi.multiThread.designParten.guardedSuspension.rpcDubbo_OneToOne;  
+  
+import lombok.extern.slf4j.Slf4j;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/16 10:58  
+ */@Slf4j(topic = "c.Postman")  
+class Postman extends Thread {  
+    private int id;  
+    private String mail;  
+  
+    public Postman(int id, String mail) {  
+        this.id = id;  
+        this.mail = mail;  
+    }  
+  
+    @Override  
+    public void run() {  
+        GuardedObject guardedObject = Mailboxes.getGuardedObject(id);  
+        log.debug("送信 id:{}, 内容:{}", id, mail);  
+        guardedObject.complete(mail);  
+    }  
+}
+```
+测试程序如下：
+- 创建三个接收线程，创建了3个不同的GuardedObject，id分别是1 2 3
+- 创建三个发送线程，Postman的id也分别是1 2 3，同时每个发送线程只向1个GuardedObject中发送数据，对应关系如下1-1，2-2，3-3
+```java
+package org.lyflexi.multiThread.designParten.guardedSuspension.rpcDubbo_OneToOne;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/16 10:57  
+ */public class TestRpc {  
+    public static void main(String[] args) throws InterruptedException {  
+        for (int i = 0; i < 3; i++) {  
+            new People().start();  
+        }  
+        Thread.sleep(1000);  
+        for (Integer id : Mailboxes.getIds()) {  
+            new Postman(id, "内容" + id).start();  
+        }  
+    }  
+}
+```
+打印信息如下：
+```shell
+10:59:46.799 c.People [Thread-1] - 开始收信 id:2
+10:59:46.799 c.People [Thread-2] - 开始收信 id:1
+10:59:46.799 c.People [Thread-0] - 开始收信 id:3
+10:59:47.801 c.Postman [Thread-3] - 送信 id:3, 内容:内容3
+10:59:47.802 c.People [Thread-0] - 收到信 id:3, 内容:内容3
+10:59:47.802 c.Postman [Thread-4] - 送信 id:2, 内容:内容2
+10:59:47.802 c.People [Thread-1] - 收到信 id:2, 内容:内容2
+10:59:47.802 c.Postman [Thread-5] - 送信 id:1, 内容:内容1
+10:59:47.802 c.People [Thread-2] - 收到信 id:1, 内容:内容1
+
+Process finished with exit code 0
+```
+# Dubbo应用实例
+我们顺着这一个链路跟踪代码：消费者发送请求 > 提供者接收请求并执行，并且将运行结果发送给消费者 >消费者接收结果。
+
+(1) 消费者发送请求
+消费者将请求ID作为DefaultFuture的ID，并且将关系维护进FUTURES容器
+```java
+final class HeaderExchangeChannel implements ExchangeChannel {
+
+    @Override
+    public ResponseFuture request(Object request, int timeout) throws RemotingException {
+        if (closed) {
+            throw new RemotingException(this.getLocalAddress(), null, "Failed to send request " + request + ", cause: The channel " + this + " is closed!");
+        }
+        Request req = new Request();
+        req.setVersion(Version.getProtocolVersion());
+        req.setTwoWay(true);
+        req.setData(request);
+        // 代码1
+        DefaultFuture future = DefaultFuture.newFuture(channel, req, timeout);
+        try {
+            channel.send(req);
+        } catch (RemotingException e) {
+            future.cancel();
+            throw e;
+        }
+        return future;
+    }
+}
+
+class DefaultFuture implements ResponseFuture {
+
+    // FUTURES容器
+    private static final Map<Long, DefaultFuture> FUTURES = new ConcurrentHashMap<>();
+
+    private DefaultFuture(Channel channel, Request request, int timeout) {
+        this.channel = channel;
+        this.request = request;
+        // 请求ID
+        this.id = request.getId();
+        this.timeout = timeout > 0 ? timeout : channel.getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
+        FUTURES.put(id, this);
+        CHANNELS.put(id, channel);
+    }
+}
+```
+(2) 提供者接收请求并执行，并且将运行结果发送给消费者
+```java
+public class HeaderExchangeHandler implements ChannelHandlerDelegate {
+
+    void handleRequest(final ExchangeChannel channel, Request req) throws RemotingException {
+        // response与请求ID对应
+        Response res = new Response(req.getId(), req.getVersion());
+        if (req.isBroken()) {
+            Object data = req.getData();
+            String msg;
+            if (data == null) {
+                msg = null;
+            } else if (data instanceof Throwable) {
+                msg = StringUtils.toString((Throwable) data);
+            } else {
+                msg = data.toString();
+            }
+            res.setErrorMessage("Fail to decode request due to: " + msg);
+            res.setStatus(Response.BAD_REQUEST);
+            channel.send(res);
+            return;
+        }
+        // message = RpcInvocation包含方法名、参数名、参数值等
+        Object msg = req.getData();
+        try {
+
+            // DubboProtocol.reply执行实际业务方法
+            CompletableFuture<Object> future = handler.reply(channel, msg);
+
+            // 如果请求已经完成则发送结果
+            if (future.isDone()) {
+                res.setStatus(Response.OK);
+                res.setResult(future.get());
+                channel.send(res);
+                return;
+            }
+        } catch (Throwable e) {
+            res.setStatus(Response.SERVICE_ERROR);
+            res.setErrorMessage(StringUtils.toString(e));
+            channel.send(res);
+        }
+    }
+}
+```
+(3) 消费者接收结果
+以下DUBBO源码很好体现了保护性暂停这个设计模式，说明参看注释
+```java
+class DefaultFuture implements ResponseFuture {
+    private final Lock lock = new ReentrantLock();
+    private final Condition done = lock.newCondition();
+
+    public static void received(Channel channel, Response response) {
+        try {
+            // 取出对应的响应对象
+            DefaultFuture future = FUTURES.remove(response.getId());
+            if (future != null) {
+                future.doReceived(response);
+            } else {
+                logger.warn("The timeout response finally returned at "
+                            + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()))
+                            + ", response " + response
+                            + (channel == null ? "" : ", channel: " + channel.getLocalAddress()
+                               + " -> " + channel.getRemoteAddress()));
+            }
+        } finally {
+            CHANNELS.remove(response.getId());
+        }
+    }
+
+
+    @Override
+    public Object get(int timeout) throws RemotingException {
+        if (timeout <= 0) {
+            timeout = Constants.DEFAULT_TIMEOUT;
+        }
+        if (!isDone()) {
+            long start = System.currentTimeMillis();
+            lock.lock();
+            try {
+                while (!isDone()) {
+
+                    // 放弃锁并使当前线程阻塞，直到发出信号中断它或者达到超时时间
+                    done.await(timeout, TimeUnit.MILLISECONDS);
+
+                    // 阻塞结束后再判断是否完成
+                    if (isDone()) {
+                        break;
+                    }
+
+                    // 阻塞结束后判断是否超时
+                    if(System.currentTimeMillis() - start > timeout) {
+                        break;
+                    }
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } finally {
+                lock.unlock();
+            }
+            // response对象仍然为空则抛出超时异常
+            if (!isDone()) {
+                throw new TimeoutException(sent > 0, channel, getTimeoutMessage(false));
+            }
+        }
+        return returnFromResponse();
+    }
+
+    private void doReceived(Response res) {
+        lock.lock();
+        try {
+            // 接收到服务器响应赋值response
+            response = res;
+            if (done != null) {
+                // 唤醒get方法中处于等待的代码块
+                done.signal();
+            }
+        } finally {
+            lock.unlock();
+        }
+        if (callback != null) {
+            invokeCallback(callback);
+        }
+    }
+}
+```
+因此，在DUBBO的并发问题上要注意上述两点：
+1. 带超时时间的多线程虚假唤醒问题
+2. 请求和响应关系对应问题

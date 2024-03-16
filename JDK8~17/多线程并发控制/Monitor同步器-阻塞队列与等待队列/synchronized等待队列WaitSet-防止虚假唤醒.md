@@ -284,7 +284,6 @@ public class TestNotify {
 ```
 # 虚假唤醒与处理方式while+notifyAll
 将notify替换为notifyAll之后，打印信息如下：
-虽然小女线程被正确的唤醒了，但是小南线程也被唤醒了小南线程的等待条件并没有满足，这种情况称之为称之为虚假唤醒，最终导致的结果就是小南没干成活程序却结束了
 ```shell
 有烟没？[{}]false
 没烟，先歇会！1710315470318
@@ -298,6 +297,23 @@ public class TestNotify {
 
 Process finished with exit code 0
 ```
+虽然小女线程被正确的唤醒了，但是小南线程也被唤醒了小南线程的等待条件并没有满足，这种情况称之为称之为虚假唤醒，最终导致的结果就是小南没干成活程序却结束了
+
+
+关于虚假唤醒这个概念，我们看看JDK官方文档相关介绍。
+
+> A thread can also wake up without being notified, interrupted, or timing out, a so-called spurious wakeup. While this will rarely occur in practice, applications must guard against it by testing for the condition that should have caused the thread to be awakened, and continuing to wait if the condition is not satisfied. In other words, waits should always occur in loops, like this one:
+
+```java
+synchronized (obj) {
+    while (<condition does not hold>)
+        obj.wait(timeout);
+}
+```
+
+官方文档告诉我们一个线程可能会在没有被notify时虚假唤醒，所以判断是否继续wait时必须用while循环。我们在写代码时一定也要注意线程虚假唤醒问题。
+
+
 解决虚假唤醒的方式是将if条件判断改为while条件判断，形如while+wait+notifyAll组合的方式
 ```java
 synchronized(lock) {  

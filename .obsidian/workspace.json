@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式/带有超时时间的保护性暂停.md"
+                "file": "JDK8~17/多线程并发控制/线程间通信api-Waitting/03.LockSupport.park.md"
               }
             }
           }
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式/带有超时时间的保护性暂停.md",
+                "file": "JDK8~17/多线程并发控制/线程间通信api-Waitting/03.LockSupport.park.md",
                 "mode": "source",
                 "source": false
               }
@@ -87,7 +87,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 353.51103591918945
+    "width": 440.51103591918945
   },
   "right": {
     "id": "42bec07740fd88a4",
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式/带有超时时间的保护性暂停.md",
+                "file": "JDK8~17/多线程并发控制/线程间通信api-Waitting/03.LockSupport.park.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式/带有超时时间的保护性暂停.md",
+                "file": "JDK8~17/多线程并发控制/线程间通信api-Waitting/03.LockSupport.park.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,15 +157,34 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
+    "Attachments/pics/Pasted image 20240316133623.png",
+    "Attachments/pics/Pasted image 20240316133243.png",
+    "Attachments/pics/Pasted image 20240316131948.png",
+    "JDK8~17/多线程并发控制/线程间通信api-Waitting/00.演进关系.md",
+    "JDK8~17/多线程并发控制/线程间通信api-Waitting/00.演进关系.md",
+    "JDK8~17/多线程并发控制/线程间通信api-Waitting/01.synchronized.wait.md",
+    "JDK8~17/多线程并发控制/线程间通信api-Waitting/03.LockSupport.park.md",
+    "JDK8~17/多线程并发控制/线程间通信api-Waitting/02.Condition.await.md",
+    "JDK8~17/多线程创建方式/Thread之yield礼让.md",
+    "JDK8~17/多线程并发控制/线程间通信api-Waitting",
+    "JDK8~17/多线程并发控制/AQS同步器-阻塞队列与等待队列/(等待-Waitting)条件队列Condition.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/异步模式/生产者消费者模式-消息队列原理.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式/多GuardedObject-dubbo多线程核心原理.md",
+    "JDK8~17/集合Collection/HashMap源码.md",
+    "Attachments/pics/Pasted image 20240316122726.png",
+    "SpringCloud与分布式事务/手写单线程RPC.md",
+    "JDK8~17/Java设计模式/08.动态代理模式（Proxy Pattern）.md",
+    "Attachments/pics/Pasted image 20240316110048.png",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式/带有超时时间的保护性暂停.md",
+    "JDK8~17/多线程并发控制/Monitor同步器-阻塞队列与等待队列/synchronized等待队列WaitSet-防止虚假唤醒.md",
+    "JDK8~17/多线程创建方式/Thread之interrupt-两阶段终止模式.md",
+    "JDK8~17/多线程创建方式/如何开启一个Thread（get阻塞）.md",
     "Attachments/pics/Pasted image 20240315210546.png",
     "Attachments/pics/Pasted image 20240315210545.png",
     "Attachments/pics/Pasted image 20240315210512.png",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式/同步模式之保护性暂停.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式/带有超时时间的保护性暂停.md",
     "Attachments/pics/Pasted image 20240315205800.png",
-    "JDK8~17/多线程并发控制/Monitor同步机制-阻塞队列与等待队列/synchronized等待队列WaitSet.md",
-    "JDK8~17/多线程创建/Thread之interrupt-两阶段终止模式.md",
-    "JDK8~17/多线程创建/Thread之sleep.md",
+    "JDK8~17/多线程创建方式/Thread之sleep.md",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/终止模式-两阶段终止模式.md",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/异步模式",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式",
@@ -175,33 +194,14 @@
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/4.实现SQL语句配置化的MyBatis.md",
     "手写框架系列handson_miniFramework/手写mini_SpringhasMvc/三、实现JDBCTemplate/2.抽取专门的参数传入组件与返回对象封装组件.md",
     "JDK8~17/多线程并发控制/对象头关键结构分析-Markword/synchronized锁升级过程.md",
-    "JDK8~17/多线程并发控制/线程间通信方式演进Monitor-Condition-LockSupport.md",
-    "JDK8~17/多线程并发控制/Monitor同步机制-阻塞队列与等待队列/synchronized阻塞队列EntryList-重量级锁.md",
-    "JDK8~17/多线程并发控制/Monitor同步机制-阻塞队列与等待队列/synchronized字节码层面原理.md",
-    "JDK8~17/多线程并发控制/Monitor同步机制-阻塞队列与等待队列/synchronized特点与其他对比.md",
-    "JDK8~17/JVM/init和client.md",
+    "JDK8~17/多线程并发控制/Monitor同步器-阻塞队列与等待队列/synchronized阻塞队列EntryList-重量级锁.md",
     "Attachments/pics/Pasted image 20240315125840.png",
-    "JDK8~17/JVM/源代码的执行过程（执行引擎）.md",
-    "JDK8~17/JVM/常量池与运行时常量池.md",
-    "JDK8~17/JVM/JVM内存结构.md",
     "Attachments/pics/Pasted image 20240315124353.png",
-    "JDK8~17/多线程并发控制/Monitor同步机制-阻塞队列与等待队列/多线程协调案例.md",
-    "JDK8~17/JVM/各种垃圾回收器/00.垃圾回收概论.md",
-    "JDK8~17/Java设计模式/00.七大设计原则.md",
-    "Attachments/pics/Pasted image 20240314232109.png",
-    "JDK8~17/多线程并发控制/局部变量的线程安全性分析.md",
-    "SpringBoot3/Servlet中成员变量的线程安全性分析.md",
-    "SpringBoot3/Bean是线程不安全的.md",
-    "Attachments/pics/Pasted image 20240314222524.png",
-    "Attachments/pics/Pasted image 20240314214551.png",
-    "Attachments/pics/Pasted image 20240314214516.png",
-    "JDK8~17/多线程并发控制/非阻塞式乐观锁CAS",
-    "Attachments/pics/Pasted image 20240314121807.png",
+    "JDK8~17/多线程并发控制/CAS乐观锁工具类-自旋",
     "Attachments/pics/R.jfif",
-    "JDK8~17/多线程并发控制/Monitor同步机制-阻塞队列与等待队列",
-    "JDK8~17/多线程并发控制/AQS同步机制-阻塞队列与等待队列",
+    "JDK8~17/多线程并发控制/Monitor同步器-阻塞队列与等待队列",
+    "JDK8~17/多线程并发控制/AQS同步器-阻塞队列与等待队列",
     "JDK8~17/多线程并发控制/对象头关键结构分析-Markword",
-    "JDK8~17/JVM/各种垃圾回收器",
-    "JDK8~17/多线程创建"
+    "JDK8~17/JVM/各种垃圾回收器"
   ]
 }

@@ -172,6 +172,17 @@ public interface Lock {
     Condition newCondition();
 }
 ```
+ReentrantLock基本语法
+```java
+// 获取锁  
+reentrantLock.lock();  
+try {  
+	// 临界区  
+} finally {  
+	// 释放锁  
+	reentrantLock.unlock();  
+}
+```
 
 ## 可重入锁
 
@@ -180,7 +191,6 @@ public interface Lock {
 **“可重入锁”** 指的是自己可以再次**自己获取自己**的内部锁。比如一个线程获得了某个对象的锁，此时这个对象锁还没有释放，当其再次想要获取这个对象的锁的时候还是可以获取的，如果不可锁重入的话，可能就会造成死锁。同一个线程每次获取锁，锁的计数器都自增 1，所以要等到锁的计数器下降为 0 时才能释放锁。
 
 通俗来说：当线程请求一个由其它线程持有的对象锁时，该线程会阻塞，而当线程请求由自己持有的对象锁时，如果该锁是重入锁，请求就会成功.
-
 ```Java
 package com.test.reen;
 
@@ -228,40 +238,178 @@ try{
 }
 ```
 
-## 超时退出
-
-Lock可以让等待锁的线程响应中断处理，如tryLock(long time, TimeUnit unit)在参数时间内未获取锁，则立即退出尝试获取锁，去执行else内的代码块。而synchronized却不行，使用synchronized时，等待的线程会一直等待下去，不能够中断，程序员无法控制；
-
-```Java
-public void runThread(Thread t){
-    //lock对象调用trylock(long time , TimeUnit unit)方法尝试获取锁
-    try {
-        //注意，这个方法需要抛出中断异常
-        if(lock.tryLock(2000L,TimeUnit.MILLISECONDS)){
-                //获锁成功代码段
-                System.out.println("线程"+t.getName()+"获取锁成功");
-                try {
-                        //执行的代码
-                        Thread.sleep(4000);
-                } catch (Exception e) {
-                        //异常处理内容，比如中断异常
-                } finally {
-                        //获取锁成功之后，一定记住加finally并unlock()方法,释放锁
-                        System.out.println("线程"+t.getName()+"释放锁");
-                        lock.unlock();
-                }
-            }else{
-                //获锁失败代码段
-                //具体获取锁失败的回复响应
-                System.out.println("线程"+t.getName()+"获取锁失败");
-             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-         }
+## 尝试一次
+Lock在获取锁的时候尝试只获取一次的API是tryLock()
+```java
+package org.lyflexi.syncVsReentrantLock;  
+  
+import lombok.extern.slf4j.Slf4j;  
+  
+import java.util.concurrent.locks.ReentrantLock;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/18 17:02  
+ */@Slf4j(topic = "c.TesttryLock")  
+public class TesttryLock {  
+    public static void main(String[] args) throws InterruptedException {  
+        ReentrantLock lock = new ReentrantLock();  
+        Thread t1 = new Thread(() -> {  
+            log.debug("启动...");  
+            if (!lock.tryLock()) {  
+                log.debug("获取立刻失败，返回");  
+                return;  
+            }  
+            try {  
+                log.debug("获得了锁");  
+            } finally {  
+                lock.unlock();  
+            }  
+        }, "t1");  
+  
+        lock.lock();  
+        log.debug("获得了锁");  
+        t1.start();  
+        try {  
+            Thread.sleep(2);  
+        } finally {  
+            lock.unlock();  
+        }  
+    }  
 }
 ```
+打印信息如下：
+```shell
+17:02:40.926 c.TesttryLock [main] - 获得了锁
+17:02:40.928 c.TesttryLock [t1] - 启动...
+17:02:40.928 c.TesttryLock [t1] - 获取立刻失败，返回
+
+Process finished with exit code 0
+```
+## 超时退出
+Lock在获取锁的时候可以设置超时时间，而synchronized在获取锁的时候无法设置超时时间，使用synchronized时，等待的线程会一直等待下去；
+Lock在获取锁的时候设置超时时间的API是tryLock(long time, TimeUnit unit)
+```Java
+package org.lyflexi.syncVsReentrantLock;  
+  
+import lombok.extern.slf4j.Slf4j;  
+  
+import java.util.concurrent.TimeUnit;  
+import java.util.concurrent.locks.ReentrantLock;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/18 17:02  
+ */@Slf4j(topic = "c.TesttryLock")  
+public class TesttryLockHasTime {  
+    public static void main(String[] args) throws InterruptedException {  
+        ReentrantLock lock = new ReentrantLock();  
+        Thread t1 = new Thread(() -> {  
+            log.debug("启动...");  
+            try {  
+                if (!lock.tryLock(1, TimeUnit.SECONDS)) {  
+                    log.debug("获取等待 1s 后失败，返回");  
+                    return;  
+                }  
+            } catch (InterruptedException e) {  
+                e.printStackTrace();  
+            }  
+            try {  
+                log.debug("获得了锁");  
+            } finally {  
+                lock.unlock();  
+            }  
+        }, "t1");  
+  
+        lock.lock();  
+        log.debug("获得了锁");  
+        t1.start();  
+        try {  
+            Thread.sleep(2000);  
+        } finally {  
+            lock.unlock();  
+        }  
+    }  
+}
+```
+打印信息如下：
+```shell
+17:04:30.372 c.TesttryLock [main] - 获得了锁
+17:04:30.374 c.TesttryLock [t1] - 启动...
+17:04:31.385 c.TesttryLock [t1] - 获取等待 1s 后失败，返回
+
+Process finished with exit code 0
+```
 ## 响应中断
-ReentrantLock另外提供了一种能够中断等待锁的线程的机制，通过 lock.lockInterruptibly() 来实现这个机制。也就是说正在等待的线程可以选择直接放弃等待，改为处理其他事情。
+ReentrantLock可打断AQD，synchronized可打断WaitSet而非EntryList
+- ReentrantLock另外提供了一种能够中断等待锁的线程的机制，用于打断在阻塞队列AQS中一直等待获取锁的线程，通过 lock.lockInterruptibly() 来实现这个机制。
+- 注意，原本synchronized的打断的是调用wait/join方法后位于等待队列WaitSet中的等待线程，而非EntryList中的阻塞线程，因为调用wait的时候synchronized已经释放掉锁不再参与争抢了
+ReentrantLock#lockInterruptibly测试中断程序如下：
+```java
+package org.lyflexi.syncVsReentrantLock;  
+  
+import lombok.extern.slf4j.Slf4j;  
+  
+import java.util.concurrent.locks.ReentrantLock;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/18 16:43  
+ */@Slf4j(topic = "c.TestInterrupt")  
+public class TestlockInterruptibly {  
+    public static void main(String[] args) {  
+  
+        ReentrantLock lock = new ReentrantLock();  
+  
+        Thread t1 = new Thread(() -> {  
+            log.debug("启动...");  
+            try {  
+                lock.lockInterruptibly();  
+            } catch (InterruptedException e) {  
+                e.printStackTrace();  
+                log.debug("等锁的过程中被打断,子线程返回");  
+                return;  
+            }  
+            try {  
+                log.debug("获得了锁");  
+            } finally {  
+                lock.unlock();  
+            }  
+        }, "t1");  
+  
+  
+        lock.lock();  
+        log.debug("主线程获得了锁");  
+        t1.start();  
+        try {  
+            Thread.sleep(1000);  
+            t1.interrupt();  
+            log.debug("执行打断");  
+        } catch (InterruptedException e) {  
+            throw new RuntimeException(e);  
+        } finally {  
+            lock.unlock();  
+        }  
+  
+    }  
+}
+```
+打印信息如下：
+```shell
+16:58:03.063 c.TestInterrupt [main] - 主线程获得了锁
+16:58:03.065 c.TestInterrupt [t1] - 启动...
+16:58:04.070 c.TestInterrupt [main] - 执行打断
+16:58:04.071 c.TestInterrupt [t1] - 等锁的过程中被打断,子线程返回
+java.lang.InterruptedException
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer.doAcquireInterruptibly(AbstractQueuedSynchronizer.java:898)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireInterruptibly(AbstractQueuedSynchronizer.java:1222)
+	at java.util.concurrent.locks.ReentrantLock.lockInterruptibly(ReentrantLock.java:335)
+	at org.lyflexi.syncVsReentrantLock.TestlockInterruptibly.lambda$main$0(TestlockInterruptibly.java:20)
+	at java.lang.Thread.run(Thread.java:750)
+
+Process finished with exit code 0
+```
+
 ## 公平与否
 
 synchronized 和 ReentrantLock 默认是非公平锁，因为非公平锁性能较高：
@@ -270,9 +418,8 @@ synchronized 和 ReentrantLock 默认是非公平锁，因为非公平锁性能�
 
 可实现公平锁 : ==ReentrantLock正义之锁==，它可以指定是公平锁还是非公平锁，可以构造ReentrantLock(boolean fair)的时候传入true代表公平锁。而synchronized只能是非公平锁。
 
-什么时候用公平？什么时候用非公平？
-
-如果为了更高的吞吐量，很显然非公平锁是比较合适的,因为节省很多线程切换时间,吞吐量自然就上去了。否则那就用公平锁,大家公平使用
+- Lock公平锁出现的本意是为了解决线程饥饿问题，先入AQS锁阻塞队列的线程在唤醒后优先先使用锁，不过公平锁使用较少，一般没必要使用
+- 为了更高的吞吐量往往使用非公平锁，节省很多线程切换时间，吞吐量自然就上去了。
 
 ## 悲观与否
 
@@ -307,11 +454,123 @@ public void m2(){
 - Lock锁的范围有局限性，仅适用于代码块范围
 - 而synchronized可以锁住代码块、对象实例、类；
 
-## 选择性通知|分组唤醒
-
+## 多条件等待|选择性通知|分组唤醒->正确使用姿势
+synchronized 中也有条件变量，就是我们讲原理时那个 waitSet 休息室，当条件不满足时进入 waitSet 等待
+ReentrantLock 的条件变量比 synchronized 强大之处在于，它是支持多个条件变量的，这就好比ReentrantLock 支持多间休息室，有专门等烟的休息室、专门等早餐的休息室、唤醒时也是按休息室来唤 醒
 - synchronized关键字使用`wait()`和`notify()`/`notifyAll()`方法相结合可以实现等待/通知机制。但是ObjectMonitor不支持选择性通知
 - ReentrantLock可实现选择性通知：借助于Condition接口与newCondition()方法，其他线程对象可以注册在指定的Condition中，Condition实例的signalAll()方法只会唤醒注册在该Condition实例中的所有等待线程。
+ReentrantLock的正确使用姿势如下，注意事项与synchronized一样
+- 使用await 和 signal之前都需要获得锁 
+- await 执行后，会释放锁，进入 conditionObject 等待 
+- await 的线程被唤醒（或打断、或超时）之后会重新竞争 lock 锁 
+- 竞争 lock 锁成功后，从 await 后继续执行
+```java
+package org.lyflexi.syncVsReentrantLock;  
+  
+import lombok.extern.slf4j.Slf4j;  
+  
+import java.util.concurrent.locks.Condition;  
+import java.util.concurrent.locks.ReentrantLock;  
+  
+  
+@Slf4j(topic = "c.TestCondition")  
+public class TestLockCondition {  
+    static boolean hasCigarette = false;  
+    static boolean hasTakeout = false;  
+    // 锁，代表这个大房子  
+    static ReentrantLock ROOM = new ReentrantLock();  
+    // 等待烟的休息室  
+    static Condition waitCigaretteSet = ROOM.newCondition();  
+    // 等外卖的休息室  
+    static Condition waitTakeoutSet = ROOM.newCondition();  
+  
+    public static void main(String[] args) {  
+  
+  
+        new Thread(() -> {  
+            ROOM.lock();  
+            try {  
+                log.debug("有烟没？[{}]", hasCigarette);  
+                while (!hasCigarette) {  
+                    log.debug("没烟，先歇会！");  
+                    try {  
+                        waitCigaretteSet.await();  
+                    } catch (InterruptedException e) {  
+                        e.printStackTrace();  
+                    }  
+                }  
+                log.debug("可以开始干活了");  
+            } finally {  
+                ROOM.unlock();  
+            }  
+        }, "小南").start();  
+  
+        new Thread(() -> {  
+            ROOM.lock();  
+            try {  
+                log.debug("外卖送到没？[{}]", hasTakeout);  
+                while (!hasTakeout) {  
+                    log.debug("没外卖，先歇会！");  
+                    try {  
+                        waitTakeoutSet.await();  
+                    } catch (InterruptedException e) {  
+                        e.printStackTrace();  
+                    }  
+                }  
+                log.debug("可以开始干活了");  
+            } finally {  
+                ROOM.unlock();  
+            }  
+        }, "小女").start();  
+  
+  
+  
+  
+        try {  
+            Thread.sleep(1000);  
+        } catch (InterruptedException e) {  
+            throw new RuntimeException(e);  
+        }  
+        new Thread(() -> {  
+            ROOM.lock();  
+            try {  
+                hasTakeout = true;  
+                waitTakeoutSet.signal();//signal同样需要在lock块内使用  
+            } finally {  
+                ROOM.unlock();  
+            }  
+        }, "送外卖的").start();  
+  
+        try {  
+            Thread.sleep(1000);  
+        } catch (InterruptedException e) {  
+            throw new RuntimeException(e);  
+        }  
+  
+        new Thread(() -> {  
+            ROOM.lock();  
+            try {  
+                hasCigarette = true;  
+                waitCigaretteSet.signal();//signal同样需要在lock块内使用  
+            } finally {  
+                ROOM.unlock();  
+            }  
+        }, "送烟的").start();  
+    }  
+  
+}
+```
+打印信息如下：
+```shell
+19:59:55.572 c.TestCondition [小南] - 有烟没？[false]
+19:59:55.576 c.TestCondition [小南] - 没烟，先歇会！
+19:59:55.576 c.TestCondition [小女] - 外卖送到没？[false]
+19:59:55.576 c.TestCondition [小女] - 没外卖，先歇会！
+19:59:56.575 c.TestCondition [小女] - 可以开始干活了
+19:59:57.584 c.TestCondition [小南] - 可以开始干活了
 
+Process finished with exit code 0
+```
 ## 锁拥有者线程对象
 Synchronized获取锁的时候，先判断共享资源`_count`:
 - 如果`_count`为0，则当前线程获取锁，并设置 `_owner` 为当前线程

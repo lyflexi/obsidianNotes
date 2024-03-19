@@ -1,4 +1,4 @@
-请使用Obsidian打开本知识库：
+请使用Obsidian打开本知识库：https://github.com/lyflexi/obsidianNotes.git
 - 自动渲染文章
 - 自动建立起附件索引
 - 自动集成我的Obsidian插件
@@ -6,7 +6,7 @@
 Obsidian知识库渲染效果展示：
 ![这是图片](./Attachments/relativePath/readme_obsidian.png " Custom name")
 
-Java武林絕學盡藏於本知識庫📚：git clone https://github.com/lyflexi/obsidianNotes.git
+知識庫目录📚，持续更新：
 - 集合
 - 注解
 - 反射

@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JDK8~17/多线程并发控制/核心脉络，同步与互斥-如阻塞队列和等待队列之别.md"
+                "file": "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md"
               }
             }
           }
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JDK8~17/多线程并发控制/核心脉络，同步与互斥-如阻塞队列和等待队列之别.md",
+                "file": "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
                 "mode": "source",
                 "source": false
               }
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JDK8~17/多线程并发控制/核心脉络，同步与互斥-如阻塞队列和等待队列之别.md",
+                "file": "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JDK8~17/多线程并发控制/核心脉络，同步与互斥-如阻塞队列和等待队列之别.md",
+                "file": "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,51 +157,51 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
+    "Attachments/pics/Pasted image 20240319173302.png",
+    "Attachments/pics/Pasted image 20240319173258.png",
+    "Attachments/pics/Pasted image 20240319173255.png",
+    "JDK8~17/JVM/各种垃圾回收器/03.并发收集器CMS oldgc.md",
+    "Attachments/pics/Pasted image 20240319172157.png",
+    "Attachments/pics/Pasted image 20240319172133.png",
+    "Attachments/pics/Pasted image 20240319171736.png",
+    "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
+    "JDK8~17/JVM/各种垃圾回收器/00.垃圾回收概论.md",
+    "JDK8~17/JVM/JVM内存结构.md",
+    "JDK8~17/Java线程和操作系统线程什么关系.md",
+    "408操作系统/计算机操作系统知识点总结.md",
+    "Attachments/pics/Pasted image 20240319162056.png",
+    "Attachments/pics/Pasted image 20240319161602.png",
+    "JDK8~17/多线程创建方式/ThreadLocal原理.md",
+    "Redis/如何保证缓存一致性.md",
+    "Redis/fork系统调用原理.md",
+    "Redis/Redis持久化原理.md",
+    "Redis/Redis客户端堆外内存溢出BUG.md",
+    "MySQL/特殊场景-待研究/索引合并？待研究.md",
+    "MySQL/特殊场景-待研究/MySQL死锁问题？待研究.md",
+    "MySQL/索引与优化.md",
+    "MySQL/特殊场景-待研究",
+    "Netty网络编程与NIO/epoll系统调用-实现多路复用.md",
+    "Netty网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
+    "Netty网络编程与NIO/NIO/1.NIO三大组件与手写代码.md",
+    "JDK8~17/多线程并发控制/核心脉络，互斥与同步-如阻塞队列和等待队列之别.md",
     "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized阻塞队列EntryList-重量级锁.md",
-    "JDK8~17/多线程并发控制/核心脉络，同步与互斥-如阻塞队列和等待队列之别.md",
     "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized等待队列WaitSet-防止虚假唤醒.md",
     "JDK8~17/多线程并发控制/！juc套装-AQS阻塞队列与Condition等待队列/(锁池-Blocked)阻塞队列AQS.md",
     "JDK8~17/多线程并发控制/！juc套装-AQS阻塞队列与Condition等待队列/(等待-Waitting)条件队列Condition.md",
     "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized特点与其他对比.md",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-LockSupport版.md",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-sync版.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-condition版.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-condition版.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-sync版.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-LockSupport版.md",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/终止模式Parten",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/保护性暂停模式",
-    "JDK8~17/多线程并发控制/活跃性activeness/04.哲学家就餐问题与死锁解决.md",
-    "JDK8~17/多线程并发控制/活跃性activeness/02.死锁与jvm信息.md",
-    "JDK8~17/多线程并发控制/活跃性activeness/03.活锁.md",
-    "408操作系统/计算机操作系统知识点总结.md",
     "Attachments/pics/Pasted image 20240318155500.png",
     "Attachments/pics/Pasted image 20240318154924.png",
-    "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
     "Attachments/pics/Pasted image 20240318150759.png",
-    "Attachments/pics/Pasted image 20240318145256.png",
-    "Attachments/pics/Pasted image 20240318145220.png",
-    "JDK8~17/多线程并发控制/活跃性activeness/01.多把锁.md",
-    "JDK8~17/多线程并发控制/对象头关键结构分析-Markword/synchronized锁升级过程.md",
     "JDK8~17/多线程并发控制/活跃性activeness",
-    "JDK8~17/多线程并发控制/Java线程六大状态转换大总结.md",
-    "Attachments/pics/Pasted image 20240318121657.png",
-    "Attachments/pics/Pasted image 20240318121542.png",
-    "Attachments/pics/Pasted image 20240318121435.png",
-    "Attachments/pics/Pasted image 20240318121315.png",
-    "Attachments/pics/Pasted image 20240318121059.png",
-    "JDK8~17/多线程创建方式/Thread之join().md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/保护性暂停模式/保护性暂停设计模式.md",
-    "Redis/Redis业务打点规则.md",
-    "JDK8~17/多线程并发控制/线程间通信api-Waitting/03.LockSupport.park.md",
-    "JDK8~17/多线程并发控制/线程间通信api-Waitting/00.演进关系.md",
-    "JDK8~17/多线程并发控制/线程间通信api-Waitting/00.演进关系.md",
     "JDK8~17/多线程并发控制/线程间通信api-Waitting",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/异步模式Parten",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten",
-    "JDK8~17/多线程并发控制/！CAS乐观锁套装-自旋"
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten"
   ]
 }

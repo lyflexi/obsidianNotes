@@ -7,7 +7,7 @@
 :8001/#/login:1 Access to XMLHttpRequest at 'http://localhost:88/api/sys/login' from origin 'http://localhost:8001' has been blocked by CORS policy: 
 Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 ```
-
+# 预检请求
 一个合法的跨域请求的实现是通过预检请求先发送一个预检请求preflight request探路，收到响应允许跨域后再发送真实请求，完整流程如下：
 ![[Pasted image 20240303125004.png]]
 # 同源策略

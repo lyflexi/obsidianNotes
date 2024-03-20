@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md"
+                "file": "Nginx负载均衡/CORS-403Forbidden.md"
               }
             }
           }
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
+                "file": "Nginx负载均衡/CORS-403Forbidden.md",
                 "mode": "source",
                 "source": false
               }
@@ -66,7 +66,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "Comparator",
+                "query": "jaka",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
+                "file": "Nginx负载均衡/CORS-403Forbidden.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
+                "file": "Nginx负载均衡/CORS-403Forbidden.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,6 +157,27 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
+    "Nginx负载均衡/请求头Host丢失问题.md",
+    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+    "SpringBoot3/三层境界自定义robot-Starter.md",
+    "SpringBoot3/嵌入式Tomcat配置原理.md",
+    "SpringBoot3/Servlet中成员变量的线程安全性分析.md",
+    "SpringBoot3/函数式Web.md",
+    "SpringBoot3/自动配置原理与SPI机制.md",
+    "MySQL/MYSQL单表数据达2000万性能严重下降.md",
+    "MySQL/RBAC设计.md",
+    "MySQL/数据库范式.md",
+    "MySQL/MySQL日志.md",
+    "MySQL/SQL与优化.md",
+    "Redis/Redis业务打点规则.md",
+    "Redis/Redis数据类型和结构.md",
+    "Redis/scan查询 推荐！.md",
+    "Redis/expire原理.md",
+    "Redis/缓存有哪些失效场景.md",
+    "Redis/Redis客户端堆外内存溢出BUG.md",
+    "Redis/Redis持久化原理.md",
+    "408计网/计算机网络知识点总结.md",
+    "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
     "Attachments/pics/Pasted image 20240319173302.png",
     "Attachments/pics/Pasted image 20240319173258.png",
     "Attachments/pics/Pasted image 20240319173255.png",
@@ -164,40 +185,19 @@
     "Attachments/pics/Pasted image 20240319172157.png",
     "Attachments/pics/Pasted image 20240319172133.png",
     "Attachments/pics/Pasted image 20240319171736.png",
-    "JDK8~17/JVM/各种垃圾回收器/04.全代回收器 G1.md",
     "JDK8~17/JVM/各种垃圾回收器/00.垃圾回收概论.md",
     "JDK8~17/JVM/JVM内存结构.md",
     "JDK8~17/Java线程和操作系统线程什么关系.md",
     "408操作系统/计算机操作系统知识点总结.md",
     "Attachments/pics/Pasted image 20240319162056.png",
     "Attachments/pics/Pasted image 20240319161602.png",
-    "JDK8~17/多线程创建方式/ThreadLocal原理.md",
-    "Redis/如何保证缓存一致性.md",
-    "Redis/fork系统调用原理.md",
-    "Redis/Redis持久化原理.md",
-    "Redis/Redis客户端堆外内存溢出BUG.md",
-    "MySQL/特殊场景-待研究/索引合并？待研究.md",
-    "MySQL/特殊场景-待研究/MySQL死锁问题？待研究.md",
-    "MySQL/索引与优化.md",
     "MySQL/特殊场景-待研究",
-    "Netty网络编程与NIO/epoll系统调用-实现多路复用.md",
-    "Netty网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
-    "Netty网络编程与NIO/NIO/1.NIO三大组件与手写代码.md",
-    "JDK8~17/多线程并发控制/核心脉络，互斥与同步-如阻塞队列和等待队列之别.md",
-    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized阻塞队列EntryList-重量级锁.md",
-    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized等待队列WaitSet-防止虚假唤醒.md",
-    "JDK8~17/多线程并发控制/！juc套装-AQS阻塞队列与Condition等待队列/(锁池-Blocked)阻塞队列AQS.md",
-    "JDK8~17/多线程并发控制/！juc套装-AQS阻塞队列与Condition等待队列/(等待-Waitting)条件队列Condition.md",
-    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized特点与其他对比.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-LockSupport版.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-sync版.md",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/终止模式Parten",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/保护性暂停模式",
     "Attachments/pics/Pasted image 20240318155500.png",
     "Attachments/pics/Pasted image 20240318154924.png",
-    "Attachments/pics/Pasted image 20240318150759.png",
     "JDK8~17/多线程并发控制/活跃性activeness",
     "JDK8~17/多线程并发控制/线程间通信api-Waitting",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/异步模式Parten",

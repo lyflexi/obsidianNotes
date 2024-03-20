@@ -79,7 +79,8 @@ public class UserBizHandler {
      * @param request  
      * @return  
      * @throws Exception  
-     */    public ServerResponse getUsers(ServerRequest request) throws Exception{  
+     */    
+     public ServerResponse getUsers(ServerRequest request) throws Exception{  
         log.info("查询所有用户信息完成");  
         //业务处理  
         List<Person> list = Arrays.asList(new Person(1L, "哈哈", "aa@qq.com", 18, "admin"),  

@@ -470,14 +470,40 @@ for(int i = 0; i < pageNo; i++){
 ```
 以上的实现方案，会存在limit深分页问题，limit语句会先扫描offset+n行，然后再丢弃掉前offset行，只返回后n行数据。
 那怎么优化呢？
-#### 标签记录法
-试想，如果limit的下一次的查询能从前一次查询结束后标记的位置开始查找
-```sql
-do{
+#### 最小ID记录法
+首先查询最小ID
+```java
+//查询最小ID  
+String  lastId = accountDAO.queryMinId();  
+  
+//查询最小ID对应的SQL  
+<select id="queryMinId" returnType=“java.lang.String”>  
+	select MIN(id)  from account  where create_time >='2021-01-01 00:00:00'  and type ='A'  
+</select> 
+```
+然后设置固定页大小，让limit的下一次的查询能从前一次查询结束后标记的位置开始查找
+```java
+//一页的条数  
+Integer pageSize = 100;  
+  
+List<AcctountPO> list ;  
+do{  
+	list = listAccountByPage(lastId,pageSize);  
+	//标签记录法，记录上次查询过的Id  
 	lastId = list.get(list,size()-1).getId();  
-	lastList = select id,name,balance FROM account where id > #{lastId} order by id limit 10; 
-	list.add(lastList);
-}while(lastList==null)
+	//上报大数据  
+	postBigData(list);  
+}while(CollectionUtils.isNotEmpty(list));  
+  
+<select id ="listAccountByPage">  
+	select *  
+	from account  
+	where create_time >='2021-01-01 00:00:00'  
+	and id > #{lastId}  
+	and type ='A'  
+	order by id asc  
+	limit #{pageSize}  
+</select>
 ```
 #### 使用between and
 很多时候，可以将`limit`查询转换为已知位置的查询，这样MySQL通过范围扫描`between...and`，就能获得到对应的结果。

@@ -27,11 +27,12 @@ java 本身并不具备 IO 读写能力，因此 read 方法调用后，要从 j
 
 如何提升IO的性能呢？
 
-# NIO 优化-DirectByteBuf
-通过 DirectByteBuf
+# mmap()
+mmap（memory map）是一种内存映射文件的方法，即将一个文件或者其它对象映射到进程的地址空间，实现文件磁盘地址和进程虚拟地址空间中一段虚拟地址的一一对映关系。简单地说就是内核缓冲区和应用缓冲区进行映射，用户在操作应用缓冲区时就好像在操作内核缓冲区。
+
+NIO通过 DirectByteBuf实现了mmap()的效果， 将堆外内存映射到 jvm 内存中来直接访问使用，减少了一次数据拷贝：
 - ByteBuffer.allocate(10) HeapByteBuffer 使用的还是 jvm 堆内存
 - ByteBuffer.allocateDirect(10) DirectByteBuffer 使用的是操作系统内存（堆外内存）
-大部分步骤与优化前相同，不再赘述。唯有一点：java 可以使用 DirectByteBuf 将堆外内存映射到 jvm 内存中来直接访问使用，减少了一次数据拷贝：
 
 ![[0025.png]]
 DirectByteBuffer内存的特点（了解）：

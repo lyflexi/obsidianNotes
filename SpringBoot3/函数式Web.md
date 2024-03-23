@@ -1,13 +1,12 @@
 传统的Web请求处理的方式是@Controller + @RequestMapping：耦合式 （路由与@Autowired业务耦合）  
 
-
 SpringMVC 5.2 以后 允许我们对Restfull风格的请求使用函数式Web的方式来定义Web的请求处理流程，这意味着我们可以集中式管理web-api，将路由与业务代码完全分离
 # 核心API
 
-- **RouterFunction**
-- **RequestPredicate**
-- **ServerRequest**
-- **ServerResponse**
+- RouterFunction
+- RequestPredicate
+- ServerRequest
+- ServerResponse
 
 场景模拟：User RESTful - CRUD  
 - GET /user/1 获取1号用户  
@@ -84,7 +83,7 @@ public class UserBizHandler {
         log.info("查询所有用户信息完成");  
         //业务处理  
         List<Person> list = Arrays.asList(new Person(1L, "哈哈", "aa@qq.com", 18, "admin"),  
-                new Person(2L, "哈哈2", "aa2@qq.com", 12, "admin2"));  
+        new Person(2L, "哈哈2", "aa2@qq.com", 12, "admin2"));  
   
         //构造响应  
         return ServerResponse  

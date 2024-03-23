@@ -1,11 +1,45 @@
-# 数据类型
 Redis数据类型指的是value的类型，它有五种：
 
 string（字符串），hash（哈希），list（列表），set（集合）及zset(sorted set：有序集合)。
 
 还有一些高级数据类型，比如Bitmap、HyperLogLog、GEO等，其底层都是基于上述5种基本数据类型。因此在Redis的源码中，其实只有5种数据类型。
+# RedisObject对象
 
-## String（字符串）
+不管是任何一种数据类型，最终都会封装为RedisObject格式，它是一种结构体，C语言中的一种结构，可以理解为Java中的类。
+
+结构大概是这样的：
+![[Pasted image 20240127134744.png]]
+可以看到整个结构体中并不包含真实的数据，仅仅是对象头信息，内存占用的大小为4+4+24+32+64 = 128bit，也就是16字节，所以RedisObject的内存开销是很大的。
+- 其中的指针`ptr`指针指向的才是真实数据存储的内存地址。
+- 其中的`encoding`就是当前对象底层采用的编码方式，不同的编码方式意味着不同的数据结构，可选的有11种之多：
+
+| **编号** | **编码方式**                | **说明**             |
+| ------ | ----------------------- | ------------------ |
+| 0      | OBJ_ENCODING_RAW        | raw编码动态字符串         |
+| 1      | OBJ_ENCODING_INT        | long类型的整数的字符串      |
+| 2      | OBJ_ENCODING_HT         | hashTable表（也叫dict） |
+| 3      | OBJ_ENCODING_ZIPMAP     | 已废弃                |
+| 4      | OBJ_ENCODING_LINKEDLIST | 双端链表               |
+| 5      | OBJ_ENCODING_ZIPLIST    | 压缩列表               |
+| 6      | OBJ_ENCODING_INTSET     | 整数集合               |
+| 7      | OBJ_ENCODING_SKIPLIST   | ==跳表==             |
+| 8      | OBJ_ENCODING_EMBSTR     | embstr编码的动态字符串     |
+| 9      | OBJ_ENCODING_QUICKLIST  | 快速列表               |
+| 10     | OBJ_ENCODING_STREAM     | Stream流            |
+| 11     | OBJ_ENCODING_LISTPACK   | 紧凑列表               |
+
+Redis中的5种不同的数据类型采用的底层数据结构和编码方式如下：
+
+| **数据类型** | **编码方式**                                           |
+| -------- | -------------------------------------------------- |
+| STRING   | `int`、`embstr`、`raw`                               |
+| LIST     | `LinkedList和ZipList`(3.2以前)、`QuickList`（3.2以后）     |
+| SET      | `intset`、`HT`                                      |
+| ZSET     | `ZipList`（7.0以前）、`Listpack`（7.0以后）、`HT`、`SkipList` |
+| HASH     | `ZipList`（7.0以前）、`Listpack`（7.0以后）、`HT`            |
+
+
+# String-int+embstr+raw
 
 string 是 redis 最基本的类型，你可以理解成与 Memcached 一模一样的类型，一个 key 对应一个 value。
 
@@ -20,7 +54,7 @@ redis 127.0.0.1:6379 GET runoob
 "菜鸟教程"
 ```
 
-## Hash（哈希）
+# Hash-哈希表HT
 
 DEL runoob 用于删除前面测试用过的 key，不然会报错：(error) WRONGTYPE Operation against a key holding the wrong kind of value
 
@@ -34,7 +68,7 @@ redis 127.0.0.1:6379 HGET runoob field2
 "World"
 ```
 
-## List（列表）
+# List-LinkedList列表
 
 Redis 列表是简单的字符串列表，按照插入顺序排序。你可以添加一个元素到列表的头部（左边）或者尾部（右边）。
 
@@ -53,7 +87,7 @@ redis 127.0.0.1:6379 lrange runoob 0 10
 redis 127.0.0.1:6379
 ```
 
-## Set（集合）
+# Set-哈希表HT
 
 Redis 的 Set 是 string 类型的无序集合。
 
@@ -80,7 +114,7 @@ redis 127.0.0.1:6379 smembers runoob
 
 以上实例中 rabbitmq 添加了两次，但根据集合内元素的唯一性，第二次插入的元素将被忽略。
 
-## zset(sorted set：有序集合+score)
+# zSet-HT+SkipList
 
 Redis zset 和 set 一样也是string类型元素的集合,且不允许重复的成员。
 
@@ -105,52 +139,12 @@ redis 127.0.0.1:6379 ZRANGEBYSCORE runoob 0 1000
 2) "rabbitmq"
 3) "redis"
 ```
-
-# 数据结构
-## RedisObject
-
-不管是任何一种数据类型，最终都会封装为RedisObject格式，它是一种结构体，C语言中的一种结构，可以理解为Java中的类。
-
-结构大概是这样的：
-![[Pasted image 20240127134744.png]]
-可以看到整个结构体中并不包含真实的数据，仅仅是对象头信息，内存占用的大小为4+4+24+32+64 = 128bit，也就是16字节，所以RedisObject的内存开销是很大的。
-
-==其中的指针`ptr`指针指向的才是真实数据存储的内存地址。==
-
-属性中的`encoding`就是当前对象底层采用的编码方式，不同的编码方式意味着不同的数据结构，可选的有11种之多：
-
-| **编号** | **编码方式** | **说明** |
-|---|---|---|
-|0|OBJ_ENCODING_RAW|raw编码动态字符串|
-|1|OBJ_ENCODING_INT|long类型的整数的字符串|
-|2|OBJ_ENCODING_HT|==hashTable表（也叫dict）== |
-|3|OBJ_ENCODING_ZIPMAP|已废弃|
-|4|OBJ_ENCODING_LINKEDLIST|双端链表|
-|5|OBJ_ENCODING_ZIPLIST|压缩列表|
-|6|OBJ_ENCODING_INTSET|整数集合|
-|7|OBJ_ENCODING_SKIPLIST|==跳表== |
-|8|OBJ_ENCODING_EMBSTR|embstr编码的动态字符串|
-|9|OBJ_ENCODING_QUICKLIST|快速列表|
-|10|OBJ_ENCODING_STREAM|Stream流|
-|11|OBJ_ENCODING_LISTPACK|紧凑列表|
-
-Redis中的5种不同的数据类型采用的底层数据结构和编码方式如下：
-
-|**数据类型** | **编码方式** |
-|---|---|
-|STRING|`int`、`embstr`、`raw`|
-|LIST|`LinkedList和ZipList`(3.2以前)、`QuickList`（3.2以后）|
-|SET|`intset`、`HT`|
-|ZSET|`ZipList`（7.0以前）、`Listpack`（7.0以后）、`HT`、`SkipList`|
-|HASH|`ZipList`（7.0以前）、`Listpack`（7.0以后）、`HT`|
-## SkipList升序排列
-
+支撑zSort的数据结构：HashTable+Skiplist
+- 根据element查询score值，要实现根据element查询对应的score值，就必须实现element与score之间的键值映射，SortedSet底层是基于HashTable来实现的。
+- 要按照score值升序或降序查询element，并且查询效率还高，就需要有一种高效的有序数据结构，SortedSet是基于跳表Skiplist实现的。
 SkipList（跳表）首先是链表，但与传统链表相比有几点差异：
-- ==跳表中的元素按照升序有序存储==
-- 节点可能包含多个指针，指针跨度不同。
-
-传统链表只有指向前后元素的指针，因此只能顺序依次访问。如果查找的元素在链表中间，查询的效率会比较低。而SkipList则不同，它内部包含跨度不同的多级指针，可以让我们跳跃查找链表中间的元素，效率非常高。
-
+- 先将跳表中的元素按照升序有序存储
+- 节点可包含跨度不同的多级指针，指针跨度不同。
 其结构如图：
 ![[Pasted image 20240127135014.png]]
 
@@ -164,19 +158,6 @@ SkipList（跳表）首先是链表，但与传统链表相比有几点差异：
 
 这种多级指针的查询方式就避免了传统链表的逐个遍历导致的查询效率下降问题。==在对有序数据==做随机查询和排序时效率非常高。
 
-跳表SkipList的结构体如下：
-可以看到SkipList主要属性是header和tail，也就是头尾指针，因此它是支持双向遍历的。
-```C
-typedef struct zskiplist {
-    // 头尾节点指针
-    struct zskiplistNode *header, *tail;
-    // 节点数量
-    unsigned long length;
-    // 最大的索引层级
-    int level;
-} zskiplist;
-```
-
 跳表中zskiplistNode节点的结构体如下：
 ```C
 typedef struct zskiplistNode {
@@ -189,13 +170,3 @@ typedef struct zskiplistNode {
     } level[]; // 多级索引数组
 } zskiplistNode;
 ```
-## SortedSet底层数据结构分析
-SortedSet是有序集合，底层的存储的每个数据都包含element和score两个值。score是得分，element则是字符串值。SortedSet会根据每个element的score值排序，形成有序集合。
-
-根据score的排序原理如下：
-- 根据element查询score值，要实现根据element查询对应的score值，就必须实现element与score之间的键值映射，SortedSet底层是基于==HashTable==来实现的。
-- 要按照score值升序或降序查询element，并且查询效率还高，就需要有一种高效的有序数据结构，SortedSet是基于==跳表Skiplist==实现的。
-
-加分项：因为SortedSet底层需要用到两种数据结构，对内存占用比较高。因此Redis底层会对SortedSet中的元素大小做判断。如果元素大小小于128且每个元素都小于64字节，SortedSet底层会采用ZipList，也就是压缩列表来代替HashTable和SkipList
-
-不过，`ZipList`存在连锁更新问题，因此而在Redis7.0版本以后，`ZipList`又被替换为Listpack（紧凑列表）。

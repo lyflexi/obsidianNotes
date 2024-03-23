@@ -41,103 +41,75 @@ HashTable中采用了全表锁，即所有操作均上锁，串行执行，如�
 # 1.7ConcurrentHashMap分段锁|segment
 
 针对HashTable中锁粒度过粗的问题，在JDK1.8之前，ConcurrentHashMap引入了分段锁机制。整体的存储结构如下图所示，在原有结构的基础上拆分出多个segment，每个segment下再挂载原来的entrys（`HashMap`中经常提到的哈希桶数组），每次操作只需要锁定元素所在的segment，不需要锁定整个表。因此，锁定的范围更小，并发度也会得到提升。
-![[Pasted image 20231225105210.png]]
+![[Pasted image 20240322180245.png]]
 
 数据结构：**Segment 数组 + HashEntry 数组 + 链表**
 
 # 1.8ConcurrentHashMap
-## 一、乐观锁CAS
+在JDK1.8中，ConcurrentHashMap摒弃了分段锁，将锁的级别控制在了更细粒度的哈希桶数组元素级别，也就是说只需要锁住这个链表头节点（红黑树的根节点），就不会影响其他的哈希桶数组元素的读写，大大提高了并发度。
+![[Pasted image 20240322180315.png]]
+同时使用了乐观锁cas+悲观锁synchronized共存的实现方式
+- 不存在冲突时，乐观锁cas
+- 存在冲突时，解决冲突使用悲观锁DCL
 
-虽然引入了分段锁的机制，即可以保证线程安全，又可以解决锁粒度过粗导致的性能低下问题，但是对于追求极致性能的工程师来说，这还不是性能的天花板。因此，在JDK1.8中，ConcurrentHashMap摒弃了分段锁，使用了乐观锁的实现方式。放弃分段锁的原因主要有以下几点：
-- 使用segment之后，会增加ConcurrentHashMap的存储空间。
-- 当单个segment过大时，并发性能会急剧下降。
+## volatile
+### volatile数组
+哈希桶数组table用 volatile 修饰主要是保证在数组扩容的时候保证可见性。
+![[Pasted image 20240322194411.png]]
+注意：get 方法不需要加锁与 volatile 修饰的哈希桶数组table无关
+### volatile节点
+Node 的元素 value 和指针 next 使用 volatile 修饰，为了保证在多线程环境下线程A修改节点的 value 或者新增节点的时候是对线程B可见的。这也是get 方法不需要加锁的原因
+![[Pasted image 20240322194358.png]]
+## put方法逻辑
+putVal大致可以分为以下步骤：
+1. 根据 key 计算出 hash 值，根据`(n - 1) & hash` 确定元素存放在哪个桶中
+2. 判断是否需要进行初始化，依旧是懒加载机制
+3. 定位到 Node，拿到首节点 f，判断首节点f：
+	- 如果为  null  ，则通过 CAS 无锁的方式尝试添加；tabAt+casTabAt
+	- 如果为 `f.hash = MOVED = -1` ，说明其他线程在扩容，参与一起扩容helpTransfer
+	- 如果都不满足 ，synchronized 锁住 f 节点，判断是链表还是红黑树，遍历插入；
+源码如下：
+![[Pasted image 20240322193238.png]]
 
-**ConcurrentHashMap在JDK1.8中的实现废弃了之前的segment结构，沿用了与HashMap中的类似的Node数组结构。**
-![[Pasted image 20231225105233.png]]
 
-ConcurrentHashMap中的乐观锁是采用synchronized+CAS进行实现的。这里主要看下put的相关代码。
-
-当put的元素在哈希桶数组中不存在时，则直接casTabAt进行写操作。
+### 不存在冲突则直接cas
+当发现头节点为null时，直接casTabAt进行写操作
 ![[Pasted image 20231225105244.png]]
-
-### tabAt计算出指定元素的起始内存地址
-
-上面涉及到了两个重要的操作，`tabAt`与`casTabAt`。可以看出，这里面都使用了Unsafe类的方法。Unsafe这个类在日常的开发过程中比较罕见。我们通常对Java语言的认知是：Java语言是安全的，所有操作都基于JVM，在安全可控的范围内进行。然而，Unsafe这个类会打破这个边界，使Java拥有C的能力，可以操作任意内存地址，是一把双刃剑。这里使用到了前文中所提到的ASHIFT，来计算出指定元素的起始内存地址，再通过getObjectVolatile与compareAndSwapObject分别进行取值与CAS操作。
-
-ConcurrentHashMap中的`((long)i << ASHIFT) + ABASE)`是用来计算哈希数组中某个元素在实际内存中的初始位置，通过((long)i << ASHIFT) + ABASE)进行计算，便可得到数组中第i个元素的起始内存地址。
-
+上面涉及到了两个重要的操作，tabAt与casTabAt
+tabAt对应于UnSafe.getObjectVolatile
 ```Java
-    @SuppressWarnings("unchecked")
-    static final <K,V> Node<K,V> tabAt(Node<K,V>[] tab, int i) {
-        return (Node<K,V>)U.getObjectVolatile(tab, ((long)i << ASHIFT) + ABASE);
-    }
+@SuppressWarnings("unchecked")  
+static final <K,V> Node<K,V> tabAt(Node<K,V>[] tab, int i) {  
+    return (Node<K,V>)U.getObjectVolatile(tab, ((long)i << ASHIFT) + ABASE);  
+}  
+```
+casTabAt对应于UnSafe.compareAndSwapObject
+```java
+static final <K,V> boolean casTabAt(Node<K,V>[] tab, int i,  
+                                    Node<K,V> c, Node<K,V> v) {  
+    return U.compareAndSwapObject(tab, ((long)i << ASHIFT) + ABASE, c, v);  
+}
 ```
 
-位于ConcurrentHashMap源码的末尾处，声明了private static final sun.misc.Unsafe _U_
-
-- `ABASE`由Unsafe类获取。ABASE = U.arrayBaseOffset(ak);
-- `ASHIFT`由31 - Integer.numberOfLeadingZeros(scale);计算出来的，用总位数减去前导0的个数能够获取给定值的最高有效位数
-    - ASHIFT采取的计算方式是31与scale前导0的数量做差
-    - 其中`scale`就是哈希桶数组Node[]中每个元素的大小，由Unsafe类获取。int scale = U.arrayIndexScale(ak);
-![[Pasted image 20231225105258.png]]
-
-我们继续看下前导0的数量是怎么计算出来的，numberOfLeadingZeros是Integer的静态方法，还是沿用找规律的方式一探究竟。
-![[Pasted image 20231225105317.png]]
-
-其中n初始值为1
-
-假设 i = 0000 0000 0000 0100 0000 0000 0000 0000
-
-```Java
-i >>> 16  0000 0000 0000 0000 0000 0000 0000 0100   不为0 
-i >>> 24  0000 0000 0000 0000 0000 0000 0000 0000   等于0
-```
-
-右移了24位等于0，说明24位到31位之间肯定全为0，即n = 1 + 8 = 9，由于高8位全为0，并且已经将信息记录至n中，因此可以舍弃高8位，即 i <<= 8。此时，
-
-```Java
-i = 0000 0100 0000 0000 0000 0000 0000 0000
-```
-
-类似地，i >>> 28 也等于0，说明28位到31位全为0，n = 9 + 4 = 13，舍弃高4位。此时，
-
-```Java
-i = 0100 0000 0000 0000 0000 0000 0000 0000
-```
-
-继续运算，
-
-```Java
-i >>> 30  0000 0000 0000 0000 0000 0000 0000 0001   不为0 
-i >>> 31  0000 0000 0000 0000 0000 0000 0000 0000   等于0
-```
-
-最终可得出n = 13，即有13个前导0。
-
-`n -= i >>> 31`是检查最高位31位是否是1，因为n初始化值是1，如果最高位是1，则不存在前置0，即n = n - 1 = 0。
-
-总结一下，以上的操作其实是基于二分法的思想来定位二进制中1的最高位，先看高16位，若为0，说明1存在于低16位；反之存在高16位。由此将搜索范围由32位（确切的说是31位）减少至16位，进而再一分为二，校验高8位与低8位，以此类推。
-
-计算过程中校验的位数依次为16、8、4、2、1，加起来刚好为31。为什么是31不是32呢？因为前置0的数量为32的情况下i只能为0，在前面的if条件中已经进行过滤。
-
-这样一来，非0值的情况下，前置0只能出现在高31位，因此只需要校验高31位即可。最终，用总位数减去计算出来的前导0的数量，即可得出二进制的最高有效位数。
-
-代码中使用的是31 - Integer.numberOfLeadingZeros(scale)，而不是总位数32，这是为了能够得到哈希桶数组中第i个元素的起始内存地址，方便进行CAS等操作。
-
-#### Unsafe方法.getObjectVolatile
-
-在获取哈希桶数组中指定位置的元素时为什么不能直接get而是要使用getObjectVolatile呢？
-
-虽然ConcurrentHashMap中的Node数组`table`是由volatile修饰的，可以保证可见性，但是Node数组中元素是不具备可见性的。因此，在获取数据时通过Unsafe的方法`getObjectVolatile`直接到主存中拿，保证获取的数据是最新的。
-![[Pasted image 20231225105331.png]]
-
->在JVM的内存模型中，每个线程有自己的工作内存，也就是栈中的局部变量表，它是主存的一份copy。因此，线程1对某个共享资源进行了更新操作，并写入到主存，而线程2的工作内存之中可能还是旧值，脏数据便产生了。Java中的volatile是用来解决上述问题，保证可见性，任意线程对volatile关键字修饰的变量进行更新时，会使其它线程中该变量的副本失效，需要从主存中获取最新值。
-
-### casTabAt进行并发写操作
-
-#### Unsafe方法.compareAndSetReference
-
-## 二、扩容操作helpTransfer
+### 存在冲突则上DCL锁
+继续往下看put方法的逻辑，看到这里只有在发生哈希冲突的情况下才使用synchronized锁定头节点
+1. 当put的元素在哈希桶数组中存在，并且不处于扩容状态时，则使用synchronized锁定哈希桶数组中第i个位置中的第一个元素f（头节点）
+2. 接着进行DCL(double check lock)，类似于线程安全单例模式的思想。防止当前线程获取到锁之后进行扩容操作改变了元素的位置
+3. 校验通过后，会遍历当前冲突链上的元素，并选择合适的位置进行put操作。
+![[Pasted image 20231225105403.png]]
+## 不支持key和value为null的原因？★★★
+我们知道用于单线程状态的 HashMap允许多个null值和一个null键
+- key可以为null，hash函数中明确处理了key为null的情况，但是由于key不能重复null键只可能存在1个
+- value可以为null，可以用`containsKey(key)` 去判断到底是否包含了这个 null 。
+但是ConcurrentHashMap的key和value均不能为null：
+- 我们先来说value 为什么不能为 null。因为 ConcurrentHashMap 是用于多线程的 ，如果`ConcurrentHashMap.get(key)`得到了 null ，这就无法判断，是映射的value是 null ，还是没有找到对应的key而为 null ，就有了二义性。
+- key也不可以为null，这个问题讨论的价值不大，因为ConcurrentHashMap的源码就是这样写的，Doug Lea在设计之初就不允许null的key存在。
+Doug Lea和Effective Java作者Josh Bloch共同参与了HashMap的设计，Josh Bloch允许key和value为null，
+![[Pasted image 20240322200444.png]]
+ConcurrentHashMap的作者只有Doug Lea，Doug Lea十分讨厌null，也确实nullkey和nullvalue是一种很不合理的设计，因此ConcurrentHashMap的key和value均不能为null
+![[Pasted image 20240322200414.png]]
+传送门->[这道面试题我真不知道面试官想要的回答是什么 (qq.com)](https://mp.weixin.qq.com/s?__biz=Mzg3NjU3NTkwMQ==&mid=2247505071&idx=1&sn=5b9bbe01a71cbfae4d277dd21afd6714&source=41#wechat_redirect)
+## 并发扩容helpTransfer？待研究
 ```java
 final V putVal(K key, V value, boolean onlyIfAbsent) {  
     if (key == null || value == null) throw new NullPointerException();  
@@ -156,20 +128,3 @@ final V putVal(K key, V value, boolean onlyIfAbsent) {
             tab = helpTransfer(tab, f);
         else {...}
 ```
-
-## 三、Synchronized+DoubleCheck思想
-
-继续往下看put方法的逻辑：
-
-1. 当put的元素在哈希桶数组中存在，并且不处于扩容状态时，则使用synchronized锁定哈希桶数组中第i个位置中的第一个元素f（头节点）
-2. 接着进行DCL(double check lock)，类似于线程安全单例模式的思想。防止当前线程获取到锁之后进行扩容操作改变了元素的位置
-3. 校验通过后，会遍历当前冲突链上的元素，并选择合适的位置进行put操作。
-
-![[Pasted image 20231225105403.png]]
-
-最后总结下ConcurrentHashMap：
-- **悲观->乐观锁：这里只有在发生哈希冲突的情况下才使用synchronized锁定头节点
-- **粗粒度->细粒度锁：只在特定场景下锁定其中一个哈希桶，这是比分段锁更细粒度的锁实现，降低锁了的影响范围。
-- **数据结构和HashMap一样，依然是Node 数组 + 链表 / 红黑树**。当冲突链表达到一定长度8，且数组长度大于64的时候，链表会转换成红黑树。
-
-Java Map针对并发场景解决方案的演进方向可以归结为，从悲观锁到乐观锁，从粗粒度锁到细粒度锁，这也可以作为我们在日常并发编程中的指导方针。

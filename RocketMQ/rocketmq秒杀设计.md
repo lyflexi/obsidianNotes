@@ -56,11 +56,57 @@ rocketmq:
 #        access-key: rocketmq2  
 #        secret-key: 12345678
 ```
+## 用户请求去重
+自定义uk = userId + "-" + goodsId，每个用户唯一，通过setIfAbsent("uk:" + uk, "");返回boolean对用户请求去重，防止同一个用户爆刷接口
+```java
+package org.lyflexi.seckill_web.controller;  
 
-SeckillController设计：
-1. 自定义uk = userId + "-" + goodsId，通过setIfAbsent("uk:" + uk, "");返回boolean对用户请求去重，防止用户爆刷接口
-2. 根据从MySQL同步过来的库存，进行预扣减
-3. 发送消息至seckill-service模块执行真正的扣减
+/**  
+ * @Author: DLJD  
+ * @Date: 2023/4/24  
+ */@RestController  
+public class SeckillController {  
+  
+  
+    @Autowired  
+    private StringRedisTemplate redisTemplate;  
+  
+    @Resource  
+    private RocketMQTemplate rocketMQTemplate;  
+  
+    //CAS java无锁的   原子性 安全的  
+    AtomicInteger userIdAt = new AtomicInteger(0);  
+  
+    /**  
+     * 1.用户去重  
+     * 2.库存的预扣减  
+     * 3.消息放入mq  
+     * 秒杀不是一个单独的系统  
+     * 都是大项目的某一个小的功能模块  
+     *  
+     * @param goodsId  
+     * @param userId  真实的项目中 要做登录的 不要传这个参数  
+     * @return  
+     */  
+    @GetMapping("seckill")  
+    public String doSecKill(Integer goodsId /*, Integer userId*/) {  
+        // log 2023-4-24 16:58:11  
+        // log 2023-4-24 16:58:11        int userId = userIdAt.incrementAndGet();  
+        // uk uniqueKey = [yyyyMMdd] +  userId + goodsId  
+        String uk = userId + "-" + goodsId;  
+        // 1.这一步使用setIfAbsent，只是用来防止用户的重复请求。分布式锁在另外的seckill_service模块做的  
+        Boolean flag = redisTemplate.opsForValue().setIfAbsent("uk:" + uk, "");  
+        if (!flag) {  
+            return "您已经参与过该商品的抢购，请参与其他商品O(∩_∩)O~";  
+        }  
+        //TODO 2.预扣减...
+        //TODO 3.放mq 异步处理  
+        return "正在拼命抢购中,请稍后去订单中心查看";  
+    }  
+}
+```
+## 库存预扣减
+根据从MySQL同步过来的库存，进行预扣减
 ```java
 package org.lyflexi.seckill_web.controller;  
 
@@ -102,14 +148,70 @@ public class SeckillController {
         if (!flag) {  
             return "您已经参与过该商品的抢购，请参与其他商品O(∩_∩)O~";  
         }  
-        //redis的线程安全操作api：decrement  
+        //2. 预扣减redis的线程安全操作api：decrement  
         Long restCount = redisTemplate.opsForValue().decrement("goodsId:" + goodsId);  
         if (restCount < 0) {  
             // 保证我的redis的库存 最小值是0  
             redisTemplate.opsForValue().increment("goodsId:" + goodsId);  
             return "该商品已经被抢完,下次早点来(●ˇ∀ˇ●)";  
         }  
-        // 方mq 异步处理  
+        //TODO 3.放mq 异步处理  ...
+        return "正在拼命抢购中,请稍后去订单中心查看";  
+    }  
+
+}
+```
+## 生产消息
+将String uk = userId + "-" + goodsId作为消息，发送至分布式锁模块seckill-service
+```java
+package org.lyflexi.seckill_web.controller;  
+
+/**  
+ * @Author: DLJD  
+ * @Date: 2023/4/24  
+ */@RestController  
+public class SeckillController {  
+  
+  
+    @Autowired  
+    private StringRedisTemplate redisTemplate;  
+  
+    @Resource  
+    private RocketMQTemplate rocketMQTemplate;  
+  
+    //CAS java无锁的   原子性 安全的  
+    AtomicInteger userIdAt = new AtomicInteger(0);  
+  
+    /**  
+     * 1.用户去重  
+     * 2.库存的预扣减  
+     * 3.消息放入mq  
+     * 秒杀不是一个单独的系统  
+     * 都是大项目的某一个小的功能模块  
+     *  
+     * @param goodsId  
+     * @param userId  真实的项目中 要做登录的 不要传这个参数  
+     * @return  
+     */  
+    @GetMapping("seckill")  
+    public String doSecKill(Integer goodsId /*, Integer userId*/) {  
+        // log 2023-4-24 16:58:11  
+        // log 2023-4-24 16:58:11        int userId = userIdAt.incrementAndGet();  
+        // uk uniqueKey = [yyyyMMdd] +  userId + goodsId  
+        String uk = userId + "-" + goodsId;  
+        // 这一步使用setIfAbsent，只是用来防止用户的重复请求。分布式锁在另外的seckill_service模块做的  
+        Boolean flag = redisTemplate.opsForValue().setIfAbsent("uk:" + uk, "");  
+        if (!flag) {  
+            return "您已经参与过该商品的抢购，请参与其他商品O(∩_∩)O~";  
+        }  
+        //2. 预扣减redis的线程安全操作api：decrement  
+        Long restCount = redisTemplate.opsForValue().decrement("goodsId:" + goodsId);  
+        if (restCount < 0) {  
+            // 保证我的redis的库存 最小值是0  
+            redisTemplate.opsForValue().increment("goodsId:" + goodsId);  
+            return "该商品已经被抢完,下次早点来(●ˇ∀ˇ●)";  
+        }  
+        // 3.放mq 异步处理  ...
         rocketMQTemplate.asyncSend("seckillTopic3", uk, new SendCallback() {  
             @Override  
             public void onSuccess(SendResult sendResult) {  
@@ -121,17 +223,10 @@ public class SeckillController {
                 System.out.println("发送失败:" + throwable.getMessage());  
                 System.out.println("用户的id:" + userId + "商品id" + goodsId);  
             }  
-        });  
+        });
         return "正在拼命抢购中,请稍后去订单中心查看";  
     }  
-  
-  
-    /**  
-     * 抢一个付费的商品  
-     * 1.先扣减库存  再付费  | 如果不付费 库存需要回滚  
-     * 2.先付费  再扣减库存  | 如果库存不足  则退费  
-     */  
-  
+
 }
 ```
 
@@ -186,91 +281,7 @@ public class DataSync {
   
 }
 ```
-## 消费监听MQ
-### 方案一：jvm锁
-MySQL默认隔离级别是RR，所以一定要在事务块外面加锁，只有保证第一个并发先提交事务，第二个再获取锁，这样才可以实现并发安全，要不然可重读旧数据，造成最后的库存结果不符合预期，少卖了
-```java
-@Override  
-public void onMessage(MessageExt message) {  
-	String msg = new String(message.getBody());  
-	// userId + "-" + goodsId  
-	Integer userId = Integer.parseInt(msg.split("-")[0]);  
-	Integer goodsId = Integer.parseInt(msg.split("-")[1]);  
-
-	synchronized (this) {  
-		goodsService.realSeckill(userId, goodsId);  
-	}  
-}
-```
-service：
-```java
-/**  
- *     *  常规的 方案  
- *  锁加载调用方法的地方 要加载事务外面  
- * @param userId  
- * @param goodsId  
- */  
-@Override  
-@Transactional(rollbackFor = Exception.class) // rr  
-public void realSeckill(Integer userId, Integer goodsId) {  
-	// 扣减库存  插入订单表  
-	Goods goods = goodsMapper.selectByPrimaryKey(goodsId);  
-	int finalStock = goods.getTotalStocks() - 1;  
-	if (finalStock < 0) {  
-		// 只是记录日志 让代码停下来   这里的异常用户无法感知  
-		throw new RuntimeException("库存不足：" + goodsId);  
-	}  
-	goods.setTotalStocks(finalStock);  
-	goods.setUpdateTime(new Date());  
-	// update goods set stocks =  1 where id = 1  没有行锁，完全靠完全的jvm锁控制  
-	int i = goodsMapper.updateByPrimaryKey(goods);  
-	if (i > 0) {  
-		Order order = new Order();  
-		order.setGoodsid(goodsId);  
-		order.setUserid(userId);  
-		order.setCreatetime(new Date());  
-		orderMapper.insert(order);  
-	}  
-}
-```
-另外jvm锁没法集群  ，当前服务的锁对象EntrySet/WaitSet的作用域是当前服务内部，无法适用于分布式的情况
-### 方案二：MySQL分布式锁
-mysql(行锁)   可以做分布式锁，对于update中使用类似于如下的复合操作update goods set total_stocks = total_stocks - 1 可以自动触发行锁
-```java
-@Override  
-public void onMessage(MessageExt message) {  
-    String msg = new String(message.getBody());  
-    // userId + "-" + goodsId  
-    Integer userId = Integer.parseInt(msg.split("-")[0]);  
-    Integer goodsId = Integer.parseInt(msg.split("-")[1]);  
-    goodsService.realSeckill(userId, goodsId);  
-}
-```
-service：
-```java
-@Override  
-@Transactional(rollbackFor = Exception.class)  
-public void realSeckill(Integer userId, Integer goodsId) {  
-    // update goods set total_stocks = total_stocks - 1 where goods_id = goodsId and total_stocks - 1 >= 0;  
-    // 通过mysql来控制锁  
-    int i = goodsMapper.updateStock(goodsId);  
-    if (i > 0) { //同时创建当前订单
-        Order order = new Order();  
-        order.setGoodsid(goodsId);  
-        order.setUserid(userId);  
-        order.setCreatetime(new Date());  
-        orderMapper.insert(order);  
-    }  
-}
-```
-xml：
-```java
-<update id="updateStock">  
-  update  goods set total_stocks = total_stocks - 1 ,update_time = now() where goods_id = #{value} and total_stocks - 1 >= 0  
-</update>
-```
-但mysql不适合并发较大场景  ，性能感人
-### 方案三：Redis分布式自旋锁
+## Redis分布式锁消费监听MQ
 分布式锁必须给定自动过期时间。如果没有定时自动解锁，假设第一个线程拿到redis锁后,还未释放锁,此时系统宕机,锁就永久存在redis,竞争线程即使在系统恢复后也无法获得锁
 ```java
 package org.lyflexi.seckill_service.listener;  

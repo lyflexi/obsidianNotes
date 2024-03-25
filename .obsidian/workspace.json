@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 20.206489675516224,
+        "dimension": 16.876971608832807,
         "children": [
           {
             "id": "d079b05bbd2bd676",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md"
+                "file": "分布式锁解决方案/基于MySQL的分布式锁/唯一性索引作分布式锁-创建去重表-类似于redis占坑.md"
               }
             }
           }
@@ -23,7 +23,7 @@
       {
         "id": "48e60c444ef36431",
         "type": "tabs",
-        "dimension": 79.79351032448378,
+        "dimension": 83.1230283911672,
         "children": [
           {
             "id": "46edece85008acc7",
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
+                "file": "分布式锁解决方案/基于MySQL的分布式锁/唯一性索引作分布式锁-创建去重表-类似于redis占坑.md",
                 "mode": "source",
                 "source": false
               }
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
+                "file": "分布式锁解决方案/基于MySQL的分布式锁/唯一性索引作分布式锁-创建去重表-类似于redis占坑.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
+                "file": "分布式锁解决方案/基于MySQL的分布式锁/唯一性索引作分布式锁-创建去重表-类似于redis占坑.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,6 +157,20 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
+    "分布式锁解决方案/基于MySQL的分布式锁/Optimistic乐观锁实现分布式锁.md",
+    "分布式锁解决方案/基于MySQL的分布式锁/唯一性索引作分布式锁-创建去重表-类似于redis占坑.md",
+    "分布式锁解决方案/基于MySQL的分布式锁/OneSql实现分布式锁.md",
+    "分布式锁解决方案/基于MySQL的分布式锁/for update实现分布式锁.md",
+    "MySQL/MySQL锁机制.md",
+    "MySQL/MySQL事务与多版本并发读MVCC.md",
+    "Attachments/pics/Pasted image 20240325231504.png",
+    "MySQL/SQL与优化.md",
+    "MySQL/MYSQL单表数据达2000万性能严重下降.md",
+    "JDK8~17/多线程并发控制/如何正确的给事务方法加锁.md",
+    "RocketMQ/rocketmq秒杀设计.md",
+    "RocketMQ/00.RocketMQ架构！重要.md",
+    "JDK8~17/多线程并发控制/jvm锁失效场景.md",
+    "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
     "JDK8~17/Java设计模式/00.七大设计原则.md",
     "SpringCloud与分布式事务/sentinel限流、隔离、熔断.md",
     "SpringCloud与分布式事务/seata下订单业务.md",
@@ -170,19 +184,6 @@
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-sync版.md",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-LockSupport版.md",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-condition版.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-sync版.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-LockSupport版.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-condition版.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/保护性暂停模式/03.多GuardedObject-dubbo多线程核心原理.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/保护性暂停模式/02.带有超时时间的保护性暂停.md",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/保护性暂停模式/01.保护性暂停设计模式.md",
-    "JDK8~17/多线程并发控制/线程间通信api-Waitting/03.LockSupport.park.md",
-    "JDK8~17/多线程并发控制/活跃性activeness/02.死锁与jvm信息.md",
-    "JDK8~17/多线程并发控制/活跃性activeness/04.哲学家就餐问题与死锁解决.md",
-    "JDK8~17/多线程并发控制/活跃性activeness/03.活锁.md",
-    "JDK8~17/多线程并发控制/活跃性activeness/01.多把锁.md",
-    "JDK8~17/多线程创建方式/ThreadLocal原理.md",
-    "JDK8~17/多线程并发控制/核心脉络，互斥与同步-如阻塞队列和等待队列之别.md",
     "Attachments/pics/Pasted image 20240325111120.png",
     "Attachments/pics/Pasted image 20240325111016.png",
     "Attachments/pics/Pasted image 20240325101807.png",
@@ -192,7 +193,6 @@
     "Attachments/pics/Pasted image 20240323110552.png",
     "Attachments/pics/Pasted image 20240323110548.png",
     "Attachments/pics/Pasted image 20240323110224.png",
-    "Attachments/pics/Pasted image 20240323110214.png",
     "MySQL/特殊场景-待研究",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/终止模式Parten",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式",

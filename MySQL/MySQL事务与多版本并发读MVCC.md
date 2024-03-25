@@ -19,6 +19,7 @@
 不可重复度和幻读区别：
 - 不可重复读的重点是修改：事务1中的A先生读取自己的工资为 1000的操作还没完成，事务2中的B先生就修改了A的工资为2000，导致A再读自己的工资时工资变为 2000；这就是不可重复读。
 - 幻读的重点在于新增或者删除：假某工资单表中工资大于3000的有4人，事务1读取了所有工资大于3000的人，共查到4条记录，这时事务2又插入了一条工资大于3000的记录，事务1再次读取时查到的记录就变为了5条，这样就导致了幻读。
+-  不可重复读可以设置RR隔离级别解决，幻读需要借助临键锁Next Key Lock来解决
 # 隔离级别设置
 
 MySQL为了解决并发事务产生的问题，支持以下的隔离级别：
@@ -29,7 +30,6 @@ MySQL为了解决并发事务产生的问题，支持以下的隔离级别：
 - SERIALIZABLE(可串行化)： 最高的隔离级别，完全服从ACID的隔离级别。所有的事务依次逐个执行，这样事务之间就完全不可能产生干扰，也就是说，该级别可以防止脏读、不可重复读以及幻读。在 分布式事务 的情况下一般会用到 SERIALIZABLE(可串行化) 隔离级别
 
 MySQL InnoDB 存储引擎默认使用 REPEATABLE-READ（可重读），通过下述命令可以查看隔离级别
-
 ```Java
 //MySQL8.0之前的查看命令
 mysql> SELECT @@tx_isolation;
@@ -41,80 +41,11 @@ mysql> SELECT @@tx_isolation;
 //MySQL8.0之后的查看命令
 mysql> SELECT @@transaction_isolation;
 ```
-# 当前读，行锁解决幻读
-引言：MySQL InnoDB 默认的隔离级别是REPEATABLE-READ（可重复读），可重复读并不能避免幻读，如果继续提升隔离级别那就是SERIALIZABLE，这是万万不可的，因此聪明的MySQL又想出了新办法--当前读。
-
-当前读需要对select语句加锁，而这个加锁读使用到的机制就是临建锁Next-Key Locks
-
-在讲Next-Key Locks之前，我们需要先了解下MySQL下的各种锁。==声明：本文只讨论排他锁==
-![[Pasted image 20240118162132.png]]
-InnoDB 实现了标准的行锁，对行数据进行锁定，行锁包括共享锁lock in share mode和排它锁for update
-- 对于共享锁而言，对当前行加共享锁，不会阻塞其他事务对同一行的读请求，但会阻塞对同一行的写请求。只有当读锁释放后，才会执行其它写操作。共享锁的脚本是lock in share mode
-- 对于排它锁而言，会阻塞其他事务对同一行的读和写操作，只有当写锁释放后，才会执行其它事务的读写操作。排他锁的脚本是for update
-```sql
--- 加共享行锁（S）
-select * from table_name where ... lock in share mode
-
--- select加排它行锁（X)，对于delete、insert语句MySQL会自动给涉及数据集加排它锁X
-select * from table_name where ... for update
--- 对于delete、insert语句MySQL会自动给涉及数据集加排它行锁X，
--- 对于update语句如update  goods set total_stocks = total_stocks - 1 能够自动触发行锁
-update  goods set total_stocks = total_stocks - 1 ,update_time = now() where goods_id = #{value} and total_stocks - 1 >= 0
-```
-
-对于排他锁而言，InnoDB又细分了以下三种锁：
-- 记录锁Record Locks
-- 间隙锁Gap Locks
-- 临建锁Next-Key Locks
-
-## Record Lock记录锁
-
-记录锁也是对表中的记录加锁，记录锁属于排他锁X，因此记录锁的加锁脚本是`FOR UPDATE`
-```sql
--- 记录锁在 id=1 的记录上加上排他锁，以阻止其他事务插入，更新，删除 id=1 这一行。
-SELECT * FROM `test` WHERE `id`=1 FOR UPDATE; 
-```
-==需要注意的是InnoDB 中的行锁的实现依赖于索引，一旦某个加锁操作没有使用到索引，那么该锁就会退化为表锁==。
-此外记录锁是锁住索引记录，而不是真正的数据记录。
-## Gap Locks间隙锁
-
-使用间隙锁锁住的是整个区间。
-举例来说，假如emp表中只有101条记录，其empid的值分别是{1，2，...，100，101}，我们需要检索出empid>100的数据
-
-间隙锁对记录区间施加排他锁FOR UPDATE，InnoDB不仅会对符合条件的empid=101的记录加锁，也会对empid>101的记录进行加锁，尽管这些记录并不存在。这个时候如果你插入empid等于102的数据，如果间隙锁事物还没有提交，那你就会处于等待状态，无法插入数据。
-
-```Java
-SELECT * FROM emp WHERE empid > 100 FOR UPDATE 
-```
-
-## Next-Key Lock记录锁+间隙锁
-
-同时锁住数据+间隙锁 
-==在Repeatable Read隔离级别下，Next-key Lock 算法是默认的行记录锁定算法。==
-假设有如下表：id列是主键，age列是普通索引，临键锁锁定一段左开右闭的索引区间(a，b]
-
-| id | age | name |
-| ---- | ---- | ---- |
-| 1 | 10 | zhangsan |
-| 3 | 24 | lisi |
-| 5 | 32 | wangwu |
-| 7 | 45 | zhaoliu |
-假如在事务A中执行如下命令，那么age列潜在的临键锁有：(-∞, 10]、(10, 24]、(24, 32]、(24, 45]、(45, +∞]
-```sql
--- 根据非唯一索引列 UPDATE 某条记录 
-UPDATE table SET name = Vladimir WHERE age = 24; 
--- 或根据非唯一索引列 FOR UPDATE 某条记录 
-SELECT * FROM table WHERE age = 24 FOR UPDATE; 
-```
-不管执行了上述 SQL 中的哪一句，之后如果在事务 B 中执行以下命令，则该命令会被阻塞：
-```sql
-INSERT INTO table VALUES(100, 26, 'tianqi'); 
-```
-
-# 快照读，undo log实现MVCC多版本并发控制
-上面我们通过对行数据加锁Next-Key-Lock，已经解决了幻读问题。
-
-==但是精益求精MySQL的InnoDB实现了MVCC来更好地处理读写冲突，每一次修改数据，都会在 undo log 中存有快照记录，而ReadView就是undo log中的某一版本， “读” 数据时无需加锁也可以读取到数据的某一个版本的快照，从而实现"非阻塞并发读"==。这种方式的优点是可以不用加锁就可以读取到数据，缺点是读取到的数据可能不是最新的版本。在进一步了解MySQL中实现MVCC的细节之前，先回顾一下redo log 和 undo log：
+# MVCC实现并发读
+MySQL实现了 “读” 数据时无需加锁也可以读取到数据的某一个版本的快照，从而实现"非阻塞并发读"
+- 每一次修改数据，MySQL都会在 undo log 中存有快照记录
+- 再结合ReadView来精确定位到具体的快照版本
+在进一步了解MySQL中实现MVCC的细节之前，先回顾一下redo log 和 undo log：
 - 在修改数据的时候，会向 redo log 中记录修改的页内容（为了在数据库宕机重启后恢复对数据库的操作），
 - 也会向 undo log 记录数据原来的快照（用于回滚事务）。==undo log有两个作用，除了用于回滚事务，还用于实现MVCC。==
 

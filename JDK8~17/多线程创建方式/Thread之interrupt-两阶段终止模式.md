@@ -32,8 +32,8 @@ public boolean isInterrupted()
 public static boolean interrupted() 
 ```
 
-# interrupt+isInterrupted实现中断机制
-
+# 测试打断running线程
+interrupt+isInterrupted实现
 ```Java
 /**  
  * @Author: ly  
@@ -85,7 +85,7 @@ t1 -----hello interrupt api
 t1 -----hello interrupt api
 t1	 isInterrupted()返回true，并清除中断状态设置为flase，程序停止
 ```
-# interrupt打断sleep线程
+# 测试打断sleep线程
 如果t1线程处于被阻塞状态，例如处于sleep，wait，join等状态，当线程t2调用t1.interrupt()时，那么t1线程将立即退出被阻塞状态并且抛出interruptedException异常并且把中断状态清除，因此事后调用isInterrupted将返回false
 ```java
 package org.lyflexi.thread.interrupt;  
@@ -130,9 +130,82 @@ java.lang.InterruptedException: sleep interrupted
 	at java.lang.Thread.sleep(Native Method)
 	at org.lyflexi.thread.interrupt.InterruptSleep$1.run(InterruptSleep.java:17)
 ```
+# 测试打断park线程
+LockSupport.park(); 被interrupte打断之后，无法再次进入park，原因是interrupte设置了中断标志为true
+```java
+package org.lyflexi.thread.interrupt;  
+  
+import lombok.extern.slf4j.Slf4j;  
+  
+import java.util.concurrent.locks.LockSupport;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/14 12:22  
+ */@Slf4j(topic = "c.Test14")  
+public class InterruptPark {  
+
+    private static void test() throws InterruptedException {  
+        Thread t1 = new Thread(() -> {  
+            log.debug("park...");  
+            LockSupport.park();  
+            log.debug("unpark...");  
+            log.debug("打断状态：{}", Thread.currentThread().isInterrupted());  
+  
+            LockSupport.park();  
+            log.debug("unpark...");  
+        }, "t1");  
+        t1.start();  
+  
+        Thread.sleep(1000);  
+        t1.interrupt();  
+  
+    }  
+  
+    public static void main(String[] args) throws InterruptedException {  
+        test();  
+    }  
+}
+```
+打印信息如下：程序终止
+```shell
+12:27:57.243 c.Test14 [t1] - park...
+12:27:58.252 c.Test14 [t1] - unpark...
+12:27:58.252 c.Test14 [t1] - 打断状态：true
+12:27:58.257 c.Test14 [t1] - unpark...
+
+Process finished with exit code 0
+```
+要想让LockSupport.park();中断之后还可以再次进入LockSupport.park();，必须事后调用静态方法Thread.interrupted()将中断标志设为false
+```java
+private static void test2() {  
+    Thread t1 = new Thread(() -> {  
+        for (int i = 0; i < 5; i++) {  
+            log.debug("park..."+i);  
+            LockSupport.park();  
+            log.debug("打断状态：{}", Thread.interrupted());  
+        }  
+    });  
+    t1.start();  
+  
+  
+    try {  
+        Thread.sleep(1000);  
+    } catch (InterruptedException e) {  
+        throw new RuntimeException(e);  
+    }  
+    t1.interrupt();  
+}
+```
+测试程序不变，打印如下：程序并未终止
+```shell
+12:29:40.058 c.Test14 [Thread-0] - park...0
+12:29:41.059 c.Test14 [Thread-0] - 打断状态：true
+12:29:41.063 c.Test14 [Thread-0] - park...1
+```
 # 两阶段终止模式（多线程设计模式）
  两阶段终止模式Two Phase Termination，在一个线程 T1 中如何“优雅”终止线程 T2？这里的【优雅】指的是给 T2 一个料理后事的机会。 错误思路有两种 
- - 使用线程对象的 stop() 方法停止线程 stop 方法会真正杀死线程，如果这时线程锁住了共享资源，那么当它被杀死后就再也没有机会释放锁， 其它线程将永远无法获取锁 ，而且stop由于不安全已经被淘汰了
+ - 使用线程对象的 stop() 方法停止线程 stop 方法会真正杀死线程，但是通过stop杀死的线程不会释放锁， 可能会造成死锁其它线程将永远无法获取锁 ，由于stop不安全已经被淘汰了
  - 使用 System.exit(int) 方法停止线程 目的仅是停止一个线程，但这种做法会让整个程序都停止
 
 下面我们就模拟一个监控程序，每隔两秒执行监控记录，流程图如下：
@@ -250,78 +323,4 @@ java.lang.InterruptedException: sleep interrupted
 	at java.lang.Thread.run(Thread.java:750)
 
 Process finished with exit code 0
-```
-
-# 打断 park 线程-静态方法Thread.interrupted()
-LockSupport.park(); 被interrupte打断之后，无法再次进入park，原因是interrupte设置了中断标志为true
-```java
-package org.lyflexi.thread.interrupt;  
-  
-import lombok.extern.slf4j.Slf4j;  
-  
-import java.util.concurrent.locks.LockSupport;  
-  
-/**  
- * @Author: ly  
- * @Date: 2024/3/14 12:22  
- */@Slf4j(topic = "c.Test14")  
-public class InterruptPark {  
-
-    private static void test() throws InterruptedException {  
-        Thread t1 = new Thread(() -> {  
-            log.debug("park...");  
-            LockSupport.park();  
-            log.debug("unpark...");  
-            log.debug("打断状态：{}", Thread.currentThread().isInterrupted());  
-  
-            LockSupport.park();  
-            log.debug("unpark...");  
-        }, "t1");  
-        t1.start();  
-  
-        Thread.sleep(1000);  
-        t1.interrupt();  
-  
-    }  
-  
-    public static void main(String[] args) throws InterruptedException {  
-        test();  
-    }  
-}
-```
-打印信息如下：程序终止
-```shell
-12:27:57.243 c.Test14 [t1] - park...
-12:27:58.252 c.Test14 [t1] - unpark...
-12:27:58.252 c.Test14 [t1] - 打断状态：true
-12:27:58.257 c.Test14 [t1] - unpark...
-
-Process finished with exit code 0
-```
-要想让LockSupport.park();中断之后还可以再次进入LockSupport.park();，必须事后调用静态方法Thread.interrupted()将中断标志设为false
-```java
-private static void test2() {  
-    Thread t1 = new Thread(() -> {  
-        for (int i = 0; i < 5; i++) {  
-            log.debug("park..."+i);  
-            LockSupport.park();  
-            log.debug("打断状态：{}", Thread.interrupted());  
-        }  
-    });  
-    t1.start();  
-  
-  
-    try {  
-        Thread.sleep(1000);  
-    } catch (InterruptedException e) {  
-        throw new RuntimeException(e);  
-    }  
-    t1.interrupt();  
-}
-```
-测试程序不变，打印如下：程序并未终止
-```shell
-12:29:40.058 c.Test14 [Thread-0] - park...0
-12:29:41.059 c.Test14 [Thread-0] - 打断状态：true
-12:29:41.063 c.Test14 [Thread-0] - park...1
 ```

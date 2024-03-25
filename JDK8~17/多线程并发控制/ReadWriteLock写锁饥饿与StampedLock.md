@@ -135,21 +135,37 @@ lock.ReadWriteLockDemo
 Process finished with exit code 0
 ```
 写操作无法被打断，但是读操作可以共同读
-## 写锁降级DCL
-除了读读共存之外，`ReentrantReadWriteLock`还有另外一个特点：当同一个线程持有了写锁，在没有释放写锁的情况下，它还可以继续获得读锁。该特点的经典应用场景是锁降级策略，所谓锁降级指的是将写锁降级为读锁。
+## 最佳实践：锁不可升级但可以降级+读写锁版DCL（重要！LRU线程安全实现思路）
+`ReentrantReadWriteLock`有两个特点：
+- ReadWriteLock不支持升级，如果当前持有读锁，在获取写锁之前必须首先释放读锁。
+- ReadWriteLock支持锁降级，当同一个线程持有了写锁，在没有释放写锁的情况下，它还可以继续获得读锁。该特点的经典应用场景是锁降级策略，所谓锁降级指的是将写锁降级为读锁。
+- 所以在释放读锁和获取写锁的空隙之内，可能有其他线程修改了数据，准备写之前需要再次判断数据的有效性DCL
 ![[Pasted image 20231225161509.png]]
-
-
-下面示例是一个典型的利用锁的降级功能的代码。代码中声明了一个volatile类型的布尔值`cacheValid`变量，目的是保证数据可见性。
-1. 在processCachedData 方法中，会首先获取到读锁来判断当前的缓存是否有效，如果有效那么就直接跳过整个 if 语句
-2. 缓存无效则释放读锁切换为写锁，然后是经典的 try finally 语句，在 try 语句中我们==再次判断缓存是否有效==，因为在刚才释放读锁和获取写锁的过程中，可能有其他线程抢先修改了数据，所以在此我们需要进行二次判断。用 new Object() 这样的方式来示意，获取到了新的数据内容，并把缓存的标记位设置为 ture，让缓存变得有效。
-3. ==由于我们后续希望打印出有效的 data 值，所以不能在此处释放掉写锁。我们的选择是在释放写锁之前先获取读锁==
-4. 在持有读锁的情况下释放写锁，最后，在最下面的 try 中把 data 的值打印出来。
-5. 最后释放读锁
-
+下面示例是一个典型的线程安全问题
+CachedData的成员变量定义如下：
+- 代码中声明了一个volatile类型的布尔值`cacheValid`变量，目的是保证可见性。
+- 声明了共享数据Object data;
+- 成员变量ReentrantReadWriteLock
+```java
+public class CachedData {
+    Object data;
+    volatile boolean cacheValid;
+    final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+    void processCachedData() {
+	    ...
+	}
+}
+```
+这个时候利用写锁降级+DCL是很好的办法，可以提高整体性能，因为我们只有一处修改数据的代码`data = new Object();`，后面我们对于 data 仅仅是读取。如果还一直使用写锁的话，就不能让多个线程同时来读取了，降低了整体的效率
+- 初始读锁，需要写的时候（条件，判断数据有效性）必须先释放读锁，才能获取写锁
+- 再次判断数据的有效性，因为在我们释放读锁和获取写锁的空隙之内，可能有其他线程修改了数据。
+- 写锁代码块进行修改操作
+- 在不释放写锁的情况下，直接获取读锁，这就是读写锁的降级。
+- 释放了写锁，但是依然持有读锁
+- 最后释放读锁
+processCachedData的完整实现如下
 ```Java
 public class CachedData {
-
     Object data;
     volatile boolean cacheValid;
     final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
@@ -157,7 +173,7 @@ public class CachedData {
     void processCachedData() {
         rwl.readLock().lock();
         if (!cacheValid) {
-            //在获取写锁之前，必须首先释放读锁。
+            //不支持锁升级，所以在获取写锁之前，必须首先释放读锁。
             rwl.readLock().unlock();
             rwl.writeLock().lock();
             try {
@@ -183,18 +199,143 @@ public class CachedData {
     }
 }
 ```
-
-问题来了，那我一直持有最高等级的写锁不就可以了吗？这样谁都没办法来影响到我自己的工作，永远是线程安全的。
-- ==因为如果我们在刚才的方法中，一直使用写锁，最后才释放写锁的话，虽然确实是线程安全的，但是也是没有必要的，因为我们只有一处修改数据的代码==。
-```Java
-data = new Object();
+LUR线程安全版代码如下，请以get方法对比之
+```java
+package org.lyflexi.solutions.ListNode;  
+  
+/**  
+ * @Author: ly  
+ * @Date: 2024/3/25 17:41  
+ */import java.util.HashMap;  
+import java.util.concurrent.locks.Lock;  
+import java.util.concurrent.locks.ReadWriteLock;  
+import java.util.concurrent.locks.ReentrantReadWriteLock;  
+  
+  
+/*  
+* 当前共享数据除了HashMap还有DNode，ConcurrentHashMap可以保证缓存的安全，但DNode的安全无法保证  
+*  
+* 所以最好使用synchronized/Lock来统一控制，使用读写锁ReentrantReadWrite优化性能:  
+* ReadWriteLock rwLock = = new ReentrantReadWriteLock();  
+* - Lock readLock = rwLock.readLock();  
+* - Lock writeLock = rwLock.writeLock();  
+*  
+* */  
+class Solution03_LRUCacheWithRWLock {  
+    static class DNode {  
+        int key;  
+        int value;  
+        DNode prev;  
+        DNode next;  
+  
+        public DNode(int key, int value) {  
+            this.key = key;  
+            this.value = value;  
+        }  
+    }  
+  
+    private final int capacity;  
+    private final HashMap<Integer, DNode> keyToDNodeCache;  
+    private final ReadWriteLock rwLock;  
+  
+    private final Lock readLock;  
+    private final Lock writeLock;  
+    private final DNode dummy;  
+  
+    //初始化成员变量  
+    public Solution03_LRUCacheWithRWLock(int capacity) {  
+        this.capacity = capacity;//final只赋值一次  
+        this.keyToDNodeCache = new HashMap<>(capacity);//final只赋值一次  
+        this.rwLock = new ReentrantReadWriteLock();//final只赋值一次  
+        this.readLock = rwLock.readLock();//final只赋值一次  
+        this.writeLock = rwLock.writeLock();//final只赋值一次  
+        this.dummy = new DNode(0, 0);//final只赋值一次  
+        this.dummy.next = this.dummy;  
+        this.dummy.prev = this.dummy;  
+    }  
+  
+    //读的时候，虽然keyToDNodeCache的安全的，但无法保证链表操作moveToTail安全  
+    //处理方式：读写锁降级+DCL双减  
+    public int get(int key) {  
+        readLock.lock();  
+        try {  
+            DNode node = keyToDNodeCache.get(key);  
+            if (node != null) {  
+                //不支持锁升级，在获取写锁之前，必须首先释放读锁。  
+                readLock.unlock();  
+                writeLock.lock();  
+                try {  
+                    //DCL这里需要再次判断数据的有效性,因为在我们释放读锁和获取写锁的空隙之内，可能有其他写线程导致链表满删除了当前缓存。  
+                    if (node != null) {  
+                        moveToTail(node);  
+                    }  
+                    //在不释放写锁的情况下，直接获取读锁，这就是读写锁的降级。  
+                    readLock.lock();  
+                } finally {  
+                    //释放了写锁，但是依然持有读锁  
+                    writeLock.unlock();  
+                }  
+                return node.value;  
+            }  
+            return -1;  
+        } finally {  
+            readLock.unlock();  
+        }  
+    }  
+    public void put(int key, int value) {  
+        writeLock.lock();  
+  
+        try {  
+            DNode node = keyToDNodeCache.get(key);  
+  
+            if (node != null) {  
+                node.value = value;  
+                moveToTail(node);  
+                return;  
+            }  
+  
+            if (keyToDNodeCache.size() >= capacity) {  
+                DNode toRemove = dummy.next;  
+                keyToDNodeCache.remove(toRemove.key);  
+                removeNode(toRemove);  
+            }  
+  
+            node = new DNode(key, value);  
+            addToTail(node);  
+            keyToDNodeCache.put(key, node);  
+        } finally {  
+            writeLock.unlock();  
+        }  
+    }  
+  
+    private void moveToTail(DNode node) {  
+        removeNode(node);  
+        addToTail(node);  
+    }  
+  
+    private void addToTail(DNode node) {  
+        node.prev = dummy.prev;  
+        node.next = dummy;  
+        dummy.prev.next = node;  
+        dummy.prev = node;  
+    }  
+  
+    private void removeNode(DNode node) {  
+        node.prev.next = node.next;  
+        node.next.prev = node.prev;  
+    }  
+  
+  
+  
+    public static void main(String[] args) {  
+        Solution01_LRUCacheByDoubleLinked lRUCache = new Solution01_LRUCacheByDoubleLinked(2);  
+        lRUCache.put(1, 1);  
+        lRUCache.put(2, 2);  
+        System.out.println(lRUCache.get(1));       // 返回 1        lRUCache.put(3, 3);                        // 该操作会使得关键字 2 作废，缓存是 {1=1, 3=3}        System.out.println(lRUCache.get(2));       // 返回 -1 (未找到)  
+        lRUCache.put(4, 4);                        // 该操作会使得关键字 1 作废，缓存是 {4=4, 3=3}        System.out.println(lRUCache.get(1));       // 返回 -1 (未找到)  
+        System.out.println(lRUCache.get(3));       // 返回 3        System.out.println(lRUCache.get(4));       // 返回 4    }  
+}
 ```
-
-后面我们对于 data 仅仅是读取。如果还一直使用写锁的话，就不能让多个线程同时来读取了，持有写锁是浪费资源的，降低了整体的效率，所以这个时候利用锁的降级是很好的办法，可以提高整体性能。
-
-ReadWriteLock仅支持锁的降级，但不支持升级，因为无法在持有读锁的时候再获得写锁
-
-
 ## 写锁饥饿问题
 读读共享是优点，但是与此同时也造成了写操作的饥饿现象，原因是读写锁不可升级，倘若读的时候别的线程还能修改的话，那读的数据就是脏数据了。因此读锁没有完成之前，写锁无法获得
 ![[Pasted image 20231225161555.png]]

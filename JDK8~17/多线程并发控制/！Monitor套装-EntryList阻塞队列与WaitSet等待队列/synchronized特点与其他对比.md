@@ -341,7 +341,7 @@ public class TesttryLockHasTime {
 Process finished with exit code 0
 ```
 ## 响应中断
-ReentrantLock可打断AQD，synchronized可打断WaitSet而非EntryList
+ReentrantLock可打断AQS，synchronized可打断WaitSet而非EntryList
 - ReentrantLock另外提供了一种能够中断等待锁的线程的机制，用于打断在阻塞队列AQS中一直等待获取锁的线程，通过 lock.lockInterruptibly() 来实现这个机制。
 - 注意，原本synchronized的打断的是调用wait/join方法后位于等待队列WaitSet中的等待线程，而非EntryList中的阻塞线程，因为调用wait的时候synchronized已经释放掉锁不再参与争抢了
 ReentrantLock#lockInterruptibly测试中断程序如下：

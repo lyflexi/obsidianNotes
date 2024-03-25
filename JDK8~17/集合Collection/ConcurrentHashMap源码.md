@@ -53,13 +53,14 @@ HashTable中采用了全表锁，即所有操作均上锁，串行执行，如�
 - 存在冲突时，解决冲突使用悲观锁DCL
 
 ## volatile
-### volatile数组
+### volatile数组，扩容可见
 哈希桶数组table用 volatile 修饰主要是保证在数组扩容的时候保证可见性。
 ![[Pasted image 20240322194411.png]]
 注意：get 方法不需要加锁与 volatile 修饰的哈希桶数组table无关
-### volatile节点
-Node 的元素 value 和指针 next 使用 volatile 修饰，为了保证在多线程环境下线程A修改节点的 value 或者新增节点的时候是对线程B可见的。这也是get 方法不需要加锁的原因
+### volatile节点，get可见
+Node 的元素 value 和指针 next 使用 volatile 修饰，为了保证在多线程环境下线程A修改节点的 value 或者新增节点的时候是对线程B可见的。
 ![[Pasted image 20240322194358.png]]
+这也是get 方法不需要加synchronized锁的原因，因为共享数据已经被volatile 修饰为可见了
 ## put方法逻辑
 putVal大致可以分为以下步骤：
 1. 根据 key 计算出 hash 值，根据`(n - 1) & hash` 确定元素存放在哪个桶中
@@ -70,8 +71,6 @@ putVal大致可以分为以下步骤：
 	- 如果都不满足 ，synchronized 锁住 f 节点，判断是链表还是红黑树，遍历插入；
 源码如下：
 ![[Pasted image 20240322193238.png]]
-
-
 ### 不存在冲突则直接cas
 当发现头节点为null时，直接casTabAt进行写操作
 ![[Pasted image 20231225105244.png]]
@@ -98,17 +97,16 @@ static final <K,V> boolean casTabAt(Node<K,V>[] tab, int i,
 3. 校验通过后，会遍历当前冲突链上的元素，并选择合适的位置进行put操作。
 ![[Pasted image 20231225105403.png]]
 ## 不支持key和value为null的原因？★★★
-我们知道用于单线程状态的 HashMap允许多个null值和一个null键
+==我们知道用于单线程状态的 HashMap允许多个null值和一个null键==
 - key可以为null，hash函数中明确处理了key为null的情况，但是由于key不能重复null键只可能存在1个
 - value可以为null，可以用`containsKey(key)` 去判断到底是否包含了这个 null 。
-但是ConcurrentHashMap的key和value均不能为null：
-- 我们先来说value 为什么不能为 null。因为 ConcurrentHashMap 是用于多线程的 ，如果`ConcurrentHashMap.get(key)`得到了 null ，这就无法判断，是映射的value是 null ，还是没有找到对应的key而为 null ，就有了二义性。
-- key也不可以为null，这个问题讨论的价值不大，因为ConcurrentHashMap的源码就是这样写的，Doug Lea在设计之初就不允许null的key存在。
 Doug Lea和Effective Java作者Josh Bloch共同参与了HashMap的设计，Josh Bloch允许key和value为null，
 ![[Pasted image 20240322200444.png]]
-ConcurrentHashMap的作者只有Doug Lea，Doug Lea十分讨厌null，也确实nullkey和nullvalue是一种很不合理的设计，因此ConcurrentHashMap的key和value均不能为null
+==但是ConcurrentHashMap的key和value均不能为null：==
+- 我们先来说value 为什么不能为 null。因为 ConcurrentHashMap 是用于多线程的 ，如果`ConcurrentHashMap.get(key)`得到了 null ，这就无法判断，是映射的value是 null ，还是没有找到对应的key而为 null ，就有了二义性。
+- key也不可以为null，这个问题讨论的价值不大，因为ConcurrentHashMap的源码就是这样写的，Doug Lea在设计之初就不允许null的key存在。
 ![[Pasted image 20240322200414.png]]
-传送门->[这道面试题我真不知道面试官想要的回答是什么 (qq.com)](https://mp.weixin.qq.com/s?__biz=Mzg3NjU3NTkwMQ==&mid=2247505071&idx=1&sn=5b9bbe01a71cbfae4d277dd21afd6714&source=41#wechat_redirect)
+ConcurrentHashMap的作者只有Doug Lea，Doug Lea十分讨厌null，也确实nullkey和nullvalue是一种很不合理的设计，因此ConcurrentHashMap的key和value均不能为null，传送门->[这道面试题我真不知道面试官想要的回答是什么 (qq.com)](https://mp.weixin.qq.com/s?__biz=Mzg3NjU3NTkwMQ==&mid=2247505071&idx=1&sn=5b9bbe01a71cbfae4d277dd21afd6714&source=41#wechat_redirect)
 ## 并发扩容helpTransfer？待研究
 ```java
 final V putVal(K key, V value, boolean onlyIfAbsent) {  

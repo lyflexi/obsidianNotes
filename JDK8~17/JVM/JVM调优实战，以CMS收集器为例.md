@@ -15,7 +15,7 @@ Definitions:    
 <hostid>:      <hostname>[:<port>]
 ```
 # JVM脚本命令
-## jps：查看正在运行的Java进程
+## jps：查看Java进程id
 通过`jps`命令获取Java进程的进程ID（PID）以及主类名称或JAR文件的完整路径名。
 [参数选项]：
 - `-l`：输出主类或者JAR的完全路径名。例如，运行`jps -l`命令将列出所有Java进程及其对应的主类名称或JAR文件的完整路径名。
@@ -61,7 +61,7 @@ jstat -<option> [-t] [-h<lines>] <vmid> [<interval> [<count>]]
 ```
 结果演示：
 ![[Pasted image 20240303111504.png]]
-## jmap：导出内存映像文件&内存使用情况
+## jmap：导出堆转储文件&内存使用情况
 `jmap` 用于生成堆内存映射或堆转储文件（heap dump）。这些文件可以用于后续的堆分析，帮助开发者诊断内存泄漏、内存溢出等问题。
 ```
 jmap [option] <pid>
@@ -122,6 +122,7 @@ jstack 10217
 
 为此，JDK提供了一些内存泄漏的分析工具，如`jconsole，jvisualvm`等，用于辅助开发人员定位问题，但是这些工具很多时候并不足以满足快速定位的需求。
 ## jconsole
+类似于jstack，可视化指定进程id，查看其中所有线程正在执行的方法堆栈，可视化检查线程死锁情况
 ## jvisualvm
 为方便测试，我们在window下使用Visual VM ：{JAVA_HOME}/bin/jvisualvm.exe 来演示效果（功能性详细信息，请自行发掘）
 比如：我们在程序中写一个最简单OOM的例子。
@@ -199,11 +200,17 @@ java -jar -Xms8m -Xmx8m -XX:+PrintGC -XX:+PrintGCDetails -XX:+HeapDumpOnOu
 - `-XX:+UseParNewGC`：设置使用并行新生代收集器。
 - `-XX:+UseParalledlOldGC`: 设置使用并行年老代收集器。
 - `-XX:+UseConcMarkSweepGC`: 设置使用并发收集器。
-- ==`-XX:ParallelGCThreads=n`: 设置并行收集器使用的gc线程数。这个并行gc参数只要是并行 GC 都可以使用，不只是 ParNew。==
+- `-XX:ParallelGCThreads=n`: 设置并行收集器使用的gc线程数。这个并行gc参数只要是并行 GC 都可以使用，不只是 ParNew。
 - `-XX:MaxGCPauseMillis=n`: 设置并行收集的最大暂停时间。
 - `-XX:GCTimeRatio=n`: 设置垃圾回收时间占程序运行时间的百分比，1/(1+n)。
 - `-XX:+DisableExplicitGC`: 禁止外部调用`System.gc()`。
 - `-XX:MaxTenuringThreshold`: 设置年轻代对象复制到老年代前的最大复制次数。
+特别的，对于常见的CMS收集器：
+- -XX:+UseConcMarkSweepGc 手动指定使用CMS收集器执行内存回收任务。开启该参数后会自动将-XX:+UseParNewGc打开。即： ParNew （Young区用） +CMS （Old区用）的组合。
+- -XX：cmsinitiatingOccupanyFraction设置堆内存使用率的阈值，一旦达到该阈值，便开始进行CMS回收。JDK5及以前版本的默认值为68，即当老年代的空间使用率达到68%时，会执行一 次CMS 回收。 JDK6及以上版本默认值为92%
+- -XX： +UseCMSCompactAtFullCollection，用于强制每次在执行完Full GC后对内存空间进行压缩整理，以此避免内存碎片的产生。不过由于内存压缩整理过程无法并发执行，所带来的问题就是停顿时间变得更长了。
+- -XX：CMSFullGCsBeforeCompaction设置在执行多少次Full GC后对内存空间进行压缩整理。
+- -XX：ParallelCMSThreads 设置CMS的gc线程数量。CMS 默认启动的并发线程数是（ParallelGCThreads+3） /4， ParallelGCThreads是年轻代并行收集器的线程数。注意ParallelCMSThreads不等于ParallelGCThreads
 ## 三、开启垃圾回收信息统计
 使用以下参数，我们可以记录_GC_活动：
 - `-XX:+PrintGC`: 打印垃圾回收信息。
@@ -240,7 +247,7 @@ java -Xms1g -Xmx2g -Xss512k -XX:MaxMetaspaceSize=256m
 解释一下这些参数：
 一、设置堆、栈、方法区等内存大小
 - `-Xms1g`: 设置堆的初始大小为 1GB。
-- `-Xmx2g`: 设置堆的最大大小为 2GB。
+- `-Xmx2g`: 设置堆的最大大小为 2GB。建议将堆大小设置为总内存的一半，以留出足够的空间给操作系统和其他 JVM 组件使用。
 - 栈的大小设置为 512KB，支持当前线程方法的调用深度，线程私有的。
 - 方法区的大小设置为 256MB：
 二、指定垃圾回收器与回收器相关参数

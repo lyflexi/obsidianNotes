@@ -37,8 +37,7 @@ synchronized重量级锁整体的同步流程如下，精妙的图示：
 - 当Thread-2执行synchronized(obj)，会将对象头中的MarkWord与底层Monitor相关联，同将Monitor的所有者Owner置为Thread-2，Monitor中只能有一个Owner
 - 在Thread-2上锁的过程中，如果Thread-1,Thread-3也来执行synchronized(obj),就会进入EntryList BLOCKED
 - Thread-2执行完同步代码块的内容，然后唤醒EntryList中等待的线程来竞争锁，竞争的时是非公平的
-- 图中WaitSet是之前获得过锁但条件不满足进入WAITING状态的线程，与wait-notify有关，涉及到线程间通信
-
+- 图中WaitSet是之前获得过锁但条件不满足进入WAITING状态的线程，与wait-notify有关，涉及到线程间通信，本文暂不讨论
 # 可重入分析Monitor_recursions
 下面简单介绍下ObjectMonitor.hpp数据结构
 ```C++

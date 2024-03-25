@@ -77,11 +77,11 @@ public class AtomicInteger extends Number implements java.io.Serializable {
 ## AtomicX调用Unsafe的compareAndSwapInt
 
 ```Java
-    ...
-        public final boolean compareAndSet(int expect, int update) {
-        return unsafe.compareAndSwapInt(this, valueOffset, expect, update);
-    }
-    ...
+...
+	public final boolean compareAndSet(int expect, int update) {
+	return unsafe.compareAndSwapInt(this, valueOffset, expect, update);
+}
+...
 ```
 
 CAS的全称是：比较并交换（Compare And Swap）。在CAS中，有这样四个值：

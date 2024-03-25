@@ -23,6 +23,10 @@ Java基于监视器锁Monitor对象来实现重量级锁的，但是因为监视
 |           Mark Word (32 bits)      | Klass Word (32 bits)    |array length(32bits)  | 
 |------------------------------------|------------------------------------------------|
 ```
+所以对象头(Header)，对象头中包含三部分内容：
+1. MarkWord ，又叫运行时元数据，用于存储对象自身的运行时数据，如 HashCode、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID即JavaThread、偏向时间戳epoch等等。
+2. 类型指针：指向元空间，虚拟机通过这个指针确定该对象是哪个类的实例。
+3. 如果是数组对象的话，对象头还有一部分是存储数组的长度。
 以 32 位虚拟机为例，其中 Mark Word 结构为，age占4位也证明了GC最大年龄MaxTenuringThreshold为15
 ```shell
 |-------------------------------------------------------|--------------------|  
@@ -39,10 +43,6 @@ Java基于监视器锁Monitor对象来实现重量级锁的，但是因为监视
 |                                                  | 11 |      Marked for GC |  
 |-------------------------------------------------------|--------------------|
 ```
-所以对象头(Header)，对象头中包含三部分内容：
-1. MarkWord ，又叫运行时元数据，用于存储对象自身的运行时数据，如 HashCode、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID即JavaThread、偏向时间戳epoch等等。
-2. 类型指针：指向元空间，虚拟机通过这个指针确定该对象是哪个类的实例。
-3. 如果是数组对象的话，对象头还有一部分是存储数组的长度。
 64 位虚拟机 Mark Word结构如下。
 ```shell
 |--------------------------------------------------------------------|--------------------|  
@@ -270,7 +270,7 @@ Space losses: 0 bytes internal + 4 bytes external = 4 bytes total
 Process finished with exit code 0
 ```
 
-## 测试偏向锁批量重偏向
+## 测试偏向锁批量重偏向20
 因为偏向锁的撤销仍然是消耗性能的，虽然偏向锁一般来说是一次性的，但偏向锁还是提供了重新偏向的机会
 
 当撤销偏向锁阈值超过 20 次后，jvm 会这样觉得，我是不是偏向错了呢，于是会在给这些对象加锁时重新偏向至加锁线程
@@ -363,7 +363,7 @@ public class B_BiasableBatch {
       4     4        (object header)                           25 02 00 00 (00100101 00000010 00000000 00000000) (549)
 ```
 
-## 测试偏向锁批量撤销
+## 测试偏向锁批量撤销40
 当撤销偏向锁阈值超过 40 次后，jvm 会这样觉得，自己确实偏向错了，根本就不该偏向。于是该锁的所有实例对象 都会变为不可偏向的，新建的对象也是不可偏向的
 ```java
 package org.lyflexi.monitor_synchronized.upgrade;  
@@ -690,12 +690,13 @@ public class LockClearUPDemo
 
 Process finished with exit code 0
 ```
-## 局部变量锁未发生栈上逃逸
+## 锁没有发生栈上逃逸
 使用Benchmark测试，下面的注解含义如下：
 - @BenchmarkMode(Mode.AverageTime) ：求方法执行的平均时间
 - @Warmup(iterations=3) ：热启动3次
 - @Measurement(iterations=5)：迭代5次求平均值
 - @OutputTimeUnit(TimeUnit.NANOSECONDS)：输出单位 秒
+锁位于方法内部，作为局部变量并且没有发生栈上逃逸，这种情况jit即时编译器会删除锁
 ```java
  
 package org.example;  

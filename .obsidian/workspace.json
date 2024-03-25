@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md"
+                "file": "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md"
               }
             }
           }
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md",
+                "file": "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
                 "mode": "source",
                 "source": false
               }
@@ -66,7 +66,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "jaka",
+                "query": "jstack",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md",
+                "file": "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md",
+                "file": "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,36 +157,36 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/2.启动过程九大事件与探针监听Listener.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/4.SpringBoot与Spring整合大回环.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md",
-    "SpringFrameWork/懒加载.md",
-    "SpringFrameWork/@PostConstruct扩展点.md",
-    "SpringFrameWork/事务控制/Spring事务参数配置.md",
+    "JDK8~17/Java设计模式/00.七大设计原则.md",
+    "SpringCloud与分布式事务/sentinel限流、隔离、熔断.md",
+    "SpringCloud与分布式事务/seata下订单业务.md",
+    "分布式锁解决方案/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
+    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized特点与其他对比.md",
+    "JDK8~17/多线程并发控制/对象头关键结构分析-Markword/synchronized锁升级过程.md",
+    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized阻塞队列EntryList-重量级锁.md",
+    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized等待队列WaitSet-防止虚假唤醒.md",
+    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized字节码层面原理.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/异步模式Parten/生产者消费者模式-消息队列原理.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-sync版.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-LockSupport版.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-condition版.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-sync版.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-LockSupport版.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-condition版.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/保护性暂停模式/03.多GuardedObject-dubbo多线程核心原理.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/保护性暂停模式/02.带有超时时间的保护性暂停.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/保护性暂停模式/01.保护性暂停设计模式.md",
+    "JDK8~17/多线程并发控制/线程间通信api-Waitting/03.LockSupport.park.md",
+    "JDK8~17/多线程并发控制/活跃性activeness/02.死锁与jvm信息.md",
+    "JDK8~17/多线程并发控制/活跃性activeness/04.哲学家就餐问题与死锁解决.md",
+    "JDK8~17/多线程并发控制/活跃性activeness/03.活锁.md",
+    "JDK8~17/多线程并发控制/活跃性activeness/01.多把锁.md",
+    "JDK8~17/多线程创建方式/ThreadLocal原理.md",
+    "JDK8~17/多线程并发控制/核心脉络，互斥与同步-如阻塞队列和等待队列之别.md",
     "Attachments/pics/Pasted image 20240325111120.png",
     "Attachments/pics/Pasted image 20240325111016.png",
-    "SpringFrameWork/向容器中注册组件的方式/FactoryBean.md",
-    "SpringFrameWork/向容器中注册组件的方式/@ComponentScan+@Component.md",
-    "SpringFrameWork/向容器中注册组件的方式/@Configuration+@Bean.md",
-    "SpringFrameWork/监听器和多播器/三、Multicaster多播器原理.md",
-    "SpringFrameWork/监听器和多播器/四、@EventListener监听器原理EventListenerMethodProcessor.md",
-    "SpringFrameWork/监听器和多播器/监听器ApplicationListener的使用说明.md",
-    "SpringFrameWork/监听器和多播器/一、Event事件发布原理.md",
-    "Netty网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
-    "Netty网络编程与NIO/sendFile系统调用-实现磁盘零拷贝.md",
-    "Netty网络编程与NIO/epoll系统调用-实现多路复用.md",
-    "Netty网络编程与NIO/NIO/1.NIO三大组件与手写代码.md",
-    "Redis/Redis如何优化大key问题.md",
     "Attachments/pics/Pasted image 20240325101807.png",
     "Attachments/pics/Pasted image 20240325101745.png",
-    "Redis/expire原理.md",
-    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
-    "MySQL/SQL与优化.md",
-    "MySQL/索引与优化.md",
-    "MySQL/MYSQL单表数据达2000万性能严重下降.md",
-    "Redis/缓存有哪些失效场景.md",
-    "Redis/Redis客户端堆外内存溢出BUG.md",
     "Attachments/pics/Pasted image 20240324203649.png",
     "Attachments/pics/Pasted image 20240324203629.png",
     "Attachments/pics/Pasted image 20240323110552.png",

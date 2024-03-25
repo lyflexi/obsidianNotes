@@ -14,6 +14,17 @@ package org.lyflexi.multiThread.designParten.syncParten.alternatelySequence.bySy
    b           2             3  
    c           3             1 */
 class WaitNotify {  
+
+    // 等待标记  
+    private int flag; // 2  
+    // 循环次数  
+    private int loopNumber;  
+  
+    public WaitNotify(int flag, int loopNumber) {  
+        this.flag = flag;  
+        this.loopNumber = loopNumber;  
+    }  
+
     // 打印               a           1             2    
     public void print(String str, int waitFlag, int nextFlag) {  
         for (int i = 0; i < loopNumber; i++) {  
@@ -32,15 +43,7 @@ class WaitNotify {
         }  
     }  
   
-    // 等待标记  
-    private int flag; // 2  
-    // 循环次数  
-    private int loopNumber;  
-  
-    public WaitNotify(int flag, int loopNumber) {  
-        this.flag = flag;  
-        this.loopNumber = loopNumber;  
-    }  
+
 }
 ```
 测试类TestByWaitNotify
@@ -56,9 +59,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j(topic = "c.TestByWaitNotify")  
 public class TestByWaitNotify {  
     public static void main(String[] args) {  
-        WaitNotify wn = new WaitNotify(1, 5);  
+        WaitNotify wn = new WaitNotify(1, 5); 
         new Thread(() -> {  
-            wn.print("a", 1, 2);  
+            wn.print("a", 1, 2);//因为上面new WaitNotify(1, 5)，所以"a", 1, 2先满足条件启动
         }).start();  
         new Thread(() -> {  
             wn.print("b", 2, 3);  

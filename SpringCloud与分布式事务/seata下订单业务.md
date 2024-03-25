@@ -127,7 +127,7 @@ docker logs -f seata
 发现trade-service、cart-service、item-service的TM还有RM就有注册成功的提示
 ![[Pasted image 20240127100611.png]]
 
-# XA二阶段提交
+# XA二阶段暂不提交
 Seata对原始的XA模式做了简单的封装和改造，以适应自己的事务模型，基本架构如图：
 ![[Pasted image 20240127115543.png]]
 `RM`一阶段的工作：

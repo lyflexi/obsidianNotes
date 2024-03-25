@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "MySQL/索引与优化.md"
+                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md"
               }
             }
           }
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "MySQL/索引与优化.md",
+                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md",
                 "mode": "source",
                 "source": false
               }
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "MySQL/索引与优化.md",
+                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "MySQL/索引与优化.md",
+                "file": "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,42 +157,42 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
+    "SpringBoot3/SpringBoot生命周期和九大事件与探针/2.启动过程九大事件与探针监听Listener.md",
+    "SpringBoot3/SpringBoot生命周期和九大事件与探针/4.SpringBoot与Spring整合大回环.md",
+    "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
+    "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md",
+    "SpringFrameWork/懒加载.md",
+    "SpringFrameWork/@PostConstruct扩展点.md",
+    "SpringFrameWork/事务控制/Spring事务参数配置.md",
+    "Attachments/pics/Pasted image 20240325111120.png",
+    "Attachments/pics/Pasted image 20240325111016.png",
+    "SpringFrameWork/向容器中注册组件的方式/FactoryBean.md",
+    "SpringFrameWork/向容器中注册组件的方式/@ComponentScan+@Component.md",
+    "SpringFrameWork/向容器中注册组件的方式/@Configuration+@Bean.md",
+    "SpringFrameWork/监听器和多播器/三、Multicaster多播器原理.md",
+    "SpringFrameWork/监听器和多播器/四、@EventListener监听器原理EventListenerMethodProcessor.md",
+    "SpringFrameWork/监听器和多播器/监听器ApplicationListener的使用说明.md",
+    "SpringFrameWork/监听器和多播器/一、Event事件发布原理.md",
+    "Netty网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
+    "Netty网络编程与NIO/sendFile系统调用-实现磁盘零拷贝.md",
+    "Netty网络编程与NIO/epoll系统调用-实现多路复用.md",
+    "Netty网络编程与NIO/NIO/1.NIO三大组件与手写代码.md",
+    "Redis/Redis如何优化大key问题.md",
+    "Attachments/pics/Pasted image 20240325101807.png",
+    "Attachments/pics/Pasted image 20240325101745.png",
+    "Redis/expire原理.md",
+    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+    "MySQL/SQL与优化.md",
+    "MySQL/索引与优化.md",
     "MySQL/MYSQL单表数据达2000万性能严重下降.md",
     "Redis/缓存有哪些失效场景.md",
     "Redis/Redis客户端堆外内存溢出BUG.md",
-    "Redis/Redis持久化原理.md",
-    "RocketMQ/00.RocketMQ架构！重要.md",
-    "Redis/scan查询 推荐！.md",
-    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
-    "Redis/expire原理.md",
-    "Redis/Redis数据类型与编码方式.md",
-    "Redis/Redis业务打点规则.md",
-    "Redis/zSet应用场景分析.md",
-    "JDK8~17/多线程创建方式/Java线程池ThreadPoolExecutor.md",
-    "Redis/如何保证缓存一致性.md",
-    "Redis/fork系统调用原理.md",
-    "Centos服务器/如何线上排查应用程序问题.md",
     "Attachments/pics/Pasted image 20240324203649.png",
     "Attachments/pics/Pasted image 20240324203629.png",
-    "分布式锁解决方案/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
-    "分布式锁解决方案/基于Redis的分布式锁/redis原生客户端手动实现分布式锁.md",
-    "分布式锁解决方案/基于MySQL的分布式锁/乐观锁实现分布式锁.md",
-    "分布式锁解决方案/基于MySQL的分布式锁/唯一性索引作分布式锁-类似于redis占坑.md",
-    "分布式锁解决方案/基于MySQL的分布式锁/悲观锁实现分布式锁.md",
-    "RocketMQ/rocketmq秒杀设计.md",
-    "RocketMQ/如何解决消息重复消费问题(messageID与自定义ID区分).md",
-    "MySQL/共享锁，排他锁，悲观锁与乐观锁的实现方式.md",
-    "JDK8~17/Java线程和操作系统线程什么关系.md",
-    "JDK8~17/集合Collection/双向链表LinkedList.md",
     "Attachments/pics/Pasted image 20240323110552.png",
     "Attachments/pics/Pasted image 20240323110548.png",
     "Attachments/pics/Pasted image 20240323110224.png",
     "Attachments/pics/Pasted image 20240323110214.png",
-    "Attachments/pics/Pasted image 20240323110207.png",
-    "Attachments/pics/Pasted image 20240323105301.png",
-    "Attachments/pics/Pasted image 20240323105253.png",
-    "Attachments/pics/Pasted image 20240323105249.png",
-    "SpringBoot3/嵌入式Tomcat配置原理.md",
     "MySQL/特殊场景-待研究",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/终止模式Parten",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式",

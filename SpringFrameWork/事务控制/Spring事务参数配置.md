@@ -324,14 +324,12 @@ NEVER：内部事务被NEVER修饰
 Java所有的异常都有一个共同的祖先类`Throwable`，`Throwable`类有两个重要的子类Exception和Error
 其中Exception 可以分为受检查异常`CheckException`和不受检查异常即`RuntimeException`
 - `CheckException`：受检查代码比如IO操作没有被 catch/throw 处理的话，就没办法通过编译 ，有`IOException`、`ClassNotFoundException` 、`SQLException`等。
-- `RuntimeException`：不受检查异常，即使不处理也可以正常通过编译。RuntimeException及其子类都统称为非受检查异常，有空指针异常`NullPointerException`、字符串转换为数字异常`NumberFormatException`、数组越界异常`ArrayIndexOutOfBoundsException`、类型转换异常`ClassCastException`、算术异常`ArithmeticException`等
+- `RuntimeException即UnCheckException`：不受检查异常，即使不处理也可以正常通过编译。RuntimeException及其子类都统称为非受检查异常，有空指针异常`NullPointerException`、字符串转换为数字异常`NumberFormatException`、数组越界异常`ArrayIndexOutOfBoundsException`、类型转换异常`ClassCastException`、算术异常`ArithmeticException`等
 Error属于程序无法处理的错误无法通过catch来进行捕获 ，例如Java 虚拟机运行错误`Virtual MachineError`、虚拟机内存不够错误`OutOfMemoryError`、类定义错误`NoClassDefFoundError`等 。当Error发生时，JVM一般会选择线程终止
 ![[Pasted image 20240106163426.png]]
 
 ==Spring事务只有遇到`RuntimeException`和`Error`时才会回滚，但是在遇到检查型异常`CheckException`时不会回滚。==
-
-![](https://x3r1317gt9.feishu.cn/space/api/box/stream/download/asynccode/?code=ODNkNzIwZTYwZWE1MDQ0N2M0NTc2NWE5NmFjZTVkMTBfMmtFUm1kRmZtWHJ6aEhCeTE1c29KcndTanRra0FqSVdfVG9rZW46VWt4eGJveW92b3JncEd4V1d6bmMxTXNtbk9lXzE3MDQ1Mjk5OTk6MTcwNDUzMzU5OV9WNA)
-
+![[Pasted image 20240325111016.png]]
 需要注意的是，上面这句话的限制针对的是业务代码。我们习惯性的将rollbackFor设置的更高级一点，以兼容更多样的业务运行时异常
 ```java
 @Transactional(rollbackFor = Exception.class)

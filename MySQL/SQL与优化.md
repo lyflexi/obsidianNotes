@@ -149,7 +149,8 @@ SELECT column1, column2, ...  FROM table_name1  WHERE EXISTS (SELECT column_name
 在这个例子中，`table_name1` 是外部查询的表名，`table_name2` 是子查询的表名，`column_name` 是要检查的列名，`condition` 是子查询中的条件。如果子查询返回至少一行结果，则 "EXISTS" 子句将返回 true，外部查询将返回匹配的结果。
 因此，“EXISTS”一般是这么用的：
 ```sql
-SELECT column1, column2, ...  FROM table_name1  WHERE EXISTS (SELECT 1 FROM table_name2 WHERE condition);
+SELECT column1, column2, ...  FROM table_name1  WHERE EXISTS 
+	(SELECT 1 FROM table_name2 WHERE table_name2.id=table_name1.id);
 ```
 只需要确认子查询返回至少一行结果，而不需要子查询获取实际所有结果，这有助于减少不必要的数据处理和传输。类似于以下Java代码：复杂度为N
 ```java
@@ -391,7 +392,7 @@ table | type | possible_keys | key |key_len | ref | rows | Extra EXPLAIN列的�
 MySQL可以为多个字段创建索引。一个索引最多可以包括16个字段。对于多列索引，只有查询条件使用了这些字段中的第一个字段时，索引才会被使用。
 
 ...还有很多种索引失效情况，这里不再赘述
-### 2.优化表结构
+### 2.优化表结构！最常见
 
 合理的数据库结构不仅可以使数据库占用更小的磁盘空间，而且能够使查询速度更快。数据库结构的设计，需要考虑数据冗余、查询和更新的速度、字段的数据类型是否合理等多方面的内容。
 
@@ -470,7 +471,7 @@ for(int i = 0; i < pageNo; i++){
 ```
 以上的实现方案，会存在limit深分页问题，limit语句会先扫描offset+n行，然后再丢弃掉前offset行，只返回后n行数据。
 那怎么优化呢？
-#### 最小ID记录法
+#### 最小ID记录法-子分页
 首先查询最小ID
 ```java
 //查询最小ID  

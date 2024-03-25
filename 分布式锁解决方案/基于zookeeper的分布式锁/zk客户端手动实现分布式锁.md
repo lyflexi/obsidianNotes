@@ -329,15 +329,14 @@ Jmeter压力测试：
 1. 性能一般（比mysql分布式锁略好）
 2. 不可重入
 接下来首先来提高性能
-# 性能优化-临时序列化节点
+# 性能优化-阻塞锁SEQUENTIAL
 上面实现中由于重试操作使用的是自旋，在并发高的情况下会严重影响Cpu性能：
 ![[1607048160051.png]]
 试想：每个请求要想正常的执行完成，最终都是要创建节点，如果能够避免争抢必然可以提高性能。
-==这里借助于zk的临时序列化节点，实现阻塞锁，并且加入监听机制==
+==这里借助于zk的临时序列化节点，实现阻塞锁==
 1. 在同一目录下生成多个序列化子节点，序列号小的节点先获取到锁
-2. 监听同一目录下的序列化节点中的前驱节点，若前驱节点释放，则当前序列化节点获取到锁
+2. 当释放锁之后，阻塞线程全被唤醒，进行比较看谁是最小的序列号则获取到锁
 ![[1607048783043.png]]
-## 阻塞锁实现-SEQUENTIAL
 代码实现：
 1. 主要修改了构造方法，每个并发请求来都先创建EPHEMERAL_SEQUENTIAL序列化节点
 2. 主要修改了lock方法，添加了getPreNode获取前置节点的逻辑。
@@ -440,10 +439,9 @@ jmeter测试
 ==原因：虽然不用自旋争抢创建节点了，但是会自旋判断自己是最小的节点，因为对于getPreNode来说假如当前有1000个节点在等待锁，如果获得锁的线程释放锁时，这1000个并发线程都会被唤醒，这种情况称为“羊群效应”；在这种羊群效应中，zookeeper需要通知1000个客户端，这会阻塞zookeeper的其他的操作，这个判断逻辑更复杂更耗时。==
 
 最好的情况应该只唤醒新的最小节点对应的并发线程。
-
-解决方案：监听。
-## 监听阻塞锁实现-Watcher
-应该怎么做呢？在设置事件监听时，每个客户端应该对刚好在它之前的子节点设置事件监听，举例说明：假如子节点列表为/distributed/lock-0000000000、/distributed/lock-0000000001、/distributed/lock-0000000002，
+# 性能优化-监听式阻塞锁实现
+解决方案：阻塞锁SEQUENTIAL+监听Watcher。监听同一目录下的序列化节点中的前驱节点，若前驱节点释放，则当前序列化节点触发监听可以获取锁，这样可以避免羊群效应。举例说明如下：
+- 有子节点列表为/distributed/lock-0000000000、/distributed/lock-0000000001、/distributed/lock-0000000002，
 - 序号为1的客户端监听序号为0的子节点删除消息，
 - 序号为2的监听序号为1的子节点删除消息。
 所以调整后的分布式锁算法流程如下：
@@ -578,9 +576,9 @@ import java.util.stream.Collectors;
 由此可见性能提高不少，接近于redis的分布式锁
 # 可重入实现-ThreadLocal
 实现方式1.在节点的内容中记录服务器、线程以及重入信息，这类似于Redis分布式可重入的实现方式
-实现方式2.ThreadLocal：线程的局部变量，线程私有，能够用于当前线程的重入计数我们使用这种方案：
+==实现方式2.ThreadLocal：线程的局部变量，天然的线程私有能够用于当前线程的重入计数，我们使用这种方案：==
 1. 修改构造方法：如果我这次是重入的，那就不要再重新创建锁了 
-2. 修改lock：如果ThreadLocal不为0则重入，否则置为1表示第一次获取锁
+2. 修改lock：如果ThreadLocal不为0则表示本次重入，否则置为1表示第一次获取锁
 3. 修改unlock方法：如果ThreadLocal为0记得remove，因为ZkDistributedLock是单实例的导致ThreadLocal也是单实例的，所以可能存在复用
 ```java
 package org.lyflexi.zkhandsondistrilock.lock;  
@@ -613,7 +611,7 @@ import java.util.stream.Collectors;
             this.zooKeeper = zooKeeper;  
             this.lockName = lockName;  
             //每次请求来都来创建序列号锁，lockName还是相同，但是序列号不同  
-//            this.path = zooKeeper.create(ROOT_PATH + "/" + lockName + "-", null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);  
+			//this.path = zooKeeper.create(ROOT_PATH + "/" + lockName + "-", null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);  
             //如果我这次是重入的，那就不要再重新创建锁了  
             if (THREAD_LOCAL.get() == null || THREAD_LOCAL.get() == 0){  
                 this.path = zooKeeper.create(ROOT_PATH + "/" + lockName + "-", null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);  

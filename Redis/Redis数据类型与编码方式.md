@@ -141,7 +141,7 @@ redis 127.0.0.1:6379 ZRANGEBYSCORE runoob 0 1000
 ```
 支撑zSort的数据结构：HashTable+Skiplist
 - 根据element查询score值，要实现根据element查询对应的score值，就必须实现element与score之间的键值映射，SortedSet底层是基于HashTable来实现的。
-- 要按照score值升序或降序查询element，并且查询效率还高，就需要有一种高效的有序数据结构，SortedSet是基于跳表Skiplist实现的。
+- 要按照score值升序或降序查询element，并且查询效率还高，SortedSet是基于跳表Skiplist实现的。
 SkipList（跳表）首先是链表，但与传统链表相比有几点差异：
 - 先将跳表中的元素按照升序有序存储
 - 节点可包含跨度不同的多级指针，指针跨度不同。

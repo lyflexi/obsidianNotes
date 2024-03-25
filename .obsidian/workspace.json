@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Redis/zSet应用场景分析.md"
+                "file": "MySQL/索引与优化.md"
               }
             }
           }
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Redis/zSet应用场景分析.md",
+                "file": "MySQL/索引与优化.md",
                 "mode": "source",
                 "source": false
               }
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Redis/zSet应用场景分析.md",
+                "file": "MySQL/索引与优化.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Redis/zSet应用场景分析.md",
+                "file": "MySQL/索引与优化.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,6 +157,33 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
+    "MySQL/MYSQL单表数据达2000万性能严重下降.md",
+    "Redis/缓存有哪些失效场景.md",
+    "Redis/Redis客户端堆外内存溢出BUG.md",
+    "Redis/Redis持久化原理.md",
+    "RocketMQ/00.RocketMQ架构！重要.md",
+    "Redis/scan查询 推荐！.md",
+    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
+    "Redis/expire原理.md",
+    "Redis/Redis数据类型与编码方式.md",
+    "Redis/Redis业务打点规则.md",
+    "Redis/zSet应用场景分析.md",
+    "JDK8~17/多线程创建方式/Java线程池ThreadPoolExecutor.md",
+    "Redis/如何保证缓存一致性.md",
+    "Redis/fork系统调用原理.md",
+    "Centos服务器/如何线上排查应用程序问题.md",
+    "Attachments/pics/Pasted image 20240324203649.png",
+    "Attachments/pics/Pasted image 20240324203629.png",
+    "分布式锁解决方案/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
+    "分布式锁解决方案/基于Redis的分布式锁/redis原生客户端手动实现分布式锁.md",
+    "分布式锁解决方案/基于MySQL的分布式锁/乐观锁实现分布式锁.md",
+    "分布式锁解决方案/基于MySQL的分布式锁/唯一性索引作分布式锁-类似于redis占坑.md",
+    "分布式锁解决方案/基于MySQL的分布式锁/悲观锁实现分布式锁.md",
+    "RocketMQ/rocketmq秒杀设计.md",
+    "RocketMQ/如何解决消息重复消费问题(messageID与自定义ID区分).md",
+    "MySQL/共享锁，排他锁，悲观锁与乐观锁的实现方式.md",
+    "JDK8~17/Java线程和操作系统线程什么关系.md",
+    "JDK8~17/集合Collection/双向链表LinkedList.md",
     "Attachments/pics/Pasted image 20240323110552.png",
     "Attachments/pics/Pasted image 20240323110548.png",
     "Attachments/pics/Pasted image 20240323110224.png",
@@ -165,34 +192,7 @@
     "Attachments/pics/Pasted image 20240323105301.png",
     "Attachments/pics/Pasted image 20240323105253.png",
     "Attachments/pics/Pasted image 20240323105249.png",
-    "Attachments/pics/Pasted image 20240323103109.png",
-    "Redis/Redis数据类型与编码方式.md",
-    "Redis/zSet应用场景分析.md",
-    "Redis/如何保证缓存一致性.md",
-    "Redis/Redis业务打点规则.md",
     "SpringBoot3/嵌入式Tomcat配置原理.md",
-    "SpringBoot3/函数式Web.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/4.SpringBoot与Spring整合大回环.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/3.其余仅用来感知特定阶段的监听器.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/1.启动过程六个阶段介入RunListener.md",
-    "SpringBoot3/SpringBoot生命周期和九大事件与探针/2.启动过程九大事件与探针监听Listener.md",
-    "JDK8~17/集合Collection/集合api.md",
-    "JDK8~17/集合Collection/ConcurrentHashMap源码.md",
-    "Attachments/pics/Pasted image 20240322200444.png",
-    "Attachments/pics/Pasted image 20240322200414.png",
-    "JDK8~17/集合Collection/HashMap源码.md",
-    "MySQL/MySQL事务，当前读(行锁)，快照读(MVCC).md",
-    "RocketMQ/QPS&&TPS&&RT等指标.md",
-    "RocketMQ/如何区分Topic和Tag(订阅关系一致性).md",
-    "RocketMQ/死信队列使用场景.md",
-    "RocketMQ/如何解决消息重复消费问题(messageID与自定义ID区分).md",
-    "RocketMQ/如何解决消息堆积问题.md",
-    "RocketMQ/rocketmq秒杀设计.md",
-    "RocketMQ/如何保证消息的顺序.md",
-    "RocketMQ/如何保证消息不丢失.md",
-    "RocketMQ/00.RocketMQ架构！重要.md",
-    "Netty网络编程与NIO/sendFile系统调用-实现磁盘零拷贝.md",
-    "RocketMQ/消息压缩.md",
     "MySQL/特殊场景-待研究",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/终止模式Parten",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式",

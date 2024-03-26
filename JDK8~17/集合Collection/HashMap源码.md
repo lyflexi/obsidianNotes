@@ -224,13 +224,13 @@ static int hash(int h) {
 # 插入过程（四大步骤）
 `putVal`方法，根据`(n - 1) & hash` 确定元素存放在哪个桶中，插入过程分为四大步：
 1. 如果通过HashMap的无参构造方法创建的table，则在此处扩容，即HashMap懒加载
-2. (n - 1) & hash 确定元素存放在哪个桶中，桶为空，新生成结点放入桶中(此时，这个结点是放在数组中)
+2. (n - 1) & hash 确定元素存放在哪个桶中，桶为空，新生成结点放入桶中(此时，这个结点是放在数组中)，代码末尾统一
 3. 桶中已经存在元素
 	1. 比较桶中第一个元素(数组中的结点)的hash值相等，key相等，将第一个元素赋值给e，用e来记录，代码末尾统一覆盖。若比较桶中第一个元素(数组中的结点)hash值不相等即key不相等，沿着链表向下找
-	2. 为红黑树结点吗，直接插入或者记录冲突节点
-	3. 为链表结点吗，直接插入（尾插）或者记录冲突节点
-4. 若e != null，最后执行统一的覆盖操作，表示在桶中找到key值、hash值与插入元素相等的结点
-5. 如果上面没有return，来到了最后一段代码，说明没有冲突，只是新增操作，因此需要结构性修改++modCount
+	2. 为红黑树结点吗，直接插入或者记录冲突节点e
+	3. 为链表结点吗，直接插入（尾插）或者记录冲突节点e
+	4. 若e != null，最后执行统一的覆盖操作，表示在桶中找到key值、hash值与插入元素相等的结点
+4. 如果上面没有return，来到了最后一段代码，说明没有冲突，只是往数组里面新增元素，因此需要结构性修改++modCount
 ```Java
 final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                    boolean evict) {
@@ -271,6 +271,7 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                     break;
                 }
                 // 判断链表中结点的key值与插入的元素的key值是否相等
+                //当两个键的 `hashCode()` 方法返回相同的哈希码，并且它们的 `equals()` 方法返回 true 时，HashMap 将认为这两个键是相等的
                 if (e.hash == hash &&
                     ((k = e.key) == key || (key != null && key.equals(k))))
                     // 相等，跳出循环
@@ -293,7 +294,7 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
             return oldValue;
         }
     }
-    // 如果上面没有冲突，说明是新增操作需要结构性修改
+    // 如果上面没有冲突，说明是新增元素到了普通数组里面，需要结构性修改数组大小
     ++modCount;
     // 实际大小大于阈值则扩容
     if (++size > threshold)
@@ -309,13 +310,98 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 - 链表节点存在key，则覆盖
 - 红黑树节点存在key，则覆盖
 ![[Pasted image 20231225104924.png]]
+# 如何判断key相等！重要
+注意：怎么比较key相等？要求两个键的 `hashCode()` 方法返回相同的哈希码，并且它们的 `equals()` 方法返回 true 时，HashMap 才认为这两个键是相等的，截取putVal的如下代码：
+```java
+        else {
+            for (int binCount = 0; ; ++binCount) {
+                if ((e = p.next) == null) {
+                    p.next = newNode(hash, key, value, null);
+                    if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                        treeifyBin(tab, hash);
+                    break;
+                }
+                // 判断链表中结点的key值与插入的元素的key值是否相等
+                //当两个键的 `hashCode()` 方法返回相同的哈希码，并且它们的 `equals()` 方法返回 true 时，HashMap 将认为这两个键是相等的
+                if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k))))
+                    // 相等，跳出循环
+                    break;
+                // 用于遍历桶中的链表，与前面的e = p.next组合，可以遍历链表
+                p = e;
+            }
+        }
+```
+以下是一个简单的示例，演示了如何在 Java 中使用自定义对象作为 HashMap 的键，并重写 `hashCode()` 和 `equals()` 方法来比较键的相等性：
+```java
+import java.util.HashMap;
+
+class MyKey {
+    private int id;
+
+    public MyKey(int id) {
+        this.id = id;
+    }
+
+    // 重写 hashCode() 方法
+    @Override
+    public int hashCode() {
+        // 这里可以根据实际情况生成哈希码
+        return id;
+    }
+
+    // 重写 equals() 方法
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        MyKey other = (MyKey) obj;
+        return id == other.id;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        HashMap<MyKey, String> hashMap = new HashMap<>();
+
+        MyKey key1 = new MyKey(1);
+        MyKey key2 = new MyKey(1);
+
+        // 添加键值对到哈希映射
+        hashMap.put(key1, "Value1");
+
+        // 使用键2查询值
+        String value = hashMap.get(key2);
+
+        System.out.println("Value corresponding to key2: " + value); // 输出 Value1
+    }
+}
+
+```
+输出信息如下，尽管我们使用了不同的 `MyKey` 对象实例（`key1` 和 `key2`），但我们重写了equals方法和hashCode方法
+- hashcode相同
+- equals返回也相同
+所以它们被认为是相等的键，所以我们可以成功地使用 `key2` 来检索哈希映射中的值。
+```shell
+输出 Value1
+```
 # 扩容细节（高低位链表）
 
 ## 1.7并发扩容死链问题
 关于HashMap链表插入操作，java7及之前之前是头插法，当时写这个代码的作者认为后来的值被查找的可能性更大一点，提升查找的效率。因为HashMap插入操作是不支持并发的，所以头插法会导致HashMap的在并发扩容的时候会导致链表成环的问题。导致线上在执行get的时候，会触发死循环，引起CPU的100%问题，所以一定要避免在并发环境下使用HashMap。
-
-死链情景模拟：线程在查询的时候，hashmap进行了并发扩容，改变了链表中元素原本的顺序，使得并发线程t2将链表成环
-![[Pasted image 20231225104933.png]]
+死链产生的两个条件：
+1. hashmap对数组进行扩容，尾插法会改变节点的顺序
+2. 又恰好扩容前多线程并发访问了hashmap，就会导致在扩容后出现死链现象
+阶段一：扩容前扩容前t2线程休眠
+![[Pasted image 20240326214246.png]]
+阶段二：t1线程顺利参与了扩容整个流程
+![[Pasted image 20240326214531.png]]
+阶段三：t2醒过来，死链发生
+![[Pasted image 20240326215000.png]]
+阶段四：如果当前链表后面还有元素，则无法抵达，cpu循环跑满100%
+![[Pasted image 20240326215126.png]]
 因此在JDK1.8中，为了避免之前版本中并发扩容所导致的死链问题，将头插法替换为尾插法，尾插法在链表扩容的过程中不会改变原链表的顺序，因此避免了并发插入下的死链问题。头插法->尾插法
 
 但即使是这样，HashMap仍然不是线程安全的，因为还存在并发修改问题，要想完全的线程安全则必须是ConCurrentHashMap

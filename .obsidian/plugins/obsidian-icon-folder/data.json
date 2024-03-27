@@ -34,12 +34,12 @@
   "Servlet3.0&&SpringMVC6": "FabEmpire",
   "SpringFrameWork": "FabEmpire",
   "Centos服务器": "FabEmpire",
-  "Tomcat源码？待研究": "FabEmpire",
   "MyBatis": "FabEmpire",
   "Nginx负载均衡": "FabEmpire",
   "JDK8~17": "FabEmpire",
   "Redis": "FabEmpire",
-  "Netty框架？待研究": "FabEmpire",
   "408计算机网络": "FabEmpire",
-  "分布式Session？待研究": "FabEmpire"
+  "待研究？Netty框架": "FabEmpire",
+  "待研究？分布式Session": "FabEmpire",
+  "待研究？Tomcat源码": "FabEmpire"
 }

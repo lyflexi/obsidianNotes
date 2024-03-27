@@ -25,7 +25,7 @@ class WaitNotify {
         this.loopNumber = loopNumber;  
     }  
 
-    // 打印               a           1             2    
+    //打印loopNumber轮ABC   
     public void print(String str, int waitFlag, int nextFlag) {  
         for (int i = 0; i < loopNumber; i++) {  
             synchronized (this) {  

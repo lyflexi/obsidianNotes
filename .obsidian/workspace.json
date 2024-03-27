@@ -6,7 +6,7 @@
       {
         "id": "14b616eb75cbe094",
         "type": "tabs",
-        "dimension": 18.927444794952685,
+        "dimension": 20.031545741324923,
         "children": [
           {
             "id": "d079b05bbd2bd676",
@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "JDK8~17/集合Collection/HashMap源码.md"
+                "file": "408计算机网络/02.第二层TCP重要！.md"
               }
             }
           }
@@ -23,7 +23,7 @@
       {
         "id": "48e60c444ef36431",
         "type": "tabs",
-        "dimension": 81.07255520504732,
+        "dimension": 79.96845425867508,
         "children": [
           {
             "id": "46edece85008acc7",
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "JDK8~17/集合Collection/HashMap源码.md",
+                "file": "408计算机网络/02.第二层TCP重要！.md",
                 "mode": "source",
                 "source": false
               }
@@ -66,7 +66,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "jstack",
+                "query": "虚假唤醒",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "JDK8~17/集合Collection/HashMap源码.md",
+                "file": "408计算机网络/02.第二层TCP重要！.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "JDK8~17/集合Collection/HashMap源码.md",
+                "file": "408计算机网络/02.第二层TCP重要！.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,6 +157,32 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
+    "408计算机网络/01.第一层HTTP重要！.md",
+    "408计算机网络/00.概述：五层OSI体系结构.md",
+    "408计算机网络/02.第二层TCP重要！.md",
+    "408计算机网络/03.第三四五层.md",
+    "408计算机网络/03.第三层IP.md",
+    "JDK8~17/多线程并发控制/00.核心脉络，互斥与同步-如阻塞队列和等待队列之别.md",
+    "408操作系统/计算机操作系统知识点总结.md",
+    "JDK8~17/多线程并发控制/解决并发问题的思路与总结.md",
+    "JDK8~17/网络编程与NIO",
+    "Attachments/pics/Pasted image 20240327191147.png",
+    "Attachments/pics/Pasted image 20240327190217.png",
+    "Attachments/pics/Pasted image 20240327183244.png",
+    "Attachments/pics/201302714piGQJAjp4.png",
+    "JDK8~17/网络编程与NIO/NIO/2.NIOvsBIOvsAIO.md",
+    "JDK8~17/网络编程与NIO/NIO/1.NIO三大组件与手写代码.md",
+    "JDK8~17/JVM/双亲委派机制.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-sync版.md",
+    "JDK8~17/多线程并发控制/线程间通信api-Waitting/01.synchronized.wait.md",
+    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/防止虚假唤醒-synchronized等待队列WaitSet.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-sync版.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式/交替输出-condition版.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-condition版.md",
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-LockSupport版.md",
+    "JDK8~17/Java设计模式/06.单例模式(Singleton Pattern).md",
+    "MySQL/索引与优化.md",
+    "JDK8~17/集合Collection/HashMap源码.md",
     "Attachments/pics/Pasted image 20240326215126.png",
     "Attachments/pics/Pasted image 20240326215000.png",
     "Attachments/pics/Pasted image 20240326214531.png",
@@ -166,33 +192,8 @@
     "RocketMQ/rocketmq秒杀设计.md",
     "MySQL/SQL与优化.md",
     "Redis/scan查询 推荐！.md",
-    "分布式锁解决方案/基于MySQL的分布式锁/唯一性索引作分布式锁-创建去重表-类似于redis占坑.md",
-    "分布式锁解决方案/基于MySQL的分布式锁/Optimistic乐观锁实现分布式锁.md",
-    "分布式锁解决方案/基于MySQL的分布式锁/OneSql实现分布式锁.md",
-    "分布式锁解决方案/基于MySQL的分布式锁/for update实现分布式锁.md",
-    "MySQL/MySQL锁机制.md",
-    "MySQL/MySQL事务与多版本并发读MVCC.md",
     "Attachments/pics/Pasted image 20240325231504.png",
-    "MySQL/MYSQL单表数据达2000万性能严重下降.md",
-    "JDK8~17/多线程并发控制/如何正确的给事务方法加锁.md",
-    "RocketMQ/00.RocketMQ架构！重要.md",
-    "JDK8~17/多线程并发控制/jvm锁失效场景.md",
-    "JDK8~17/多线程并发控制/ReadWriteLock写锁饥饿与StampedLock.md",
-    "JDK8~17/Java设计模式/00.七大设计原则.md",
-    "SpringCloud与分布式事务/sentinel限流、隔离、熔断.md",
-    "SpringCloud与分布式事务/seata下订单业务.md",
-    "分布式锁解决方案/基于zookeeper的分布式锁/zk客户端手动实现分布式锁.md",
-    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized特点与其他对比.md",
-    "JDK8~17/多线程并发控制/对象头关键结构分析-Markword/synchronized锁升级过程.md",
-    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized阻塞队列EntryList-重量级锁.md",
-    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized等待队列WaitSet-防止虚假唤醒.md",
-    "JDK8~17/多线程并发控制/！Monitor套装-EntryList阻塞队列与WaitSet等待队列/synchronized字节码层面原理.md",
     "Attachments/pics/Pasted image 20240325111120.png",
-    "Attachments/pics/Pasted image 20240325111016.png",
-    "Attachments/pics/Pasted image 20240325101807.png",
-    "Attachments/pics/Pasted image 20240325101745.png",
-    "Attachments/pics/Pasted image 20240324203649.png",
-    "Attachments/pics/Pasted image 20240324203629.png",
     "MySQL/特殊场景-待研究",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/终止模式Parten",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/交替输出模式",
@@ -201,7 +202,6 @@
     "JDK8~17/多线程并发控制/活跃性activeness",
     "JDK8~17/多线程并发控制/线程间通信api-Waitting",
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/异步模式Parten",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten",
-    "JDK8~17/多线程并发控制/多线程设计模式DesignParten"
+    "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten"
   ]
 }

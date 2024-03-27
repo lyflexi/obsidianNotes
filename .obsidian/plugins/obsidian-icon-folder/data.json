@@ -35,12 +35,11 @@
   "Servlet3.0&&SpringMVC6": "FabEmpire",
   "SpringFrameWork": "FabEmpire",
   "Centos服务器": "FabEmpire",
-  "408操作系统": "FabEmpire",
-  "408计网": "FabEmpire",
   "Tomcat源码？待研究": "FabEmpire",
   "MyBatis": "FabEmpire",
   "Nginx负载均衡": "FabEmpire",
-  "Netty网络编程与NIO": "FabEmpire",
   "JDK8~17": "FabEmpire",
-  "Redis": "FabEmpire"
+  "Redis": "FabEmpire",
+  "Netty框架？待研究": "FabEmpire",
+  "408计算机网络": "FabEmpire"
 }

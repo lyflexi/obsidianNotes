@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "408计算机网络/02.第二层TCP重要！.md"
+                "file": "Netty框架？待研究/00..md"
               }
             }
           }
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "408计算机网络/02.第二层TCP重要！.md",
+                "file": "Netty框架？待研究/00..md",
                 "mode": "source",
                 "source": false
               }
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "408计算机网络/02.第二层TCP重要！.md",
+                "file": "Netty框架？待研究/00..md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "408计算机网络/02.第二层TCP重要！.md",
+                "file": "Netty框架？待研究/00..md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,9 +157,11 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
+    "分布式Session？待研究/SpringSession.md",
+    "Netty框架？待研究/00..md",
+    "408计算机网络/02.第二层TCP重要！.md",
     "408计算机网络/01.第一层HTTP重要！.md",
     "408计算机网络/00.概述：五层OSI体系结构.md",
-    "408计算机网络/02.第二层TCP重要！.md",
     "408计算机网络/03.第三四五层.md",
     "408计算机网络/03.第三层IP.md",
     "JDK8~17/多线程并发控制/00.核心脉络，互斥与同步-如阻塞队列和等待队列之别.md",
@@ -190,8 +192,6 @@
     "JDK8~17/多线程创建方式/Java线程池ThreadPoolExecutor.md",
     "JDK8~17/多线程创建方式/ThreadLocal原理.md",
     "RocketMQ/rocketmq秒杀设计.md",
-    "MySQL/SQL与优化.md",
-    "Redis/scan查询 推荐！.md",
     "Attachments/pics/Pasted image 20240325231504.png",
     "Attachments/pics/Pasted image 20240325111120.png",
     "MySQL/特殊场景-待研究",

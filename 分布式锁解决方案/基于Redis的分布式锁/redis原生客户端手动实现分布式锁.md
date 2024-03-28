@@ -173,13 +173,12 @@ public class StockService {
 ```
 # 一、防死锁-加过期时间
 问题：setnx刚刚获取到锁，当前服务器宕机，导致del无法释放锁，进而即使服务器恢复正常之后，其他并发线程依旧获取不到锁
-解决：给锁设置过期时间，自动释放锁。
-设置过期时间两种方式：
-1. 通过expire设置过期时间：expire key seconds或者expire key milliseconds（缺乏原子性：如果在setnx和expire之间出现异常，锁也无法释放）
-2. 使用set指令设置过期时间：set key value ex 3 nx（保证了原子性，既达到setnx的效果，又设置了过期时间）
-set其实是一个非常复杂的指令：set key value ex seconds/px milliseconds nx|xx
-- setIfAbsent相当于底层的nx，表示如果不存在则加锁
-- setIfPresent相当于底层的xx，表示如果存在再加锁
+思路：给锁设置过期时间，自动释放锁。比如expire key seconds或者expire key milliseconds，但是缺乏原子性：如果在setnx和expire之间出现异常，锁也无法释放
+解决：其实set其实是一个非常复杂的指令：set key value ex seconds/px milliseconds nx|xx，所以一定要使用set指令设置过期时间：
+```java
+set key value ex 3 nx
+```
+这样就保证了原子性：既达到setnx的效果,又设置了过期时间
 ```java
 @Service
 public class StockService {

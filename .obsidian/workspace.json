@@ -14,7 +14,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "待研究？Tomcat源码/00..md"
+                "file": "分布式锁解决方案/基于Redis的分布式锁/redis原生客户端手动实现分布式锁.md"
               }
             }
           }
@@ -31,7 +31,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "待研究？Tomcat源码/00..md",
+                "file": "分布式锁解决方案/基于Redis的分布式锁/redis原生客户端手动实现分布式锁.md",
                 "mode": "source",
                 "source": false
               }
@@ -103,7 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "待研究？Tomcat源码/00..md",
+                "file": "分布式锁解决方案/基于Redis的分布式锁/redis原生客户端手动实现分布式锁.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "待研究？Tomcat源码/00..md",
+                "file": "分布式锁解决方案/基于Redis的分布式锁/redis原生客户端手动实现分布式锁.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,8 +157,11 @@
   },
   "active": "46edece85008acc7",
   "lastOpenFiles": [
-    "待研究？Netty框架/00..md",
+    "Redis/缓存有哪些失效场景.md",
+    "Redis/如何保证缓存一致性.md",
+    "Redis/Redis数据类型与编码方式.md",
     "待研究？Tomcat源码/00..md",
+    "待研究？Netty框架/00..md",
     "待研究？分布式Session/SpringSession.md",
     "408计算机网络/02.第二层TCP重要！.md",
     "408计算机网络/01.第一层HTTP重要！.md",
@@ -185,13 +188,10 @@
     "JDK8~17/多线程并发控制/多线程设计模式DesignParten/同步模式Parten/固定顺序模式/同步模式之顺序控制-LockSupport版.md",
     "JDK8~17/Java设计模式/06.单例模式(Singleton Pattern).md",
     "MySQL/索引与优化.md",
-    "JDK8~17/集合Collection/HashMap源码.md",
     "Attachments/pics/Pasted image 20240326215126.png",
     "Attachments/pics/Pasted image 20240326215000.png",
     "Attachments/pics/Pasted image 20240326214531.png",
     "Attachments/pics/Pasted image 20240326214246.png",
-    "JDK8~17/多线程创建方式/Java线程池ThreadPoolExecutor.md",
-    "JDK8~17/多线程创建方式/ThreadLocal原理.md",
     "Attachments/pics/Pasted image 20240325231504.png",
     "Attachments/pics/Pasted image 20240325111120.png",
     "MySQL/特殊场景-待研究",
